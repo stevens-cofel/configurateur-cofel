@@ -1,0 +1,108 @@
+{
+  "tva": 0.20,
+  "files": [
+    {
+      "name": "Lettre PVC",
+      "url": "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20PVC.csv",
+      "schema": {
+        "type_constant": "Lettre PVC",
+        "height_col": "Hauteur_mm",
+        "depth_col": "Epaisseur_mm",
+        "base_price_col": "PrixBase_EUR",
+        "row_match": "exact",
+        "currency": "EUR",
+        "single_line_csv": true
+      },
+      "options_from_columns": [
+        { "label": "Laquage",        "col": "SupLaquage_EUR",   "impact": "add_eur" },
+        { "label": "Fixations",      "col": "SupFixation_EUR",  "impact": "add_eur" },
+        { "label": "Rétroéclairage", "col": "SupRetro_EUR",     "impact": "add_eur" }
+      ]
+    },
+    {
+      "name": "Lettre alu 20/10 ou Dibond 3 mm",
+      "url": "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20alu%2020_10%20%C3%A8me%20ou%20Type%20Dibond%203%20mm.csv",
+      "schema": {
+        "type_constant": "Lettre alu 20/10 ou Dibond 3 mm",
+        "height_col": "Hauteur_mm",
+        "base_price_col": "PrixBrut_EUR",
+        "alt_price_toggle": { "label": "Laquage", "column": "PrixLaque_EUR" },
+        "row_match": "exact",
+        "currency": "EUR"
+      },
+      "options_from_columns": [
+        { "label": "Fixations", "col": "SupFixation_EUR", "impact": "add_eur" }
+      ]
+    },
+    {
+      "name": "Boîtier bâton face PMMA blanc",
+      "url": "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/lettre%20boitier%20baton%20chants%20alu%20laqu%C3%A9%20et%20face%20PMMA%20blanc%20diffusant.csv",
+      "schema": {
+        "type_constant": "Boîtier bâton face PMMA blanc",
+        "height_min_col": "HauteurMin_mm",
+        "height_max_col": "HauteurMax_mm",
+        "flag_cols": { "Eclairage": "Eclairage" },
+        "base_price_col": "PrixUnitaire_EUR",
+        "row_match": "range+flags",
+        "currency": "EUR"
+      },
+      "ui_fixed_fields": [
+        { "name": "Chant (mm)", "values": [50, 80, 100], "price_impact": "none", "note": "Sans impact prix" }
+      ],
+      "ui_flags": [
+        { "name": "Éclairage", "values": ["oui", "non"], "bind_to_col": "Eclairage" }
+      ]
+    },
+    {
+      "name": "Boîtier bâton face avant Dibond",
+      "url": "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20boitier%20laqu%C3%A9e%20B%C3%A2ton%20chants%20aluminium%20et%20face%20avant%20type%20Dibond.csv",
+      "schema": {
+        "type_constant": "Boîtier bâton face avant Dibond",
+        "height_min_col": "HauteurMin_mm",
+        "height_max_col": "HauteurMax_mm",
+        "flag_cols": { "Eclairage": "Eclairage" },
+        "base_price_col": "PrixUnitaire_EUR",
+        "row_match": "range+flags",
+        "currency": "EUR"
+      },
+      "ui_flags": [
+        { "name": "Éclairage", "values": ["oui", "non"], "bind_to_col": "Eclairage" }
+      ]
+    },
+    {
+      "name": "Boîtier fantaisie face PMMA blanc",
+      "url": "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20boitier%20Fantaisie%20chants%20laqu%C3%A9s%20et%20faces%20PMMA%20blanc%20diffusant.csv",
+      "schema": {
+        "type_constant": "Boîtier fantaisie face PMMA blanc",
+        "height_min_col": "HauteurMin_mm",
+        "height_max_col": "HauteurMax_mm",
+        "flag_cols": { "Eclairage": "Eclairage" },
+        "base_price_col": "PrixUnitaire_EUR",
+        "row_match": "range+flags",
+        "currency": "EUR"
+      },
+      "ui_fixed_fields": [
+        { "name": "Chant (mm)", "values": [50, 80, 100], "price_impact": "none", "note": "Sans impact prix" }
+      ],
+      "ui_flags": [
+        { "name": "Éclairage", "values": ["oui", "non"], "bind_to_col": "Eclairage" }
+      ]
+    },
+    {
+      "name": "Boîtier fantaisie face avant Dibond",
+      "url": "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20boitier%20laqu%C3%A9e%20Fantaisie%20chants%20aluminium%20et%20face%20avant%20type%20Dibond.csv",
+      "schema": {
+        "type_constant": "Boîtier fantaisie face avant Dibond",
+        "height_min_col": "HauteurMin_mm",
+        "height_max_col": "HauteurMax_mm",
+        "flag_cols": { "Eclairage": "Eclairage" },
+        "base_price_col": "PrixUnitaire_EUR",
+        "row_match": "range+flags",
+        "currency": "EUR"
+      },
+      "ui_flags": [
+        { "name": "Éclairage", "values": ["oui", "non"], "bind_to_col": "Eclairage" }
+      ]
+    }
+  ]
+}
