@@ -14,9 +14,14 @@
         "single_line_csv": true
       },
       "options_from_columns": [
-        { "label": "Laquage",        "col": "SupLaquage_EUR",   "impact": "add_eur" },
-        { "label": "Fixations",      "col": "SupFixation_EUR",  "impact": "add_eur" },
-        { "label": "Rétroéclairage", "col": "SupRetro_EUR",     "impact": "add_eur" }
+        { "label": "Laquage", "col": "SupLaquage_EUR", "impact": "add_eur" },
+        { "label": "Fixations", "col": "SupFixation_EUR", "impact": "add_eur" },
+        {
+          "label": "Rétroéclairage",
+          "col": "SupRetro_EUR",
+          "impact": "add_eur",
+          "constraints": { "min_depth_mm": 19 }
+        }
       ]
     },
     {
