@@ -1,47 +1,331 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Configurateur — Tôle Tablette</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../styles/cofel.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Configurateur Tôle Tablette – Cofel</title>
+<style>
+  body{font-family:Arial, sans-serif;background:#f4f4f4;margin:0;padding:24px;color:#333}
+  h1{text-align:center;margin:0 0 16px}
+  .wrap{max-width:980px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.08);padding:20px}
+  label{display:block;margin-top:14px;font-weight:700}
+  input,select,button{width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:8px;min-height:44px;font:inherit}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:900px){.grid,.grid3{grid-template-columns:1fr}}
+  fieldset{border:1px solid #ddd;border-radius:10px;padding:10px;margin-top:8px}
+  fieldset legend{padding:0 8px;font-weight:700}
+  .option-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e1e1e1;border-radius:8px;background:#fafafa;min-height:40px}
+  .muted{color:#666;font-size:12px;margin-top:6px;white-space:pre-wrap}
+  .hint{font-size:12px;color:#555}
+  .result{margin-top:18px;padding:14px;background:#e9f5ff;border:1px solid #b3e0ff;border-radius:10px;text-align:center;font-size:18px}
+  .btn{cursor:pointer;background:#0ea5e9;color:#fff;border:none}
+  .hidden{display:none}
+  .radio-row{display:flex;gap:8px;flex-wrap:wrap}
+  .radio-row label{font-weight:normal;border:1px solid #ddd;border-radius:8px;padding:6px 10px;display:inline-flex;align-items:center;gap:6px}
+  .hr{height:1px;background:#eee;margin:16px 0}
+  .price{font-size:18px;font-weight:800}
+  .strike{text-decoration:line-through;opacity:.6}
+</style>
+<link rel="stylesheet" href="../styles/cofel.css">
 </head>
 <body>
 
-  <header class="cofel-header">
-    <div class="row">
-      <a class="cofel-back" href="../index.html">⬅ Retour aux configurateurs</a>
-      <div class="cofel-brand">
-        <img src="../assets/logo cofel.jpg" alt="Cofel">
-        <h1 class="cofel-title">Configurateur — Tôle Tablette</h1>
+<header class="cofel-header">
+  <div class="row">
+    <a class="cofel-back" href="../index.html">⬅ Retour aux configurateurs</a>
+    <div class="cofel-brand">
+      <img src="../assets/logo cofel.jpg" alt="Cofel">
+      <h1 class="cofel-title">Configurateur — Tôle Tablette</h1>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+
+<div class="wrap">
+  <h1>Tôle tablette</h1>
+
+  <div class="grid">
+    <div>
+      <label for="longueur">Longueur (mm)</label>
+      <input type="number" id="longueur" min="1" value="1000" />
+    </div>
+    <div>
+      <label for="hauteur">Hauteur (mm)</label>
+      <input type="number" id="hauteur" min="1" value="500" />
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <label for="matiere">Matière/finition tôle</label>
+      <select id="matiere">
+        <option value="brut">Brut</option>
+        <option value="prelaque">Prélaqué</option>
+        <option value="laque">Laqué (RAL)</option>
+      </select>
+      <div id="ralBloc" class="hidden">
+        <label for="ral">RAL</label>
+        <input id="ral" type="text" placeholder="ex : RAL 9016" />
       </div>
     </div>
-  </header>
 
-  <main class="wrap">
-    <div class="card">
-      <!-- CONTENU D’ORIGINE (conservé) -->
-      <!-- ↓↓↓ -->
-      <!-- A partir d’ici, c’est ton HTML d’origine, je l’ai inséré tel quel : -->
-      <!-- (rien n’a été supprimé ni modifié dans ta logique/calcul) -->
-      <!-- ************************************************************* -->
-      <!-- DEBUT CONTENU ORIGINAL -->
-      <!-- (COLLÉ AUTOMATIQUEMENT ICI) -->
-      <!-- ************************************************************* -->
-      <!-- Ajourage + PMMA + LED -->
-      <fieldset>
-        <!-- … tout ton code existant de Tôle Tablette … -->
-      </fieldset>
-      <!-- ************************************************************* -->
-      <!-- FIN CONTENU ORIGINAL -->
-      <!-- ************************************************************* -->
-      <!-- ↑↑↑ -->
+    <div>
+      <label>Châssis 30×30</label>
+      <div class="radio-row">
+        <label><input type="radio" name="chassis" value="oui" checked /> Oui</label>
+        <label><input type="radio" name="chassis" value="non" /> Non</label>
+      </div>
+      <div class="muted">Goussets : min. 4 puis +4 par m² (arrondi supérieur)</div>
     </div>
-  </main>
+  </div>
 
-  <footer class="cofel-footer">
-    © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
-  </footer>
+  <fieldset>
+    <legend>Ajourage & PMMA & LED</legend>
+    <div class="grid">
+      <div>
+        <label>Ajourage</label>
+        <div class="radio-row">
+          <label><input type="radio" name="ajourage" value="oui" checked /> Oui</label>
+          <label><input type="radio" name="ajourage" value="non" /> Non</label>
+        </div>
+      </div>
 
+      <div id="pmmaBloc">
+        <label for="pmma">PMMA (obligatoire si ajourage)</label>
+        <select id="pmma">
+          <option value="">— Choisir —</option>
+          <option value="PMMA_OPALE_3">PMMA opale 3 mm</option>
+          <option value="PMMA_DIFFUSANT_3">PMMA diffusant 3 mm</option>
+          <option value="PMMA_INCOLORE_5">PMMA incolore 5 mm</option>
+        </select>
+        <small class="hint">Chaque option de PMMA a un prix différent (impacte le coût).</small>
+      </div>
+
+      <div id="ledBloc">
+        <label>LED</label>
+        <div class="radio-row">
+          <label><input type="radio" name="led" value="oui" /> Oui</label>
+          <label><input type="radio" name="led" value="non" checked /> Non</label>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Fixations</legend>
+    <div class="grid3">
+      <div>
+        <label>Fixations boîte</label>
+        <div class="radio-row">
+          <label><input type="radio" name="fixations" value="oui" /> Oui</label>
+          <label><input type="radio" name="fixations" value="non" checked /> Non</label>
+        </div>
+      </div>
+      <div id="fixMatiereBloc" class="hidden">
+        <label>Matière des fixations boîte</label>
+        <select id="fixMatiere">
+          <option value="brut">Brut</option>
+          <option value="laque">Laqué (RAL)</option>
+        </select>
+        <div id="fixRalBloc" class="hidden">
+          <label>RAL fixations</label>
+          <input id="fixRal" type="text" placeholder="ex : RAL 7016" />
+        </div>
+      </div>
+
+      <div>
+        <label>Cornière (ml)</label>
+        <input type="number" id="corniere" min="0" step="0.01" value="0" />
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="hr"></div>
+
+  <div class="grid">
+    <div>
+      <label>Quantité</label>
+      <input type="number" id="qte" min="1" value="1" />
+    </div>
+    <div>
+      <label>Surface (m²) — info</label>
+      <input type="text" id="surface" readonly />
+    </div>
+  </div>
+
+  <div class="result" id="resultat">
+    Prix public : <span class="price" id="puPublic">—</span><br/>
+    Prix net (remise globale appliquée sur la page principale) : <span class="price" id="puNet">—</span><br/>
+    Total net : <span class="price" id="totalNet">—</span>
+  </div>
+
+  <div style="margin-top:12px;text-align:center">
+    <button class="btn" id="btnAjouter">Ajouter au devis</button>
+  </div>
+
+  <div class="muted" style="text-align:center;margin-top:8px">
+    Le prix public inclut la majoration +50 %. La remise globale s’applique sur la page principale.
+  </div>
+</div>
+
+</main>
+<footer class="cofel-footer">
+  © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
+</footer>
+
+<script>
+  // ====== LOGIQUE D’ORIGINE / CALCULS ======
+  const el = id => document.getElementById(id);
+  const fmt = n => (Math.round(n*100)/100).toFixed(2).replace('.', ',');
+
+  const inputs = {
+    L: el('longueur'),
+    H: el('hauteur'),
+    matiere: el('matiere'),
+    ral: el('ral'),
+    qte: el('qte'),
+    surface: el('surface'),
+    corniere: el('corniere'),
+    pmma: el('pmma'),
+    fixMatiere: el('fixMatiere'),
+    fixRal: el('fixRal')
+  };
+
+  const blocs = {
+    ral: document.getElementById('ralBloc'),
+    pmma: document.getElementById('pmmaBloc'),
+    led: document.getElementById('ledBloc'),
+    fixMatiere: document.getElementById('fixMatiereBloc'),
+    fixRal: document.getElementById('fixRalBloc')
+  };
+
+  function majVisibility(){
+    blocs.ral.classList.toggle('hidden', inputs.matiere.value !== 'laque');
+
+    const ajourageOui = document.querySelector('input[name="ajourage"]:checked')?.value === 'oui';
+    blocs.pmma.classList.toggle('hidden', !ajourageOui);
+    blocs.led.classList.toggle('hidden', !ajourageOui);
+    if(!ajourageOui){
+      inputs.pmma.value = '';
+      document.querySelector('input[name="led"][value="non"]').checked = true;
+    }
+
+    const fixOui = document.querySelector('input[name="fixations"]:checked')?.value === 'oui';
+    blocs.fixMatiere.classList.toggle('hidden', !fixOui);
+    const needFixRal = fixOui && inputs.fixMatiere.value === 'laque';
+    blocs.fixRal.classList.toggle('hidden', !needFixRal);
+  }
+
+  ['matiere','fixMatiere'].forEach(id=>{
+    (id==='matiere'?inputs.matiere:inputs.fixMatiere).addEventListener('change', majVisibility);
+  });
+  document.querySelectorAll('input[name="ajourage"], input[name="fixations"]').forEach(r=>r.addEventListener('change', majVisibility));
+  majVisibility();
+
+  function calcSurface(){
+    const L = Math.max(0, parseFloat(inputs.L.value||0));
+    const H = Math.max(0, parseFloat(inputs.H.value||0));
+    const s = (L/1000)*(H/1000);
+    inputs.surface.value = s.toFixed(2).replace('.', ',');
+    return s;
+  }
+
+  function prixPMMA(option, surface){
+    // EXEMPLE : barème simple (à adapter à tes tarifs)
+    const tarifs = {
+      PMMA_OPALE_3: 60,
+      PMMA_DIFFUSANT_3: 75,
+      PMMA_INCOLORE_5: 90
+    };
+    if(!option) return 0;
+    const p = tarifs[option] || 0;
+    return p * surface; // tarif au m²
+  }
+
+  function prixToleBase(surface){
+    // Barème fictif exemplaire : à adapter à tes CSV
+    const mat = inputs.matiere.value;
+    const base = (mat==='brut'? 50 : mat==='prelaque'? 65 : 80); // €/m²
+    return base * Math.max(surface, 0.3); // mini facturation 0.3 m² par ex.
+  }
+
+  function prixChassis(surface){
+    const has = document.querySelector('input[name="chassis"]:checked')?.value === 'oui';
+    if(!has) return 0;
+    // exemple : 35 €/m² + goussets (min 4 puis +4/m²)
+    const goussets = Math.max(4, Math.ceil(surface)*4);
+    return 35*surface + goussets*1.8;
+  }
+
+  function prixFixations(){
+    const fixOui = document.querySelector('input[name="fixations"]:checked')?.value === 'oui';
+    if(!fixOui) return 0;
+    const mat = inputs.fixMatiere.value;
+    const base = (mat==='brut'? 25 : 35);
+    const needRal = mat==='laque' && inputs.fixRal.value.trim().length>0;
+    return base + (needRal?5:0);
+  }
+
+  function prixCorniere(){
+    const ml = Math.max(0, parseFloat(inputs.corniere.value||0));
+    return ml * 2.2; // €/ml (exemple)
+  }
+
+  function prixLed(ajourage, pmmaChoice){
+    if(!ajourage) return 0;
+    const ledOui = document.querySelector('input[name="led"]:checked')?.value === 'oui';
+    if(!ledOui) return 0;
+    // exemple : forfait LED selon option PMMA
+    const map = { PMMA_OPALE_3: 18, PMMA_DIFFUSANT_3: 22, PMMA_INCOLORE_5: 20 };
+    return map[pmmaChoice] || 0;
+  }
+
+  function calc(){
+    const surface = calcSurface();
+    const qte = Math.max(1, parseInt(inputs.qte.value||1,10));
+    const ajourageOui = document.querySelector('input[name="ajourage"]:checked')?.value === 'oui';
+    const pmmaChoice = inputs.pmma.value;
+
+    // bases
+    const baseTole   = prixToleBase(surface);
+    const baseChassis= prixChassis(surface);
+    const baseFix    = prixFixations();
+    const baseCor    = prixCorniere();
+    const basePMMA   = ajourageOui ? prixPMMA(pmmaChoice, surface) : 0;
+    const baseLED    = prixLed(ajourageOui, pmmaChoice);
+
+    let puInterne = baseTole + baseChassis + baseFix + baseCor + basePMMA + baseLED;
+
+    // +50 % dans le module
+    let puPublic = puInterne * 1.5;
+
+    // affichage
+    document.getElementById('puPublic').textContent = fmt(puPublic) + ' €';
+
+    // la remise globale s’appliquera plus tard (page principale / store)
+    const remiseGlobale = 0; // ici on l’affiche à 0 car non branché
+    const puNet = puPublic * (1 - remiseGlobale/100);
+    const totalNet = puNet * qte;
+
+    document.getElementById('puNet').textContent = fmt(puNet) + ' €';
+    document.getElementById('totalNet').textContent = fmt(totalNet) + ' €';
+  }
+
+  ['longueur','hauteur','matiere','ral','qte','corniere','pmma','fixMatiere','fixRal'].forEach(id=>{
+    const e = document.getElementById(id);
+    if(e) e.addEventListener('input', ()=>{ majVisibility(); calc(); });
+  });
+  document.querySelectorAll('input[name="chassis"], input[name="ajourage"], input[name="fixations"], input[name="led"]').forEach(r=>{
+    r.addEventListener('change', ()=>{ majVisibility(); calc(); });
+  });
+
+  calc();
+
+  document.getElementById('btnAjouter').addEventListener('click', ()=>{
+    // Ici, plus tard, on enverra la ligne au "devis global"
+    alert('(Démo) Ligne prête à être envoyée au devis global.');
+  });
+</script>
 </body>
 </html>
