@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Configurateur Lettres PVC - Cofel</title>
+<style>
+  body{font-family:Arial, sans-serif;background:#f7f7f7;margin:0;padding:24px}
+  h1{text-align:center}
+  .wrap{max-width:760px;margin:0 auto;background:#fff;border-radius:12px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+  label{font-weight:700;display:block;margin-top:14px}
+  input,select{width:100%;padding:10px;margin-top:6px;border:1px solid #d7d7d7;border-radius:8px}
+  .options{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:10px}
+  .option-item{display:flex;align-items:center;gap:8px}
+  .result{background:#e9f5ff;border:1px solid #b3e0ff;border-radius:10px;padding:14px;margin-top:18px;text-align:center}
+  .note{background:#fff7e6;border:1px solid #ffd38a;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
+  .muted{color:#666;font-size:12px;margin-top:8px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+  <h1>Configurateur Lettres PVC - Cofel</h1>
+  <div class="wrap">
+    <label for="hauteur">Hauteur (mm)</label>
+    <input type="number" id="hauteur" placeholder="Ex : 250" min="0"/>
+
+    <label for="epaisseur">Épaisseur / Chant (mm)</label>
+    <select id="epaisseur">
+      <option value="">— Sélectionnez —</option>
+      <option value="10">10 mm</option>
+      <option value="19">19 mm</option>
+      <option value="30">30 mm</option>
+    </select>
+
+    <label for="quantite">Quantité</label>
+    <input type="number" id="quantite" min="1" value="1"/>
+
+    <div class="options">
+      <div class="option-item">
+        <input type="checkbox" id="optLaquage"/>
+        <label for="optLaquage">Laquage</label>
+      </div>
+      <div class="option-item">
+        <input type="checkbox" id="optFixation"/>
+        <label for="optFixation">Fixations</label>
+      </div>
+      <div class="option-item">
+        <input type="checkbox" id="optRetro"/>
+        <label for="optRetro">Rétroéclairage</label>
+      </div>
+    </div>
+
+    <div class="result">
+      <p>Prix HT : <span id="prixHT">0,00</span> €</p>
+      <p>Prix TTC : <span id="prixTTC">0,00</span> €</p>
+    </div>
+
+    <div class="note">
+      ⚠️ Le rétroéclairage est disponible uniquement pour les lettres PVC de 19 mm ou 30 mm.
+    </div>
+
+    <div id="log" class="muted"></div>
+  </div>
+
+<script>
+const TVA = 0.20;
+const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20PVC.csv";
+
+let DATA = []; // {Hauteur_mm, Epaisseur_mm, PrixBase_EUR, SupLaquage_EUR, SupFixation_EUR, SupRetro_EUR}
+
+const elH   = document.getElementById('hauteur');
+const elE   = document.getElementById('epaisseur');
+const elQ   = document.getElementById('quantite');
+const elLQ  = document.getElementById('optLaquage');
+const elFX  = document.getElementById('optFixation');
+const elRT  = document.getElementById('optRetro');
+const elHT  = document.getElementById('prixHT');
+const elTTC = document.getElementById('prixTTC');
+const elLog = document.getElementById('log');
+
+function euro(n){ return (isFinite(n)?n:0).toFixed(2).replace('.', ','); }
+function numFR(s){
+  if(s===undefined||s===null) return NaN;
+  // supprime espaces insécables / fines, €
+  let x = String(s).replace(/[\u00A0\u202F]/g,'').replace(/€/g,'').trim();
+  // virgule décimale -> point
+  x = x.replace(',', '.');
+  return parseFloat(x);
+}
+
+/* ---------- CSV parser robuste (gère les guillemets) ---------- */
+function parseCSVLine(line, sep=','){
+  const out=[]; let cur=''; let inQ=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i], nx=line[i+1];
+    if(ch === '"'){
+      if(inQ && nx === '"'){ cur+='"'; i++; } // "" -> "
+      else inQ = !inQ;
+    }else if(ch === sep && !inQ){
+      out.push(cur); cur='';
+    }else{
+      cur += ch;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+function normalizeWeirdCSV(text){
+  // Enlève BOM/CR, remplace guillemets doubles par simples
+  let t = text.replace(/^\uFEFF/,'').replace(/\r/g,'').replace(/""/g,'"');
+  // Sépare en lignes
+  let lines = t.split('\n').filter(l=>l.trim()!=='');
+  // Beaucoup de versions “une-ligne” -> extraire blocs "..." et recomposer
+  if(lines.length === 1){
+    const blocks=[]; const re=/"([^"]*)"/g; let m;
+    while((m=re.exec(t))!==null){ blocks.push(m[1]); }
+    if(blocks.length){
+      // Chaque bloc correspond à un champ successif
+      const perLine = blocks[0].split(',').length; // nb d'entêtes
+      const out=[];
+      for(let i=0;i<blocks.length;i+=perLine){
+        out.push(blocks.slice(i,i+perLine).map(s=>`"${s}"`).join(','));
+      }
+      lines = out;
+    }
+  }else{
+    // Si chaque ligne est enveloppée de guillemets, retire ceux d'enrobage
+    lines = lines.map(l=>{
+      const s=l.trim();
+      if(s.startsWith('"') && s.endsWith('"')) return s.slice(1,-1);
+      return s;
+    });
+  }
+  return lines.join('\n');
+}
+
+function parseCSVSmart(text){
+  const norm = normalizeWeirdCSV(text);
+  const lines = norm.split('\n').filter(l=>l.trim()!=='');
+  if(!lines.length) return {heads:[], rows:[]};
+  const heads = parseCSVLine(lines[0]).map(h=>h.replace(/^"+|"+$/g,'').trim());
+  const rows = lines.slice(1).map(line=>{
+    const cells = parseCSVLine(line).map(c=>c.replace(/^"+|"+$/g,'').trim());
+    const obj={}; heads.forEach((h,i)=> obj[h] = cells[i] ?? '');
+    return obj;
+  });
+  return {heads, rows};
+}
+
+async function loadCSV(){
+  const txt = await fetch(CSV_URL, {cache:'no-store'}).then(r=>r.text());
+  const parsed = parseCSVSmart(txt);
+
+  // indices utiles
+  const idx = {};
+  parsed.heads.forEach((h,i)=> idx[h]=i);
+
+  // Map en structure numérique propre
+  DATA = parsed.rows.map(r=>{
+    const o = (key)=> r[key] ?? '';
+    return {
+      Hauteur_mm:       numFR(o('Hauteur_mm')),
+      Epaisseur_mm:     numFR(o('Epaisseur_mm')),
+      PrixBase_EUR:     numFR(o('PrixBase_EUR')),
+      SupLaquage_EUR:   numFR(o('SupLaquage_EUR'))   || 0,
+      SupFixation_EUR:  numFR(o('SupFixation_EUR'))  || 0,
+      SupRetro_EUR:     numFR(o('SupRetro_EUR'))     || 0
+    };
+  }).filter(x=>isFinite(x.Hauteur_mm)&&isFinite(x.Epaisseur_mm)&&isFinite(x.PrixBase_EUR));
+
+  elLog.textContent = `Données chargées: ${DATA.length} lignes. Entêtes: ${parsed.heads.join(' | ')}`;
+}
+
+function updateRetroAvailability(){
+  const ep = Number(elE.value);
+  if(ep===10){ elRT.checked=false; elRT.disabled=true; }
+  else { elRT.disabled=false; }
+}
+
+function compute(){
+  const h = Number(elH.value||0);
+  const e = Number(elE.value||0);
+  const q = Math.max(1, Number(elQ.value||1));
+
+  if(!(h>0) || !(e>0) || !DATA.length){
+    elHT.textContent = '0,00';
+    elTTC.textContent = '0,00';
+    return;
+  }
+
+  const pool = DATA.filter(r=>r.Epaisseur_mm===e).sort((a,b)=>a.Hauteur_mm-b.Hauteur_mm);
+  if(!pool.length){ elHT.textContent='0,00'; elTTC.textContent='0,00'; return; }
+
+  // première hauteur >= saisie (sinon la plus grande)
+  let cible = pool[0].Hauteur_mm;
+  for(const r of pool){ if(h<=r.Hauteur_mm){ cible=r.Hauteur_mm; break; } cible=r.Hauteur_mm; }
+  const row = pool.find(r=>r.Hauteur_mm===cible) || pool[pool.length-1];
+
+  let prix = row.PrixBase_EUR;
+  if(elLQ.checked) prix += row.SupLaquage_EUR;
+  if(elFX.checked) prix += row.SupFixation_EUR;
+  if(elRT.checked) prix += row.SupRetro_EUR;
+
+  const totalHT = prix * q;
+  const totalTTC = totalHT * (1+TVA);
+  elHT.textContent = euro(totalHT);
+  elTTC.textContent = euro(totalTTC);
+}
+
+function bind(){
+  [elH, elE, elQ, elLQ, elFX, elRT].forEach(el=>{
+    el.addEventListener('input', ()=>{ updateRetroAvailability(); compute(); });
+    el.addEventListener('change', ()=>{ updateRetroAvailability(); compute(); });
+  });
+}
+
+(async function init(){
+  bind();
+  await loadCSV();
+  updateRetroAvailability();
+  compute();
+})();
+</script>
+</body>
+</html>
