@@ -6,76 +6,61 @@
   <title>Configurateurs Cofel</title>
   <style>
     :root{
-      /* Couleurs charte Cofel : violet profond et déclinaison */
-      --cofel: #5a2d82;
-      --cofel-2: #7838a7;
+      --cofel:#5a2d82;        /* violet Cofel */
+      --cofel-2:#7838a7;
       --bg:#f7f5fa;
       --card:#ffffff;
       --text:#1d1327;
       --muted:#7d6f8e;
-      --shadow: 0 10px 24px rgba(0,0,0,.08);
-      --radius: 14px;
+      --shadow:0 10px 24px rgba(0,0,0,.08);
+      --radius:14px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0; font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--bg); color: var(--text);
+      background:var(--bg); color:var(--text);
       display:flex; flex-direction:column;
     }
 
     /* HEADER */
     header{
-      background: linear-gradient(135deg, var(--cofel), var(--cofel-2));
-      color:#fff; text-align:center; padding: 36px 16px 28px;
-      position: relative; overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0,0,0,.15);
+      background:linear-gradient(135deg,var(--cofel),var(--cofel-2));
+      color:#fff; text-align:center; padding:36px 16px 28px;
+      position:relative; overflow:hidden;
+      box-shadow:0 6px 20px rgba(0,0,0,.15);
     }
     header::after{
       content:""; position:absolute; inset:-40% -20% auto -20%;
-      height:200%; background: radial-gradient(ellipse at 50% 30%, rgba(255,255,255,.12), transparent 60%);
+      height:200%; background:radial-gradient(ellipse at 50% 30%, rgba(255,255,255,.12), transparent 60%);
       pointer-events:none;
     }
-    .brand{
-      display:flex; flex-direction:column; align-items:center; gap:14px;
-      position:relative; z-index:1;
-    }
-    .brand img{ height:70px; width:auto; object-fit:contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,.25)); }
-    h1{ margin:0; font-size: clamp(22px, 2.6vw, 34px); letter-spacing:.2px; }
-    .subtitle{ margin-top:6px; color:#e8dff1; font-size:14px }
+    .brand{display:flex; flex-direction:column; align-items:center; gap:14px; position:relative; z-index:1;}
+    .brand img{height:70px; width:auto; object-fit:contain; filter:drop-shadow(0 2px 6px rgba(0,0,0,.25));}
+    h1{margin:0; font-size:clamp(22px, 2.6vw, 34px); letter-spacing:.2px;}
+    .subtitle{margin-top:6px; color:#e8dff1; font-size:14px}
 
     /* GRID */
-    .wrap{ width:100%; max-width:1120px; margin: 28px auto; padding: 0 18px 36px; }
-    .grid{
-      display:grid; gap:18px;
-      grid-template-columns: repeat( auto-fit, minmax(220px, 1fr) );
-    }
+    .wrap{width:100%; max-width:1120px; margin:28px auto; padding:0 18px 36px;}
+    .grid{display:grid; gap:18px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));}
 
     a.card{
-      display:flex; align-items:center; gap:14px;
-      padding:18px 16px; text-decoration:none; color:var(--text);
-      background:var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+      display:flex; align-items:center; justify-content:center; text-align:center;
+      padding:22px 18px; text-decoration:none; color:var(--text);
+      background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
       border:1px solid rgba(0,0,0,.06);
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+      min-height:84px;
     }
-    a.card:hover{ transform: translateY(-4px); box-shadow: 0 14px 28px rgba(0,0,0,.12); border-color: var(--cofel-2);}
-    .icon{
-      flex:0 0 46px; height:46px; border-radius:10px; display:grid; place-items:center;
-      background: linear-gradient(135deg, #f3ebf9, #ede3f7);
-      border:1px solid #dec5f2;
-      font-size:22px;
-    }
-    .card .txt{ display:flex; flex-direction:column; }
-    .card .title{ font-weight:700; }
-    .card .hint{ font-size:12px; color:var(--muted); margin-top:2px; }
+    a.card:hover{transform:translateY(-4px); box-shadow:0 14px 28px rgba(0,0,0,.12); border-color:var(--cofel-2); background:#fcfaff;}
+    .card .title{font-weight:700; margin:0;}
+    .card .hint{font-size:12px; color:var(--muted); margin-top:4px;}
 
     /* FOOTER */
-    footer{ margin-top:auto; text-align:center; color:#7d6f8e; font-size:13px; padding:18px 10px; }
+    footer{margin-top:auto; text-align:center; color:#7d6f8e; font-size:13px; padding:18px 10px;}
 
     /* ACCESSIBILITÉ */
-    a.card:focus-visible{
-      outline: 3px solid #c6a8f3; outline-offset: 2px;
-    }
+    a.card:focus-visible{outline:3px solid #c6a8f3; outline-offset:2px;}
   </style>
 </head>
 <body>
@@ -90,66 +75,58 @@
   <main class="wrap">
     <section class="grid" aria-label="Liste des configurateurs">
       <a class="card" href="./configurateurs/configurateur-tole-tablette.html">
-        <div class="icon">🧱</div>
-        <div class="txt">
-          <div class="title">Tôle Tablette</div>
-          <div class="hint">Ajourage, PMMA, châssis, cornière…</div>
+        <div>
+          <p class="title">Tôle Tablette</p>
+          <p class="hint">Ajourage, PMMA, châssis, cornière…</p>
         </div>
       </a>
 
       <a class="card" href="./configurateurs/configurateur-rampe-lumineuse.html">
-        <div class="icon">💡</div>
-        <div class="txt">
-          <div class="title">Rampe Lumineuse (PLL)</div>
-          <div class="hint">Longueur, LED, platines, laquage inclus</div>
+        <div>
+          <p class="title">Rampe Lumineuse (PLL)</p>
+          <p class="hint">Longueur, LED, platines, laquage inclus</p>
         </div>
       </a>
 
       <a class="card" href="./configurateurs/configurateur-enseigne-drapeau.html">
-        <div class="icon">🚩</div>
-        <div class="txt">
-          <div class="title">Enseigne Drapeau</div>
-          <div class="hint">Rond ou carré, laquage, potence</div>
+        <div>
+          <p class="title">Enseigne Drapeau</p>
+          <p class="hint">Rond ou carré, laquage, potence</p>
         </div>
       </a>
 
       <a class="card" href="./configurateurs/configurateur-totems.html">
-        <div class="icon">🗼</div>
-        <div class="txt">
-          <div class="title">Totems</div>
-          <div class="hint">Dimensions, laquage, options d’installation</div>
+        <div>
+          <p class="title">Totems</p>
+          <p class="hint">Dimensions, laquage, options d’installation</p>
         </div>
       </a>
 
       <a class="card" href="./configurateurs/configurateur-lettres PVC.html">
-        <div class="icon">🔤</div>
-        <div class="txt">
-          <div class="title">Lettres PVC</div>
-          <div class="hint">Hauteur, épaisseur, finition</div>
+        <div>
+          <p class="title">Lettres PVC</p>
+          <p class="hint">Hauteur, épaisseur, finition</p>
         </div>
       </a>
 
       <a class="card" href="./configurateurs/configurateur-lettre-alu-alupvc.html">
-        <div class="icon">🅰️</div>
-        <div class="txt">
-          <div class="title">Lettres Alu / Alu-PVC</div>
-          <div class="hint">Hauteur, finition, (éclairage si prévu)</div>
+        <div>
+          <p class="title">Lettres Alu / Alu-PVC</p>
+          <p class="hint">Hauteur, finition, (éclairage si prévu)</p>
         </div>
       </a>
 
       <a class="card" href="./configurateurs/configurateur-lettre-boitier.html">
-        <div class="icon">🔲</div>
-        <div class="txt">
-          <div class="title">Lettres Boîtiers</div>
-          <div class="hint">Face Dibond rétro, fixation obligatoire</div>
+        <div>
+          <p class="title">Lettres Boîtiers</p>
+          <p class="hint">Face Dibond rétro, fixation obligatoire</p>
         </div>
       </a>
 
       <a class="card" href="./configurateurs/configurateur-tolerie-dibond.html">
-        <div class="icon">📐</div>
-        <div class="txt">
-          <div class="title">Tôlerie Alu / Dibond</div>
-          <div class="hint">Au m², épaisseur, laquage</div>
+        <div>
+          <p class="title">Tôlerie Alu / Dibond</p>
+          <p class="hint">Au m², épaisseur, laquage</p>
         </div>
       </a>
     </section>
