@@ -3,409 +3,385 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>Configurateur — Tôle Tablette</title>
-<link rel="stylesheet" href="../styles/cofel.css">
+<title>Configurateur Tôle Tablette – Cofel</title>
 <style>
-  /* Habillage du "wizard" (étapes) complémentaire au cofel.css */
-  .steps {
-    display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 18px;
-  }
-  .step-badge{
-    display:flex; align-items:center; gap:8px;
-    background:#fcfaff; border:1px solid #dec5f2; color:#5a2d82;
-    border-radius:999px; padding:8px 12px; font-weight:700; font-size:13px;
-  }
-  .step-badge.active{ background:#5a2d82; color:#fff; border-color:#5a2d82; }
-  .step{ display:none; }
-  .step.active{ display:block; animation:fade .18s ease; }
-  @keyframes fade{ from{opacity:.4; transform:translateY(4px)} to{opacity:1; transform:none} }
-  .nav{ display:flex; gap:10px; justify-content:space-between; margin-top:18px }
-  .nav .left, .nav .right{ display:flex; gap:10px }
-  .muted{ color:#7d6f8e; font-size:12px }
-  .inline{ display:flex; gap:8px; align-items:center }
-  .inline input[type="number"]{ width:140px }
-  .pill{ display:inline-block; padding:2px 8px; border-radius:999px; background:#efe7f6; color:#5a2d82; font-size:12px; border:1px solid #dec5f2}
-  .price-block{ margin-top:14px }
-  .hidden{ display:none !important; }
+  body{font-family:Arial, sans-serif;background:#f4f4f4;margin:0;padding:24px;color:#333}
+  h1{text-align:center;margin:0 0 16px}
+  .wrap{max-width:980px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.08);padding:20px}
+  label{display:block;margin-top:14px;font-weight:700}
+  input,select,button{width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:8px;min-height:44px;font:inherit}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:900px){.grid,.grid3{grid-template-columns:1fr}}
+  fieldset{border:1px solid #ddd;border-radius:10px;padding:10px;margin-top:8px}
+  fieldset legend{padding:0 8px;font-weight:700}
+  .option-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e1e1e1;border-radius:8px;background:#fafafa;min-height:40px}
+  .muted{color:#666;font-size:12px;margin-top:6px;white-space:pre-wrap}
+  .hint{font-size:12px;color:#555}
+  .result{margin-top:18px;padding:14px;background:#e9f5ff;border:1px solid #b3e0ff;border-radius:10px;text-align:center;font-size:18px}
+  .btn{cursor:pointer;background:#0ea5e9;color:#fff;border:none}
+  .hidden{display:none}
+  .radio-row{display:flex;gap:8px;flex-wrap:wrap}
+  .radio-row label{font-weight:normal;border:1px solid #ddd;border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:8px}
 </style>
 </head>
 <body>
+<h1>Configurateur Tôle Tablette</h1>
 
-<header class="cofel-header">
-  <div class="row">
-    <a class="cofel-back" href="../index.html">⬅ Retour aux configurateurs</a>
-    <div class="cofel-brand">
-      <img src="../assets/logo cofel.jpg" alt="Cofel">
-      <h1 class="cofel-title">Configurateur — Tôle Tablette</h1>
+<div class="wrap">
+  <!-- Quantité uniquement (TVA fixe 20% en JS) -->
+  <div class="grid">
+    <div>
+      <label for="quantite">Quantité</label>
+      <input type="number" id="quantite" min="1" value="1" />
     </div>
   </div>
-</header>
 
-<main class="wrap">
-
-  <!-- Indicateur d’étapes -->
-  <div class="steps" id="stepsBadges">
-    <div class="step-badge" data-step="0">1. Matière</div>
-    <div class="step-badge" data-step="1">2. Dimensions</div>
-    <div class="step-badge" data-step="2">3. Fixation</div>
-    <div class="step-badge" data-step="3">4. Ajourage</div>
-    <div class="step-badge" data-step="4">5. PMMA</div>
-    <div class="step-badge" data-step="5">6. LED</div>
+  <!-- Dimensions -->
+  <div class="grid3">
+    <div>
+      <label for="largeur">Largeur (mm)</label>
+      <input type="number" id="largeur" placeholder="Ex : 1500" min="1" />
+    </div>
+    <div>
+      <label for="hauteur">Hauteur (mm)</label>
+      <input type="number" id="hauteur" placeholder="Ex : 500" min="1" />
+    </div>
+    <div>
+      <label>Surface tôle (auto)</label>
+      <input id="surfaceCalc" disabled value="0.000 m²" />
+      <div class="hint">Surface = (L × H) / 1 000 000</div>
+    </div>
   </div>
 
-  <!-- Étape 1 — Matière -->
-  <section class="card step" data-step="0">
-    <h2 class="section-title">Étape 1 — Matière</h2>
-    <div class="grid">
-      <div class="field">
-        <label for="matiere">Matière / finition de la tôle</label>
-        <select id="matiere">
-          <option value="brut">Brut</option>
-          <option value="prelaque">Prélaqué</option>
-          <option value="laque">Laqué (RAL)</option>
-        </select>
-      </div>
-      <div class="field" id="ralBloc" class="hidden">
-        <label for="ral">RAL (si laqué)</label>
-        <input id="ral" type="text" placeholder="ex : RAL 7016">
-        <small class="muted">Saisissez un RAL si vous avez choisi “Laqué”.</small>
+  <!-- Matière tôle tablette -->
+  <div class="grid">
+    <div>
+      <label>Matière de la tôle tablette</label>
+      <div class="radio-row" id="matiereRow">
+        <label><input type="radio" name="matiere" value="brut"> Alu 20/10 <b>brut</b> (71,50 €/m²)</label>
+        <label><input type="radio" name="matiere" value="prelaque" checked> <b>Prélaqué</b> (89,00 €/m²)</label>
+        <label><input type="radio" name="matiere" value="laque"> Alu 20/10 <b>laqué</b> (105,00 €/m²)</label>
       </div>
     </div>
-    <div class="nav">
-      <div class="left"></div>
-      <div class="right">
-        <button class="btn" id="next0">Étape suivante →</button>
-      </div>
-    </div>
-  </section>
+    <div></div>
+  </div>
 
-  <!-- Étape 2 — Dimensions -->
-  <section class="card step" data-step="1">
-    <h2 class="section-title">Étape 2 — Dimensions</h2>
-    <div class="grid">
-      <div class="field">
-        <label for="L_mm">Largeur (mm)</label>
-        <input id="L_mm" type="number" min="1" value="1000">
-      </div>
-      <div class="field">
-        <label for="H_mm">Hauteur (mm)</label>
-        <input id="H_mm" type="number" min="1" value="500">
-      </div>
-      <div class="field">
-        <label>Surface (m²)</label>
-        <input id="surface_m2" type="text" readonly>
-        <small class="muted">Calculée automatiquement : (L×H)/1 000 000</small>
-      </div>
-    </div>
-    <div class="nav">
-      <div class="left">
-        <button class="btn secondary" id="prev1">← Étape précédente</button>
-      </div>
-      <div class="right">
-        <button class="btn" id="next1">Étape suivante →</button>
-      </div>
-    </div>
-  </section>
+  <!-- Ajourage + PMMA + LED -->
+  <fieldset>
+    <legend>Ajourage / Remplissage</legend>
+    <label class="option-item"><input type="checkbox" id="optAjour" /> Ajourage de la face avant</label>
 
-  <!-- Étape 3 — Fixation -->
-  <section class="card step" data-step="2">
-    <h2 class="section-title">Étape 3 — Fixation</h2>
-    <div class="grid">
-      <div class="field">
-        <label>Type de fixation</label>
-        <div class="inline">
-          <label class="pill"><input type="radio" name="fix" value="chassis" checked> Châssis 30×30 mm</label>
-          <label class="pill"><input type="radio" name="fix" value="boite"> Boîte à chaussures</label>
-          <label class="pill"><input type="radio" name="fix" value="corniere"> Cornière</label>
+    <div id="blockAjour" class="hidden">
+      <div class="grid">
+        <div>
+          <label for="pmmaSurface">Surface PMMA à facturer (m²)</label>
+          <div class="radio-row" style="gap:8px">
+            <input type="number" id="pmmaSurface" min="0" step="0.001" placeholder="Ex : 0.75" style="flex:1" />
+            <button class="btn" id="btnCopySurface" style="flex:0 0 auto">Copier surface tôle</button>
+          </div>
+          <div class="hint">Ajourage: <b>99,00 €/m²</b> × surface PMMA. Les LED utilisent aussi cette surface.</div>
+        </div>
+        <div>
+          <label for="pmmaSel">Type de PMMA (si trouvé dans le CSV)</label>
+          <select id="pmmaSel"><option value="">(aucun)</option></select>
         </div>
       </div>
 
-      <div class="field hidden" id="corniereBloc">
-        <label for="corniere_ml">Cornière (mètres linéaires)</label>
-        <input id="corniere_ml" type="number" min="0" step="0.1" value="0">
-        <small class="muted">Renseignez la longueur totale si vous choisissez “Cornière”.</small>
-      </div>
-    </div>
-    <small class="muted">Châssis : goussets minimum 4, puis +4 par m² (arrondi sup.).</small>
-    <div class="nav">
-      <div class="left">
-        <button class="btn secondary" id="prev2">← Étape précédente</button>
-      </div>
-      <div class="right">
-        <button class="btn" id="next2">Étape suivante →</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Étape 4 — Ajourage -->
-  <section class="card step" data-step="3">
-    <h2 class="section-title">Étape 4 — Ajourage</h2>
-    <div class="grid">
-      <div class="field">
-        <label>Ajourage</label>
-        <div class="inline">
-          <label class="pill"><input type="radio" name="ajour" value="oui"> Oui</label>
-          <label class="pill"><input type="radio" name="ajour" value="non" checked> Non</label>
+      <div class="grid">
+        <div>
+          <label class="option-item"><input type="checkbox" id="optLED" /> Éclairage LED (utilise surface PMMA)</label>
         </div>
       </div>
-      <div class="field hidden" id="surfAjourBloc">
-        <label for="surf_ajour">Surface ajourée (m²)</label>
-        <input id="surf_ajour" type="number" min="0" step="0.01" value="0.00">
-        <small class="muted">Saisir la surface réellement découpée/ajourée.</small>
-      </div>
     </div>
-    <div class="nav">
-      <div class="left">
-        <button class="btn secondary" id="prev3">← Étape précédente</button>
-      </div>
-      <div class="right">
-        <button class="btn" id="next3">Étape suivante →</button>
-      </div>
-    </div>
-  </section>
+  </fieldset>
 
-  <!-- Étape 5 — PMMA -->
-  <section class="card step" data-step="4">
-    <h2 class="section-title">Étape 5 — PMMA</h2>
-    <div class="grid">
-      <div class="field" id="pmmaBloc">
-        <label for="pmma">Type de PMMA (si ajourage = oui)</label>
-        <select id="pmma" disabled>
-          <option value="">— Pas de PMMA —</option>
-          <!-- Mets ici tes vrais libellés/ids disponibles -->
-          <option value="PMMA_OPALE_3">PMMA opale 3 mm</option>
-          <option value="PMMA_DIFFUSANT_3">PMMA diffusant 3 mm</option>
-          <option value="PMMA_INCOLORE_5">PMMA incolore 5 mm</option>
-        </select>
-        <small class="muted">Le choix du PMMA impacte le coût (barème par option).</small>
-      </div>
+  <!-- Fixation -->
+  <fieldset>
+    <legend>Fixation de la tôle tablette (choix exclusif)</legend>
+    <div class="radio-row">
+      <label><input type="radio" name="fixation" value="aucune" checked> Aucune</label>
+      <label><input type="radio" name="fixation" value="boite"> Boîte à chaussure</label>
+      <label><input type="radio" name="fixation" value="chassis"> Châssis tube 30×30</label>
+      <label><input type="radio" name="fixation" value="corniere"> Cornière (6,5 €/ml sur périmètre)</label>
     </div>
-    <div class="nav">
-      <div class="left">
-        <button class="btn secondary" id="prev4">← Étape précédente</button>
-      </div>
-      <div class="right">
-        <button class="btn" id="next4">Étape suivante →</button>
-      </div>
-    </div>
-  </section>
 
-  <!-- Étape 6 — LED -->
-  <section class="card step" data-step="5">
-    <h2 class="section-title">Étape 6 — Option lumineuse</h2>
-    <div class="grid">
-      <div class="field">
-        <label>LED derrière PMMA</label>
-        <div class="inline" id="ledRow">
-          <label class="pill"><input type="radio" name="led" value="oui" disabled> Oui</label>
-          <label class="pill"><input type="radio" name="led" value="non" checked disabled> Non</label>
-        </div>
-        <small class="muted">Les LED sont disponibles uniquement si vous avez sélectionné un PMMA.</small>
+    <div id="fixBoite" class="hidden">
+      <div class="radio-row" style="margin-top:8px">
+        <label><input type="radio" name="boiteMat" value="brut" checked> Boîte en alu 20/10 <b>brut</b> (71,50 €/m²)</label>
+        <label><input type="radio" name="boiteMat" value="laque"> Boîte en alu 20/10 <b>laqué</b> (105,00 €/m²)</label>
       </div>
-      <div class="field">
-        <label for="qte">Quantité</label>
-        <input id="qte" type="number" min="1" value="1">
+      <div class="muted">La boîte a la <b>même dimension</b> que la tôle (surface identique A).</div>
+    </div>
+
+    <div id="fixChassis" class="hidden">
+      <div class="muted" style="margin-top:8px">
+        Linéaire châssis = <b>périmètre</b> (2×(L+H)) — <b>10,50 €/ml</b>.<br />
+        Goussets = minimum 4, puis +4 par m² (arrondi à l’entier sup.).
+      </div>
+      <div style="margin-top:8px">
+        <label>Gousset €/u</label>
+        <input type="number" id="goussetPrixU" placeholder="€/u (auto/manuel)" min="0" step="0.01" />
       </div>
     </div>
 
-    <!-- Bloc prix -->
-    <div class="price-block">
-      <div class="price">
-        <div class="label">PU public (inclut +50%)</div>
-        <div class="value" id="puPublic">—</div>
-      </div>
-      <div class="price">
-        <div class="label">PU net (remise globale via page principale)</div>
-        <div class="value" id="puNet">—</div>
-      </div>
-      <div class="price">
-        <div class="label">Total net</div>
-        <div class="value" id="totalNet">—</div>
-      </div>
+    <div id="fixCorniere" class="hidden">
+      <div class="muted">Longueur = périmètre (2×(L+H)) — <b>6,50 €/ml</b>.</div>
     </div>
+  </fieldset>
 
-    <div class="nav">
-      <div class="left">
-        <button class="btn secondary" id="prev5">← Étape précédente</button>
-      </div>
-      <div class="right">
-        <button class="btn" id="btnAjouter">Ajouter au devis</button>
-      </div>
-    </div>
-  </section>
-
-</main>
-
-<footer class="cofel-footer">
-  © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
-</footer>
+  <!-- Résultats -->
+  <div class="result">
+    <p>Prix unitaire HT : <span id="prixUHT">0,00</span> €</p>
+    <p>Total HT (×Qté) : <span id="prixHT">0,00</span> €</p>
+    <p>Total TTC : <span id="prixTTC">0,00</span> €</p>
+  </div>
+</div>
 
 <script>
-  // ====== UTIL ======
-  const $ = s => document.querySelector(s);
-  const $$ = s => document.querySelectorAll(s);
-  const fmt = n => (Math.round(n*100)/100).toFixed(2).replace('.', ',');
+/*** CONFIG ***/
+const TVA = 0.20; // fixe 20 %
+const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/toles_tabelette";
+const CORNIERE_PRICE_ML = 6.5;   // €/ml fixe
+const CHASSIS_PRICE_ML  = 10.5;  // €/ml fixe (châssis)
+const MATERIAL_PRICE_M2 = {       // €/m² fixes pour la tôle tablette
+  brut: 71.5,
+  prelaque: 89.0,
+  laque: 105.0
+};
+const BOX_PRICE_M2 = {            // €/m² fixes pour la boîte (choix indépendant)
+  brut: 71.5,
+  laque: 105.0
+};
+const AJOURAGE_PRICE_M2 = 99.0;   // €/m² — appliqué sur la surface PMMA saisie
 
-  // ====== ETAPES ======
-  let step = 0;
-  const steps = $$('.step');
-  const badges = $$('#stepsBadges .step-badge');
-  function showStep(i){
-    step = Math.max(0, Math.min(steps.length-1, i));
-    steps.forEach((st,idx)=> st.classList.toggle('active', idx===step));
-    badges.forEach((b,idx)=> b.classList.toggle('active', idx===step));
-    calcAndRender(); // recalcul à chaque étape (pratique)
-  }
-  // boutons prev/next
-  $('#next0').onclick = ()=> showStep(1);
-  $('#next1').onclick = ()=> showStep(2);
-  $('#next2').onclick = ()=> showStep(3);
-  $('#next3').onclick = ()=> showStep(4);
-  $('#next4').onclick = ()=> showStep(5);
-  $('#prev1').onclick = ()=> showStep(0);
-  $('#prev2').onclick = ()=> showStep(1);
-  $('#prev3').onclick = ()=> showStep(2);
-  $('#prev4').onclick = ()=> showStep(3);
-  $('#prev5').onclick = ()=> showStep(4);
+/*** STATE / DOM ***/
+const $ = id => document.getElementById(id);
+let HEADS=[], ROWS=[], MAP=null;
 
-  // ====== CHAMPS ======
-  const matiere = $('#matiere');
-  const ralBloc = $('#ralBloc');
-  const ral = $('#ral');
+const elQ=$('quantite');
+const elL=$('largeur'), elH=$('hauteur'), elSurf=$('surfaceCalc');
 
-  const Lmm = $('#L_mm');
-  const Hmm = $('#H_mm');
-  const surf = $('#surface_m2');
+const elOptAjour=$('optAjour'), elBlockAjour=$('blockAjour');
+const elPMMA=$('pmmaSel'), elPMMASurface=$('pmmaSurface'), elBtnCopySurface=$('btnCopySurface');
 
-  const fixRadios = $$('input[name="fix"]');
-  const corniereBloc = $('#corniereBloc');
-  const corniereMl = $('#corniere_ml');
+const elLED=$('optLED');
 
-  const ajourRadios = $$('input[name="ajour"]');
-  const surfAjourBloc = $('#surfAjourBloc');
-  const surfAjour = $('#surf_ajour');
+const fixRadios=[...document.querySelectorAll('input[name="fixation"]')];
+const elFixBoite=$('fixBoite'), elFixChassis=$('fixChassis'), elFixCorniere=$('fixCorniere');
+const elGoussetPrixU=$('goussetPrixU');
 
-  const pmma = $('#pmma');
-  const ledRadios = $$('input[name="led"]');
-  const qte = $('#qte');
+const elUHT=$('prixUHT'), elHT=$('prixHT'), elTTC=$('prixTTC');
 
-  // ====== LOGIQUE D’INTERFACE ======
-  function majUI(){
-    // RAL visible si laqué
-    ralBloc.classList.toggle('hidden', matiere.value !== 'laque');
+/*** UTILS ***/
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function numFR(v){
+  if(v===null||v===undefined) return NaN;
+  let s=String(v).trim().replace(/€/g,'').replace(/[\u00A0\u202F]/g,'').replace(/\s+/g,'');
+  if(s.includes(',') && s.includes('.')) s=s.replace(/\./g,'');
+  s=s.replace(',', '.');
+  const m=s.match(/-?\d+(\.\d+)?/);
+  return m?parseFloat(m[0]):NaN;
+}
+function euro(n){return (isFinite(n)?n:0).toFixed(2).replace('.', ',');}
+function areaM2(Lmm,Hmm){return (Math.max(0,Number(Lmm||0))*Math.max(0,Number(Hmm||0)))/1e6;}
+function perimeterMeters(Lmm,Hmm){return 2*((Lmm/1000)+(Hmm/1000));}
 
-    // Cornière ML si choix "corniere"
-    const fix = [...fixRadios].find(r=>r.checked)?.value;
-    corniereBloc.classList.toggle('hidden', fix !== 'corniere');
+/*** CSV PARSER ROBUSTE ***/
+function parseCSVAuto(text){
+  const raw = String(text||'').replace(/^\uFEFF/,'');
+  const lines = raw.split(/\r\n|\n|\r/).filter(l=>l.trim()!=='');
+  if(!lines.length) return {rawHeads:[], rows:[]};
+  const first = lines[0];
+  const sep = ((first.match(/;/g)||[]).length > (first.match(/,/g)||[]).length) ? ';' : ',';
 
-    // Ajourage → surface ajourée
-    const ajour = [...ajourRadios].find(r=>r.checked)?.value === 'oui';
-    surfAjourBloc.classList.toggle('hidden', !ajour);
-
-    // PMMA activé seulement si ajourage = oui
-    pmma.disabled = !ajour;
-    if(!ajour){ pmma.value = ''; }
-
-    // LED activée seulement si PMMA choisi
-    const hasPmma = !!pmma.value;
-    ledRadios.forEach(r => r.disabled = !hasPmma);
-    if(!hasPmma){
-      // force NON si désactivé
-      ledRadios.forEach(r=>{ if(r.value==='non') r.checked=true; });
+  function parseLine(line){
+    const out=[]; let cur=''; let inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i], nx=line[i+1];
+      if(ch==='"'){ if(inQ && nx==='"'){cur+='"'; i++;} else inQ=!inQ; }
+      else if(ch===sep && !inQ){ out.push(cur); cur=''; }
+      else{ cur+=ch; }
     }
-
-    // Surface calculée
-    const s = calcSurface();
-    surf.value = fmt(s).replace(',', '.').replace('.', ','); // afficher virgule
+    out.push(cur);
+    return out;
   }
-
-  function calcSurface(){
-    const L = Math.max(0, parseFloat(Lmm.value||0));
-    const H = Math.max(0, parseFloat(Hmm.value||0));
-    return (L/1000)*(H/1000);
-  }
-
-  // ====== PRIX (exemples simples — à raccorder à tes barèmes réels) ======
-  function prixTole(surface){
-    // Exemple : €/m² selon matière
-    const base = (matiere.value==='brut')? 50 : (matiere.value==='prelaque')? 65 : 80;
-    const mini = 0.3; // mini de facturation
-    return base * Math.max(surface, mini);
-  }
-  function prixFixation(surface){
-    const fix = [...fixRadios].find(r=>r.checked)?.value;
-    if(fix==='chassis'){
-      const goussets = Math.max(4, Math.ceil(surface)*4);
-      return 35*surface + goussets*1.8;
-    }
-    if(fix==='boite'){
-      return 45*surface; // exemple
-    }
-    if(fix==='corniere'){
-      const ml = Math.max(0, parseFloat(corniereMl.value||0));
-      return ml * 2.2;
-    }
-    return 0;
-  }
-  function prixPMMA(surfaceAjour){
-    const map = { PMMA_OPALE_3:60, PMMA_DIFFUSANT_3:75, PMMA_INCOLORE_5:90 }; // €/m²
-    return (map[pmma.value]||0) * Math.max(0, surfaceAjour);
-  }
-  function prixLED(){
-    const ledOui = [...ledRadios].find(r=>r.checked)?.value==='oui';
-    if(!ledOui) return 0;
-    // petit forfait d’exemple ; à ajuster
-    return 20;
-  }
-
-  function calcAndRender(){
-    // surface panneau
-    const S = calcSurface();
-    // ajourage
-    const ajour = [...ajourRadios].find(r=>r.checked)?.value === 'oui';
-    const S_ajour = ajour ? Math.max(0, parseFloat(surfAjour.value||0)) : 0;
-
-    // bases
-    const cTole = prixTole(S);
-    const cFix  = prixFixation(S);
-    const cPMMA = ajour ? prixPMMA(S_ajour) : 0;
-    const cLED  = cPMMA>0 ? prixLED() : 0;
-
-    // PU interne
-    let pu = cTole + cFix + cPMMA + cLED;
-
-    // +50 % dans le module
-    const puPublic = pu * 1.5;
-
-    // (la remise globale viendra depuis la page principale plus tard)
-    const remiseGlobale = 0;
-    const puNet = puPublic * (1 - remiseGlobale/100);
-    const total = puNet * Math.max(1, parseInt(qte.value||1,10));
-
-    // Affichage
-    $('#puPublic').textContent = fmt(puPublic) + ' €';
-    $('#puNet').textContent = fmt(puNet) + ' €';
-    $('#totalNet').textContent = fmt(total) + ' €';
-  }
-
-  // écouteurs
-  [matiere, ral, Lmm, Hmm, corniereMl, pmma, qte].forEach(el=>{
-    el.addEventListener('input', ()=>{ majUI(); calcAndRender(); });
-    el.addEventListener('change', ()=>{ majUI(); calcAndRender(); });
+  const rawHeads=parseLine(first).map(s=>s.replace(/^"+|"+$/g,'').trim());
+  const rows = lines.slice(1).map(line=>{
+    const cells=parseLine(line).map(s=>s.replace(/^"+|"+$/g,'').trim());
+    const o={}; rawHeads.forEach((h,i)=>o[h]=cells[i]??'' ); return o;
   });
-  [...fixRadios, ...ajourRadios, ...ledRadios].forEach(r=>{
-    r.addEventListener('change', ()=>{ majUI(); calcAndRender(); });
-  });
+  return {rawHeads, rows};
+}
 
-  // init
-  showStep(0);
-  majUI();
-  calcAndRender();
+/*** MAPPING ***/
+function buildMapping(heads){
+  const n = heads.map(h=>norm(h));
+  const find=(needle)=>{ const i=n.indexOf(norm(needle)); return i>=0?heads[i]:null; };
+  const like=(...res)=>{ for(let i=0;i<n.length;i++){ const k=n[i]; if(res.every(r=>r.test(k))) return heads[i]; } return null; };
 
-  // Ajouter au devis (placeholder tant que le store global n’est pas branché)
-  $('#btnAjouter').onclick = ()=>{
-    alert('Ligne prête à être envoyée au devis global (prix public +50% inclus).');
+  return {
+    TITRE:  find('titre') || like(/titre/),
+    PROD:   find('produit') || like(/produit/),
+    PROD_REL: like(/produit.*lie/),
+    ETAPE:  find('nom étape') || like(/nom.*etape|etape/),
+    MIN:    find('temps en minute') || like(/minute/),
+    TH:     find('tauxhoraire_eur_h') || like(/taux.*horaire|eur.*h/),
+    MAT:    find('coutmatiere_eur') || like(/matiere.*eur/),
+    FORMULE: find('formule cout') || like(/formule/),
+    TARIF_M2: find('tarif_m2_eur') || like(/tarif.*m2/),
+    TARIF_ML: find('tarif mètre linéaire en eur') || like(/tarif.*metre.*lineaire/),
+    OBLIG:  find('obligatoire') || like(/oblig/),
+    COMM:   find('commentaire') || like(/comment/)
   };
+}
+
+/*** CHARGEMENT CSV ***/
+async function loadCSV(){
+  try{
+    const r = await fetch(CSV_URL, {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const txt = await r.text();
+    const {rawHeads, rows} = parseCSVAuto(txt);
+    HEADS=rawHeads; ROWS=rows; MAP=buildMapping(HEADS);
+    refreshPMMACatalog(ROWS);
+    compute();
+  }catch(e){
+    console.error('Erreur CSV:', e?.message||e);
+  }
+}
+
+/*** CATALOGUES ***/
+function refreshPMMACatalog(rows){
+  const pmmas = new Map();
+  rows.forEach(r=>{
+    const s = norm([r[MAP.ETAPE], r[MAP.PROD], r[MAP.TITRE], r[MAP.COMM]].join(' '));
+    if(/pmma/.test(s)){
+      const label = (r[MAP.ETAPE] || r[MAP.PROD] || 'PMMA').trim();
+      const priceM2 = numFR(r[MAP.TARIF_M2]);
+      if(label) pmmas.set(label, isFinite(priceM2)?priceM2:NaN);
+    }
+  });
+  const cur=elPMMA.value; elPMMA.innerHTML='';
+  const o0=document.createElement('option'); o0.value=''; o0.textContent='(aucun)'; elPMMA.appendChild(o0);
+  [...pmmas.entries()].forEach(([label, val])=>{
+    const o=document.createElement('option');
+    o.value=label;
+    o.textContent = isFinite(val)?`${label} – ${val.toFixed(2)} €/m²`:`${label}`;
+    o.dataset.price = isFinite(val)?val:'';
+    elPMMA.appendChild(o);
+  });
+  if([...pmmas.keys()].includes(cur)) elPMMA.value=cur;
+}
+
+/*** AUTO-FIND PRICES DANS LE CSV ***/
+function autoFindPrice(keywordRe, type='m2'){
+  if(!ROWS.length) return NaN;
+  for(const r of ROWS){
+    const bag = norm([r[MAP.ETAPE], r[MAP.PROD], r[MAP.TITRE], r[MAP.COMM]].join(' '));
+    if(!keywordRe.test(bag)) continue;
+    if(type==='m2'){ const v=numFR(r[MAP.TARIF_M2]); if(isFinite(v)) return v; }
+    if(type==='ml'){ const v=numFR(r[MAP.TARIF_ML]); if(isFinite(v)) return v; }
+    if(type==='u'){  const v=numFR(r[MAP.MAT]);     if(isFinite(v)) return v; }
+  }
+  return NaN;
+}
+
+/*** CALCUL ***/
+function currentSurface(){
+  const A = areaM2(elL.value, elH.value);
+  elSurf.value = `${A.toFixed(3)} m²`;
+  return A;
+}
+function currentPerimeter(){ return perimeterMeters(elL.value, elH.value); }
+
+function compute(){
+  const Q = Math.max(1, Number(elQ.value||1));
+  const A = currentSurface();      // m² tôle
+  const P = currentPerimeter();    // m périmètre
+
+  // Matière tôle (tarifs fixes)
+  const mat = (document.querySelector('input[name="matiere"]:checked')||{}).value || 'prelaque';
+  const matM2 = MATERIAL_PRICE_M2[mat] ?? 0;
+  const base = matM2 * A;
+
+  // Ajourage / PMMA / LED
+  let ajourage=0, pmma=0, led=0, pmmaSurf=0;
+  if(elOptAjour.checked){
+    pmmaSurf = Number(elPMMASurface.value||0); // m²
+    ajourage = AJOURAGE_PRICE_M2 * Math.max(0, pmmaSurf); // 99 €/m² × surface PMMA
+
+    const selectedPMMA = elPMMA.options[elPMMA.selectedIndex];
+    let pmmaM2 = selectedPMMA && selectedPMMA.dataset.price ? Number(selectedPMMA.dataset.price) : NaN;
+    if(isFinite(pmmaM2)) pmma = pmmaM2 * pmmaSurf;
+
+    if(elLED.checked){
+      let ledM2 = autoFindPrice(/(led|eclairage|éclairage)/,'m2');
+      if(isFinite(ledM2)) led = ledM2 * pmmaSurf; // même surface que PMMA
+    }
+  }
+
+  // Fixations
+  const fixVal = (document.querySelector('input[name="fixation"]:checked')||{}).value || 'aucune';
+  let fix=0, nbGoussets=0;
+
+  if(fixVal==='boite'){
+    // Boîte : matière indépendante (brut/laqué), même surface A
+    const boiteMat = (document.querySelector('input[name="boiteMat"]:checked')||{}).value || 'brut';
+    const boiteM2 = BOX_PRICE_M2[boiteMat] || 0;
+    fix = boiteM2 * A;
+
+  }else if(fixVal==='chassis'){
+    const chLinCost = CHASSIS_PRICE_ML * P; // périmètre × 10,50 €/ml
+    nbGoussets = Math.max(4, Math.ceil(4 + 4 * A)); // min 4 puis +4/m²
+    let gusU = autoFindPrice(/gousset/,'u');
+    if(!isFinite(gusU)) gusU = Number(elGoussetPrixU.value||0);
+    const gusCost = (isFinite(gusU)?gusU:0) * nbGoussets;
+    fix = chLinCost + gusCost;
+
+  }else if(fixVal==='corniere'){
+    fix = CORNIERE_PRICE_ML * P; // périmètre × 6,5 €/ml
+  }
+
+  const unitHT = base + ajourage + pmma + led + fix;
+  const totalHT = unitHT * Q;
+  const totalTTC = totalHT * (1+TVA);
+
+  elUHT.textContent = euro(unitHT);
+  elHT.textContent  = euro(totalHT);
+  elTTC.textContent = euro(totalTTC);
+}
+
+/*** UI TOGGLES ***/
+function toggleBlocks(){
+  elBlockAjour.classList.toggle('hidden', !elOptAjour.checked);
+  const fixVal = (document.querySelector('input[name="fixation"]:checked')||{}).value || 'aucune';
+  elFixBoite.classList.toggle('hidden', fixVal!=='boite');
+  elFixChassis.classList.toggle('hidden', fixVal!=='chassis');
+  elFixCorniere.classList.toggle('hidden', fixVal!=='corniere');
+}
+
+/*** EVENTS ***/
+['input','change'].forEach(evt=>{
+  [
+    quantite, largeur, hauteur,
+    ...document.querySelectorAll('input[name="matiere"]'),
+    optAjour, pmmaSel, pmmaSurface, btnCopySurface,
+    optLED, ...fixRadios, goussetPrixU,
+    ...document.querySelectorAll('input[name="boiteMat"]')
+  ].forEach(el=>{
+    el.addEventListener(evt, e=>{
+      if(e.target===btnCopySurface){ e.preventDefault(); pmmaSurface.value = areaM2(largeur.value, hauteur.value).toFixed(3); }
+      toggleBlocks();
+      compute();
+    });
+  });
+});
+
+/*** INIT ***/
+loadCSV();
+toggleBlocks();
+compute();
 </script>
 </body>
 </html>
