@@ -26,6 +26,13 @@
   .muted{color:#7d6f8e}
   .sub{font-size:14px;color:#4b3b5e;margin-top:6px}
   .hidden{display:none}
+
+  /* Bouton Ajouter au devis */
+  #btnAddDevis{
+    position:fixed;right:20px;bottom:20px;padding:10px 16px;
+    background:#ffffff;border:1px solid #ccc;border-radius:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;font-weight:600
+  }
 </style>
 </head>
 <body>
@@ -164,5 +171,65 @@ function toggleBlocks(){
 toggleBlocks();
 compute();
 </script>
+
+<!-- ====== Intégration Devis ====== -->
+<script src="../js/devis-core.js"></script>
+
+<button id="btnAddDevis">➕ Ajouter au devis</button>
+
+<script>
+(function(){
+  const btn = document.getElementById('btnAddDevis');
+  if(!btn) return;
+
+  // Récupère le total HT affiché
+  function parseTotalHT(){
+    const txt = document.getElementById('prixHT').innerText.trim(); // "1 234,56"
+    return Number(txt.replace(/\s/g,'').replace(',', '.')) || 0;
+  }
+
+  btn.addEventListener('click', () => {
+    try{
+      if(!window.Devis) throw new Error("Moteur de devis introuvable.");
+
+      const Lmm = Math.max(0, Number(document.getElementById('longueur').value || 0));
+      const qte = Math.max(1, Number(document.getElementById('quantite').value || 1));
+      if(!(Lmm>0)){ alert("Renseigne la longueur de rampe."); return; }
+
+      const fixVal = (document.querySelector('input[name="fixation"]:checked')||{}).value || 'directe';
+      const deport = Number(document.getElementById('deport')?.value || 0);
+
+      const total_ht = parseTotalHT();
+      if (total_ht <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
+
+      const pu_interne_ht = qte>0 ? total_ht / qte : 0;
+
+      const parts = [
+        `Rampe lumineuse (PLL)`,
+        `L ${Lmm} mm`,
+        `Fixation: ${fixVal}`
+      ];
+      if (fixVal === 'platine' && deport>0) parts.push(`Déport ${deport} mm`);
+      const designation = parts.join(' — ');
+
+      Devis.addLine({
+        type: 'Rampe lumineuse (PLL)',
+        designation,
+        quantite: qte,
+        pu_interne_ht: Number(pu_interne_ht.toFixed(2))
+      });
+
+      alert(`✅ Ligne ajoutée au devis !
+${designation}
+Qté : ${qte}
+PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+    }catch(err){
+      console.error(err);
+      alert('Erreur lors de l’ajout au devis : ' + err.message);
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
