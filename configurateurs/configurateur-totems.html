@@ -80,9 +80,27 @@
 
 <script>
 /* ------- CONFIG ------- */
-const URL_TARIFS  = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/Tarifs_Totems_.csv";
-const URL_OPTIONS = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/option%20platine%20et%20panier%20de%20crosses%20(1).csv";
 const TVA = 0.20;
+
+/* Candidats de chemins pour les CSV (relatifs + Raw GitHub) */
+const CANDIDATES_TARIFS = [
+  "../styles/Tarifs_Totems_.csv",
+  "../styles/Tarifs_Totems.csv",
+  "../Tarifs_Totems_.csv",
+  "../Tarifs_Totems.csv",
+  "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/styles/Tarifs_Totems_.csv",
+  "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/Tarifs_Totems_.csv"
+];
+const CANDIDATES_OPTIONS = [
+  "../styles/option platine et panier de crosses.csv",
+  "../styles/option platine et panier de crosses (1).csv",
+  "../option platine et panier de crosses.csv",
+  "../option platine et panier de crosses (1).csv",
+  "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/styles/option%20platine%20et%20panier%20de%20crosses.csv",
+  "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/styles/option%20platine%20et%20panier%20de%20crosses%20(1).csv",
+  "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/option%20platine%20et%20panier%20de%20crosses.csv",
+  "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/option%20platine%20et%20panier%20de%20crosses%20(1).csv"
+];
 
 /* ------- STATE ------- */
 let RAW_TARIFFS = [], RAW_OPTIONS = [];
@@ -90,7 +108,7 @@ let RAW_HEADERS_T = [], RAW_HEADERS_O = [];
 let HEADS_T = [], HEADS_O = [];
 let TARIFFS = [], OPTIONS = [];
 
-/* auto-map (plus de localStorage, plus d’écran de mappage) */
+/* auto-map */
 let MAP_T = {type:null,h:null,l:null,price:null};
 let MAP_O = {type:null,hmin:null,hmax:null,price:null,actif:null};
 
@@ -140,7 +158,6 @@ function isActive(v){
 
 /* ------- AUTO-MAP ------- */
 function autoMapTarifs(){
-  // essaie plusieurs regex pour chaque champ
   const F = (arr, ...res)=> arr.find(k=>res.some(r=>r.test(k))) || null;
   MAP_T.type  = F(HEADS_T, /type/, /face/);
   MAP_T.h     = F(HEADS_T, /hauteur|height|hmm|h_mm|h/);
@@ -170,7 +187,6 @@ function applyTarifs(){
   const types = [...new Set(TARIFFS.map(r=>r.type))].sort();
   elType.innerHTML = '<option value="">— sélectionnez —</option>' +
     types.map(t=>`<option value="${t}">${t}</option>`).join('');
-
   return types.length>0;
 }
 function applyOptions(){
@@ -270,53 +286,58 @@ function compute(){
   elTTC.textContent = totalTTC.toFixed(2).replace('.', ',');
 }
 
+/* ------- FETCH UTIL ------- */
+async function fetchFirst(urls){
+  for(const u of urls){
+    try{
+      const r = await fetch(u, {cache:'no-store'});
+      if(r.ok){
+        const t = await r.text();
+        return {url:u, text:t};
+      }
+    }catch(_) {}
+  }
+  throw new Error("Aucun des chemins testés n'a abouti.");
+}
+
 /* ------- CHARGEMENT ------- */
 async function loadAll(){
   try{
-    const [rt, ro] = await Promise.all([fetch(URL_TARIFS, {cache:'no-store'}), fetch(URL_OPTIONS, {cache:'no-store'})]);
-    if(!rt.ok || !ro.ok) throw new Error('Chargement CSV impossible.');
-    const [txtT, txtO] = await Promise.all([rt.text(), ro.text()]);
+    const [{url:usedT, text:txtT}, {url:usedO, text:txtO}] = await Promise.all([
+      fetchFirst(CANDIDATES_TARIFS),
+      fetchFirst(CANDIDATES_OPTIONS)
+    ]);
+
     const pT = parseCSVAuto(txtT);
     const pO = parseCSVAuto(txtO);
 
     RAW_TARIFFS = pT.rows; RAW_HEADERS_T = pT.rawHeads; HEADS_T = pT.heads;
     RAW_OPTIONS = pO.rows; RAW_HEADERS_O = pO.rawHeads; HEADS_O = pO.heads;
 
-    // Auto-mappage robuste
     const okMapT = autoMapTarifs();
     const okMapO = autoMapOptions();
-
-    if(!okMapT){
-      elMsg.textContent = "Impossible d’auto-mapper les colonnes TARIFS. En-têtes: " + RAW_HEADERS_T.join(" | ");
-      return;
-    }
-    if(!okMapO){
-      elMsg.textContent = "Impossible d’auto-mapper les colonnes OPTIONS. En-têtes: " + RAW_HEADERS_O.join(" | ");
-      return;
-    }
+    if(!okMapT){ elMsg.textContent = "Impossible d’auto-mapper TARIFS. En-têtes: "+RAW_HEADERS_T.join(" | "); return; }
+    if(!okMapO){ elMsg.textContent = "Impossible d’auto-mapper OPTIONS. En-têtes: "+RAW_HEADERS_O.join(" | "); return; }
 
     const okT = applyTarifs();
     const okO = applyOptions();
+    if(!okT){ elMsg.textContent = "Aucune ligne de tarifs exploitable après mappage."; return; }
 
-    if(!okT){
-      elMsg.textContent = "Aucune ligne de tarifs exploitable après mappage.";
-      return;
-    }
-
-    // Écouteurs
     elType.addEventListener('change', ()=>{ populateHL(); renderOptionsCheckboxes(); compute(); });
     elH.addEventListener('change',   ()=>{ renderOptionsCheckboxes(); compute(); });
     elL.addEventListener('change', compute);
     elQte.addEventListener('input', compute);
 
-    // Remplit les menus
     populateHL();
     renderOptionsCheckboxes();
     compute();
 
     elMsg.textContent =
-      `CSV chargés. ${RAW_TARIFFS.length} tarifs | ${RAW_OPTIONS.length} options.\n` +
-      `T: [${RAW_HEADERS_T.join(' | ')}]\nO: [${RAW_HEADERS_O.join(' | ')}]`;
+      `CSV chargés.\n` +
+      `Tarifs: ${RAW_TARIFFS.length} lignes (via ${usedT})\n` +
+      `Options: ${RAW_OPTIONS.length} lignes (via ${usedO})\n` +
+      `En-têtes Tarifs: [${RAW_HEADERS_T.join(" | ")}]\n` +
+      `En-têtes Options: [${RAW_HEADERS_O.join(" | ")}]`;
   }catch(e){
     elMsg.textContent = "Erreur de chargement : " + e.message;
     console.error(e);
