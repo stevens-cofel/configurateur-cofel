@@ -3,71 +3,119 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Configurateur Lettres Boîtiers - Cofel</title>
+<title>Configurateur Lettres Boîtiers – Cofel</title>
+
+<!-- Styles communs (si présents, mêmes que l’accueil) -->
+<link rel="stylesheet" href="../styles/cofel.css" />
+<link rel="stylesheet" href="../styles/cofel-config.css" />
+
 <style>
+  /* ===== Habillage Cofel (violet) — logique JS conservée ===== */
   :root{
-    --bg:#f7f7f7; --txt:#333;
-    --card:#fff; --bd:#e6e6e6; --bd2:#d7d7d7;
-    --shadow:0 10px 28px rgba(0,0,0,.08);
-    --info-bg:#e9f5ff; --info-bd:#b3e0ff;
-    --pill-bg:#f0f3f9; --pill-bd:#e5e9f3;
+    --violet:#5a2d82;
+    --bg:#f6f3fa; --txt:#2b2140;
+    --card:#fff; --bd:#e6daf4; --bd2:#d8cbe8;
   }
   *{box-sizing:border-box}
-  body{font-family:Arial, sans-serif;background:var(--bg);margin:0;padding:24px;color:var(--txt)}
-  h1{text-align:center;margin:0 0 16px}
-  .wrap{max-width:980px;margin:0 auto;background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:24px}
+  body{font-family:Arial, Helvetica, sans-serif;background:var(--bg);margin:0;color:var(--txt)}
+  h1{margin:0 0 14px;text-align:center}
+  .wrap{max-width:980px;margin:20px auto;background:var(--card);border-radius:14px;box-shadow:0 10px 28px rgba(90,45,130,.12);padding:20px}
   label{display:block;margin-top:14px;font-weight:700}
-  input,select{width:100%;padding:10px;margin-top:6px;border:1px solid var(--bd2);border-radius:8px;min-height:44px}
+  input,select{width:100%;padding:10px;margin-top:6px;border:1px solid var(--bd2);border-radius:10px;min-height:44px;background:#fff}
   input[type="number"]{appearance:textfield}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   @media (max-width:820px){ .grid{grid-template-columns:1fr} }
-  .help{font-size:12px;color:#555;margin-top:6px}
-  .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--pill-bg);color:#444;font-size:12px;border:1px solid var(--pill-bd);margin:6px 6px 0 0}
-  .result{margin-top:22px;padding:16px;background:var(--info-bg);border:1px solid var(--info-bd);border-radius:10px;font-size:18px;text-align:center}
-  .muted{color:#666;font-size:12px;margin-top:8px;white-space:pre-wrap}
-  .diag{margin-top:12px;border:1px dashed #ccc;border-radius:10px;padding:10px;background:#fafafa;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:12px;display:none}
+  .help{font-size:12px;color:#6f5b86;margin-top:6px}
+
+  .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#fcfaff;color:#4a2a6c;font-size:12px;border:1px solid var(--bd);margin:6px 6px 0 0}
+  .result{
+    margin-top:22px;padding:16px;background:#fcfaff;border:1px solid #dec5f2;border-radius:12px;font-size:18px;text-align:center;
+    box-shadow:0 8px 18px rgba(90,45,130,.08)
+  }
+  .muted{color:#7d6f8e;font-size:12px;margin-top:8px;white-space:pre-wrap}
+
+  .diag{
+    margin-top:12px;border:1px dashed #cdb6e6;border-radius:12px;padding:12px;background:#fff;
+    font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:12px;display:none;white-space:pre-wrap
+  }
+  .note{
+    margin-top:10px;background:#fff7e6;border:1px solid #ffd38a;border-radius:10px;padding:10px;font-size:13px;color:#5a430e;display:none
+  }
+
+  /* Bandeau / footer (fallback si cofel.css absent) */
+  .cofel-header{background:var(--violet);color:#fff}
+  .cofel-header .row{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 14px}
+  .cofel-back{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.35);padding:8px 12px;border-radius:10px}
+  .cofel-brand{display:flex;align-items:center;gap:10px}
+  .cofel-brand img{height:36px;border-radius:6px;object-fit:cover}
+  .cofel-title{font-size:18px;margin:0}
+  .cofel-container{max-width:1100px;margin:0 auto;padding:14px}
+  .cofel-footer{
+    margin:24px 0 0;padding:14px;text-align:center;color:#6f5b86;font-size:13px;
+    border-top:1px solid var(--bd);background:#fbf9fe
+  }
 </style>
 </head>
 <body>
-<h1>Configurateur Lettres Boîtiers - Cofel</h1>
 
-<div class="wrap">
-  <div class="grid">
-    <div>
-      <label for="famille">Type de lettre boîtier</label>
-      <select id="famille"><option value="">— sélectionnez —</option></select>
-    </div>
-    <div>
-      <label for="quantite">Quantité</label>
-      <input type="number" id="quantite" value="1" min="1"/>
+<!-- Bandeau violet / retour -->
+<header class="cofel-header">
+  <div class="row">
+    <a class="cofel-back" href="../index.html">⬅ Retour aux configurateurs</a>
+    <div class="cofel-brand">
+      <img src="../assets/logo cofel.jpg" alt="Cofel" />
+      <h1 class="cofel-title">Configurateur — Lettres Boîtiers</h1>
     </div>
   </div>
+</header>
 
-  <div class="grid">
-    <div>
-      <label for="hauteur">Hauteur (mm)</label>
-      <input type="number" id="hauteur" placeholder="Ex : 325" min="1"/>
-      <div id="rangesHelp" class="help"></div>
+<div class="cofel-container">
+  <h1>Lettres Boîtiers</h1>
+
+  <div class="wrap">
+    <div class="grid">
+      <div>
+        <label for="famille">Type de lettre boîtier</label>
+        <select id="famille"><option value="">— sélectionnez —</option></select>
+      </div>
+      <div>
+        <label for="quantite">Quantité</label>
+        <input type="number" id="quantite" value="1" min="1"/>
+      </div>
     </div>
-    <div>
-      <label for="variant">Eclairage (si présent)</label>
-      <select id="variant"><option value="">— (aucun filtre) —</option></select>
-      <div class="help" id="variantHelp"></div>
+
+    <div class="grid">
+      <div>
+        <label for="hauteur">Hauteur (mm)</label>
+        <input type="number" id="hauteur" placeholder="Ex : 325" min="1"/>
+        <div id="rangesHelp" class="help"></div>
+      </div>
+      <div>
+        <label for="variant">Éclairage (si présent)</label>
+        <select id="variant"><option value="">— (aucun filtre) —</option></select>
+        <div class="help" id="variantHelp"></div>
+        <div id="dibondRule" class="note">Pour les <b>faces Dibond</b> : si un éclairage est choisi, c’est du <b>rétroéclairage</b> et la <b>fixation est obligatoire</b> (à prévoir dans le devis).</div>
+      </div>
     </div>
+
+    <div class="result">
+      <p>Prix HT : <span id="prixHT">0,00</span> €</p>
+      <p>Prix TTC : <span id="prixTTC">0,00</span> €</p>
+    </div>
+
+    <label style="margin-top:14px;display:flex;align-items:center;gap:8px;font-weight:normal">
+      <input type="checkbox" id="toggleDiag"/> Afficher le diagnostic (débogage)
+    </label>
+    <div id="diag" class="diag"></div>
+
+    <div id="msg" class="muted"></div>
   </div>
-
-  <div class="result">
-    <p>Prix HT : <span id="prixHT">0,00</span> €</p>
-    <p>Prix TTC : <span id="prixTTC">0,00</span> €</p>
-  </div>
-
-  <label style="margin-top:14px;display:flex;align-items:center;gap:8px;font-weight:normal">
-    <input type="checkbox" id="toggleDiag"/> Afficher le diagnostic (débogage)
-  </label>
-  <div id="diag" class="diag"></div>
-
-  <div id="msg" class="muted"></div>
 </div>
+
+<!-- Pied de page -->
+<footer class="cofel-footer">
+  © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
+</footer>
 
 <script>
 /* =======================
@@ -112,6 +160,7 @@ const elTTC = document.getElementById('prixTTC');
 const elMsg = document.getElementById('msg');
 const elDiag= document.getElementById('diag');
 const elTgD = document.getElementById('toggleDiag');
+const elDibondRule = document.getElementById('dibondRule');
 
 /* =======================
    HELPERS
@@ -131,7 +180,7 @@ function numFR(v){
 }
 function euro(n){ return (isFinite(n)?n:0).toFixed(2).replace('.', ','); }
 
-/* ===== CSV Parser robuste (guillemets, virgules/points-virgules, “double quotes”) ===== */
+/* ===== CSV Parser robuste ===== */
 function parseCSVLine(line, sep=','){
   const out=[]; let cur=''; let inQ=false;
   for(let i=0;i<line.length;i++){
@@ -148,10 +197,8 @@ function parseCSVLine(line, sep=','){
   out.push(cur);
   return out;
 }
-// Normalise les CSV “encapsulés” (entièrement entre guillemets avec doublements)
 function normalizeWeirdCSV(text){
   let t = text.replace(/^\uFEFF/,'').replace(/\r/g,'');
-  // S'il y a beaucoup de guillemets et peu de retours, on reconstruit
   const manyQuotes = (t.match(/"/g)||[]).length > 50;
   const fewNewlines = (t.match(/\n/g)||[]).length < 3;
   if(manyQuotes && fewNewlines){
@@ -166,7 +213,6 @@ function normalizeWeirdCSV(text){
     }
     return lines.join('\n');
   }
-  // Retire guillemets d'enrobage ligne à ligne si présents
   return t.split('\n').map(l=>{
     const s=l.trim();
     if(s.startsWith('"') && s.endsWith('"')) return s.slice(1,-1);
@@ -182,53 +228,53 @@ function parseCSVAuto(text){
   const rawHeads = parseCSVLine(lines[0], sep).map(s=>s.replace(/^"+|"+$/g,'').trim());
   const rows = lines.slice(1).map(line=>{
     const cells = parseCSVLine(line, sep).map(s=>s.replace(/^"+|"+$/g,'').trim());
-    const o={}; rawHeads.forEach((h,i)=>o[h]=cells[i]??''); return o;
+    const o={}; rawHeads.forEach((h,i)=>o[h]=cells[i]??'' ); return o;
   });
   return {rawHeads, rows};
 }
 
-/* ===== Mapping automatique des colonnes selon tes entêtes ===== */
+/* ===== Mapping automatique ===== */
 function buildMapping(rawHeads){
   const NK = rawHeads.map(normKey);
   const findExact = (nkWanted)=> {
     const idx = NK.findIndex(k=>k===nkWanted);
     return idx>=0 ? rawHeads[idx] : null;
   };
-  const findLoose = (reArr)=> {
+  const findLoose = (...res)=> {
     for(let i=0;i<NK.length;i++){
       const k=NK[i];
-      if(reArr.every(re=>re.test(k))) return rawHeads[i];
+      if(res.every(re=>re.test(k))) return rawHeads[i];
     }
     return null;
   };
 
-  // D'après ton en-tête : HauteurMin_mm, HauteurMax_mm, PrixUnitaire_EUR, Eclairage
-  const hminKey = findExact('hauteurminmm') || findLoose([/hauteur/,/min/]);
-  const hmaxKey = findExact('hauteurmaxmm') || findLoose([/hauteur/,/max/]);
-  const baseKey = findExact('prixunitaireeur') || findLoose([/prix|tarif/,/eur|ht|unitaire/]);
-  const variantKey = findExact('eclairage') || findLoose([/eclairage|eclair|led/]);
+  // D’après tes CSV : HauteurMin_mm, HauteurMax_mm, PrixUnitaire_EUR, Eclairage (quand présent)
+  const hminKey   = findExact('hauteurminmm') || findLoose(/hauteur/,/min/);
+  const hmaxKey   = findExact('hauteurmaxmm') || findLoose(/hauteur/,/max/);
+  const baseKey   = findExact('prixunitaireeur') || findLoose(/prix|tarif/,/eur|ht|unitaire/);
+  const variantKey= findExact('eclairage') || findLoose(/eclairage|eclair|led/);
 
   return { hminKey, hmaxKey, baseKey, variantKey };
 }
 
 /* ===== UI helpers ===== */
 function fillFamilles(){
-  famille.innerHTML = '<option value="">— sélectionnez —</option>' +
+  elFam.innerHTML = '<option value="">— sélectionnez —</option>' +
     FAMILLES.map((f,i)=>`<option value="${i}">${f.name}</option>`).join('');
 }
 function buildVariantUI(){
-  variant.innerHTML = '<option value="">— (aucun filtre) —</option>';
-  variantHelp.textContent = '';
+  elVar.innerHTML = '<option value="">— (aucun filtre) —</option>';
+  elVarHelp.textContent = '';
   if(!MAP?.variantKey) return;
   const key = MAP.variantKey;
   const values = [...new Set(ROWS.map(r=>String(r[key]||'').trim()).filter(Boolean))].sort();
   if(!values.length) return;
-  variant.innerHTML = '<option value="">— sélectionnez —</option>' +
+  elVar.innerHTML = '<option value="">— sélectionnez —</option>' +
     values.map(v=>`<option value="${v}">${v}</option>`).join('');
-  variantHelp.textContent = `Filtre sur « ${key} ».`;
+  elVarHelp.textContent = `Filtre sur « ${key} ».`;
 }
 function buildRangesHelp(){
-  if(!MAP?.hmaxKey){ rangesHelp.textContent=''; return; }
+  if(!MAP?.hmaxKey){ elRanges.textContent=''; return; }
   const kmin = MAP.hminKey, kmax = MAP.hmaxKey;
   const pills=[]; const seen=new Set();
   for(const r of ROWS){
@@ -239,13 +285,20 @@ function buildRangesHelp(){
     if(!seen.has(txt)){ pills.push(txt); seen.add(txt); }
   }
   pills.sort((A,B)=> Number(A.replace(/[^\d]/g,'')) - Number(B.replace(/[^\d]/g,'')));
-  rangesHelp.innerHTML = pills.map(p=>`<span class="pill">${p}</span>`).join('');
+  elRanges.innerHTML = pills.map(p=>`<span class="pill">${p}</span>`).join('');
+}
+
+/* ===== Règle info “Dibond + éclairage” ===== */
+function updateDibondRule(){
+  const isDibondFamily = (CURRENT?.name||'').toLowerCase().includes('dibond');
+  const hasLighting = !!elVar.value;
+  elDibondRule.style.display = (isDibondFamily && hasLighting) ? 'block' : 'none';
 }
 
 /* ===== Cœur du calcul ===== */
 function filterRowsByVariant(rows){
   if(!MAP?.variantKey) return rows;
-  const v = variant.value;
+  const v = elVar.value;
   if(!v) return rows;
   return rows.filter(r => String(r[MAP.variantKey]||'').trim() === v);
 }
@@ -261,53 +314,48 @@ function findRowForHeight(H){
     return amax-bmax;
   });
 
-  // première tranche sans min : H <= max
   const first = rows[0];
   const firstMax = numFR(first[kmax]);
   if(Number.isFinite(firstMax) && H <= firstMax) return first;
 
-  // tranche [min,max]
   for(const r of rows){
     const a = numFR(kmin ? r[kmin] : 0);
     const b = numFR(r[kmax]);
     if(Number.isFinite(a) && Number.isFinite(b) && H>=a && H<=b) return r;
   }
-
-  // au-delà : dernière tranche
   return rows[rows.length-1] || null;
 }
 function compute(){
-  const H = Number(hauteur.value||0);
-  const Q = Math.max(1, Number(quantite.value||1));
+  const H = Number(elH.value||0);
+  const Q = Math.max(1, Number(elQ.value||1));
   if(!(H>0) || !ROWS.length || !MAP?.hmaxKey || !MAP?.baseKey){
-    prixHT.textContent='0,00'; prixTTC.textContent='0,00';
-    renderDiag(null,H,Q); return;
+    elHT.textContent='0,00'; elTTC.textContent='0,00';
+    renderDiag(null,H,Q); updateDibondRule(); return;
   }
   const row = findRowForHeight(H);
   const base = row ? numFR(row[MAP.baseKey]) : 0;
   const totalHT = (base || 0) * Q;
   const totalTTC = totalHT * (1+TVA);
-  prixHT.textContent = euro(totalHT);
-  prixTTC.textContent = euro(totalTTC);
+  elHT.textContent = euro(totalHT);
+  elTTC.textContent = euro(totalTTC);
   renderDiag(row,H,Q,base,totalHT,totalTTC);
+  updateDibondRule();
 }
 function renderDiag(row,H,Q,base=0,tHT=0,tTTC=0){
-  if(!toggleDiag.checked){ diag.style.display='none'; return; }
-  diag.style.display='block';
+  if(!elTgD.checked){ elDiag.style.display='none'; return; }
+  elDiag.style.display='block';
   if(!row){
-    diag.textContent = `DIAG: H=${H} | lignes=${ROWS.length}\n→ Saisir une hauteur et choisir une famille.`;
+    elDiag.textContent = `DIAG: H=${H} | lignes=${ROWS.length}\n→ Saisir une hauteur et choisir une famille.`;
     return;
   }
   const seg = [
     `Famille: ${CURRENT?.name||''}`,
+    MAP?.variantKey ? `Filtre ${MAP.variantKey}: ${elVar.value||'(aucun)'}` : null,
     `Hauteur saisie: ${H} → tranche: [${MAP.hminKey? row[MAP.hminKey] : '0'} … ${row[MAP.hmaxKey]}]`,
     `Prix unitaire: ${euro(base)} € | Qté: ${Q}`,
     `TOTAL HT: ${euro(tHT)} € | TTC: ${euro(tTTC)} €`
-  ];
-  if(MAP?.variantKey){
-    seg.splice(1,0,`Filtre ${MAP.variantKey}: ${variant.value||'(aucun)'}`);
-  }
-  diag.textContent = seg.join('\n');
+  ].filter(Boolean);
+  elDiag.textContent = seg.join('\n');
 }
 
 /* ===== LOADERS ===== */
@@ -326,31 +374,31 @@ async function loadFamily(f){
   buildVariantUI();
   buildRangesHelp();
 
-  msg.textContent = `Fichier chargé: ${f.name}
+  elMsg.textContent = `Fichier chargé: ${f.name}
 En-têtes: ${HEADS.join(' | ')}
 Colonnes → HauteurMin: ${MAP.hminKey||'n/a'} | HauteurMax: ${MAP.hmaxKey||'n/a'} | Prix: ${MAP.baseKey||'n/a'} | Variante: ${MAP.variantKey||'n/a'}`;
 }
 
 /* ===== INIT & BIND ===== */
 function bind(){
-  famille.addEventListener('change', async ()=>{
-    const i = parseInt(famille.value,10);
+  elFam.addEventListener('change', async ()=>{
+    const i = parseInt(elFam.value,10);
     if(isNaN(i)){ CURRENT=null; ROWS=[]; MAP=null; compute(); return; }
     CURRENT = FAMILLES[i];
-    msg.textContent = 'Chargement…';
+    elMsg.textContent = 'Chargement…';
     try{
       await loadFamily(CURRENT);
-      msg.textContent += '\nPrêt.';
+      elMsg.textContent += '\nPrêt.';
       compute();
     }catch(e){
       console.error(e);
-      msg.textContent = 'Erreur de chargement: '+e.message;
+      elMsg.textContent = 'Erreur de chargement: '+e.message;
     }
   });
-  quantite.addEventListener('input', compute);
-  hauteur.addEventListener('input', compute);
-  variant.addEventListener('change', compute);
-  toggleDiag.addEventListener('change', compute);
+  elQ.addEventListener('input', compute);
+  elH.addEventListener('input', compute);
+  elVar.addEventListener('change', compute);
+  elTgD.addEventListener('change', compute);
 }
 (function init(){ fillFamilles(); bind(); })();
 </script>
