@@ -26,6 +26,13 @@
   }
   .hidden{display:none}
   .hint{font-size:12px;color:#7d6f8e}
+
+  /* Bouton Ajouter au devis */
+  #btnAddDevis{
+    position:fixed;right:20px;bottom:20px;padding:10px 16px;
+    background:#ffffff;border:1px solid #ccc;border-radius:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;font-weight:600
+  }
 </style>
 </head>
 <body>
@@ -419,5 +426,96 @@ loadCSV();
 toggleBlocks();
 compute();
 </script>
+
+<!-- ===== Intégration Devis ===== -->
+<script src="../js/devis-core.js"></script>
+
+<button id="btnAddDevis">➕ Ajouter au devis</button>
+
+<script>
+(function(){
+  const btn = document.getElementById('btnAddDevis');
+  if(!btn) return;
+
+  function parseTotalHT(){
+    const txt = document.getElementById('prixHT').innerText.trim(); // "1 234,56"
+    return Number(txt.replace(/\s/g,'').replace(',', '.')) || 0;
+  }
+
+  btn.addEventListener('click', () => {
+    try{
+      if(!window.Devis) throw new Error("Moteur de devis introuvable.");
+
+      const qte = Math.max(1, Number(document.getElementById('quantite').value || 1));
+      const Lmm = Math.max(0, Number(document.getElementById('largeur').value || 0));
+      const Hmm = Math.max(0, Number(document.getElementById('hauteur').value || 0));
+      if(!(Lmm>0) || !(Hmm>0)){ alert("Renseigne largeur et hauteur."); return; }
+
+      // Matière
+      const mat = (document.querySelector('input[name="matiere"]:checked')||{}).value || 'prelaque';
+
+      // Ajourage / PMMA / LED
+      const ajour = document.getElementById('optAjour').checked;
+      const pmmaSel = document.getElementById('pmmaSel');
+      const pmmaLabel = pmmaSel && pmmaSel.value ? pmmaSel.value : '';
+      const pmmaSurf = Number(document.getElementById('pmmaSurface').value || 0);
+      const led = document.getElementById('optLED').checked;
+
+      // Fixation
+      const fixVal = (document.querySelector('input[name="fixation"]:checked')||{}).value || 'aucune';
+      const boiteMat = (document.querySelector('input[name="boiteMat"]:checked')||{}).value || '';
+      const gusU = document.getElementById('goussetPrixU')?.value || '';
+
+      // Total et PU interne
+      const total_ht = parseTotalHT();
+      if (total_ht <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
+      const pu_interne_ht = qte>0 ? (total_ht / qte) : 0;
+
+      // Désignation lisible
+      const parts = [
+        `Tôle Tablette`,
+        `L ${Lmm} × H ${Hmm} mm`,
+        `Matière: ${mat}`
+      ];
+
+      if (ajour){
+        const pmmaBits = [];
+        if (pmmaLabel) pmmaBits.push(pmmaLabel);
+        if (pmmaSurf>0) pmmaBits.push(`${pmmaSurf.toFixed(3)} m²`);
+        parts.push(`Ajouré${pmmaBits.length? ' + PMMA ('+pmmaBits.join(' · ')+')':''}`);
+        if (led) parts.push(`LED`);
+      }
+
+      if (fixVal==='boite'){
+        parts.push(`Fixation: boîte${boiteMat? ' ('+boiteMat+')':''}`);
+      }else if (fixVal==='chassis'){
+        parts.push(`Fixation: châssis tube 30×30${gusU? ' · gousset '+gusU+' €/u':''}`);
+      }else if (fixVal==='corniere'){
+        parts.push(`Fixation: cornière`);
+      }else{
+        parts.push(`Fixation: aucune`);
+      }
+
+      const designation = parts.join(' — ');
+
+      Devis.addLine({
+        type: 'Tôle Tablette',
+        designation,
+        quantite: qte,
+        pu_interne_ht: Number(pu_interne_ht.toFixed(2))
+      });
+
+      alert(`✅ Ligne ajoutée au devis !
+${designation}
+Qté : ${qte}
+PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+    }catch(err){
+      console.error(err);
+      alert('Erreur lors de l’ajout au devis : ' + err.message);
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
