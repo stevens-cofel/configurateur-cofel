@@ -6,7 +6,7 @@
   <title>Configurateurs Cofel</title>
   <style>
     :root{
-      --cofel:#5a2d82;        /* violet Cofel */
+      --cofel:#5a2d82;
       --cofel-2:#7838a7;
       --bg:#f7f5fa;
       --card:#ffffff;
@@ -23,212 +23,125 @@
       display:flex; flex-direction:column;
     }
 
-    /* HEADER */
     header{
       background:linear-gradient(135deg,var(--cofel),var(--cofel-2));
       color:#fff; text-align:center; padding:36px 16px 28px;
-      position:relative; overflow:hidden;
       box-shadow:0 6px 20px rgba(0,0,0,.15);
+      position:relative; overflow:hidden;
     }
     header::after{
       content:""; position:absolute; inset:-40% -20% auto -20%;
       height:200%; background:radial-gradient(ellipse at 50% 30%, rgba(255,255,255,.12), transparent 60%);
-      pointer-events:none;
     }
-    .brand{display:flex; flex-direction:column; align-items:center; gap:14px; position:relative; z-index:1;}
-    .brand img{height:70px; width:auto; object-fit:contain; filter:drop-shadow(0 2px 6px rgba(0,0,0,.25));}
-    h1{margin:0; font-size:clamp(22px, 2.6vw, 34px); letter-spacing:.2px;}
+    .brand{display:flex; flex-direction:column; align-items:center; gap:14px;}
+    .brand img{height:70px; filter:drop-shadow(0 2px 6px rgba(0,0,0,.25));}
+    h1{margin:0; font-size:clamp(22px, 2.6vw, 34px);}
     .subtitle{margin-top:6px; color:#e8dff1; font-size:14px}
 
-    /* GRID */
     .wrap{width:100%; max-width:1120px; margin:28px auto; padding:0 18px 36px;}
     .grid{display:grid; gap:18px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));}
 
     a.card{
-      display:flex; align-items:center; justify-content:center; text-align:center;
-      padding:22px 18px; text-decoration:none; color:var(--text);
-      background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
-      border:1px solid rgba(0,0,0,.06);
-      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
-      min-height:84px;
+      display:flex; justify-content:center; align-items:center; text-align:center;
+      background:var(--card); border-radius:var(--radius);
+      padding:22px 18px; border:1px solid rgba(0,0,0,.06); box-shadow:var(--shadow);
+      text-decoration:none; color:var(--text); min-height:84px;
+      transition:0.18s;
     }
-    a.card:hover{transform:translateY(-4px); box-shadow:0 14px 28px rgba(0,0,0,.12); border-color:var(--cofel-2); background:#fcfaff;}
-    .card .title{font-weight:700; margin:0;}
-    .card .hint{font-size:12px; color:var(--muted); margin-top:4px;}
+    a.card:hover{transform:translateY(-4px); background:#fcfaff; border-color:var(--cofel-2);}
 
-    /* FOOTER */
-    footer{margin-top:auto; text-align:center; color:#7d6f8e; font-size:13px; padding:18px 10px;}
-
-    /* ACCESSIBILITÉ */
-    a.card:focus-visible{outline:3px solid #c6a8f3; outline-offset:2px;}
+    footer{margin-top:auto; text-align:center; padding:18px 10px; color:#7d6f8e; font-size:13px;}
   </style>
 </head>
 <body>
-  <header>
-    <div class="brand">
-      <img src="./assets/logo cofel.jpg" alt="Logo Cofel" />
-      <h1>Configurateurs Cofel</h1>
-      <div class="subtitle">Choisissez un configurateur pour commencer votre chiffrage</div>
+
+<header>
+  <div class="brand">
+    <img src="./assets/logo cofel.jpg" alt="Logo Cofel" />
+    <h1>Configurateurs Cofel</h1>
+    <div class="subtitle">Choisissez un configurateur pour commencer votre chiffrage</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="grid">
+    <a class="card" href="./configurateurs/configurateur-tole-tablette.html"><div><p class="title">Tôle Tablette</p><p class="hint">Ajourage, PMMA, châssis…</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-rampe-lumineuse.html"><div><p class="title">Rampe Lumineuse (PLL)</p><p class="hint">LED + Laquage inclus</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-enseigne-drapeau.html"><div><p class="title">Enseigne Drapeau</p><p class="hint">Rond / Carré, potence</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-totems.html"><div><p class="title">Totems</p><p class="hint">Hauteurs, laquage</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-lettres PVC.html"><div><p class="title">Lettres PVC</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-lettre-alu-alupvc.html"><div><p class="title">Lettres Alu / Alu-PVC</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-lettre-boitier.html"><div><p class="title">Lettres Boîtiers</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-tolerie-dibond.html"><div><p class="title">Tôlerie Alu / Dibond</p></div></a>
+  </section>
+
+  <!-- === RÉCAP DEVIS === -->
+  <section style="background:#fff; padding:16px; border:1px solid #eee; border-radius:12px; margin-top:30px;">
+    <h2>🧾 Récapitulatif du devis</h2>
+
+    <div style="margin:12px 0; display:flex; gap:12px; align-items:center;">
+      <label>Remise client (%)</label>
+      <input type="number" id="remiseInput" value="0" min="0" max="90" style="width:80px;">
+      <span style="color:#777;font-size:12px;">(appliquée au tarif public = +50%)</span>
     </div>
-  </header>
 
-  <main class="wrap">
-    <section class="grid" aria-label="Liste des configurateurs">
-      <a class="card" href="./configurateurs/configurateur-tole-tablette.html">
-        <div>
-          <p class="title">Tôle Tablette</p>
-          <p class="hint">Ajourage, PMMA, châssis, cornière…</p>
-        </div>
-      </a>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr><th>Désignation</th><th>Qté</th><th style="text-align:right;">PU HT (net)</th><th style="text-align:right;">Total HT</th></tr></thead>
+      <tbody id="bodyDevis"><tr><td colspan="4" style="padding:10px;">Aucune ligne dans le devis.</td></tr></tbody>
+    </table>
 
-      <a class="card" href="./configurateurs/configurateur-rampe-lumineuse.html">
-        <div>
-          <p class="title">Rampe Lumineuse (PLL)</p>
-          <p class="hint">Longueur, LED, platines, laquage inclus</p>
-        </div>
-      </a>
+    <div style="text-align:right;margin-top:16px;">
+      <div>Total HT : <span id="totHT">0,00 €</span></div>
+      <div>TVA 20% : <span id="totTVA">0,00 €</span></div>
+      <div style="font-weight:bold;font-size:18px;margin-top:6px;">Total TTC : <span id="totTTC">0,00 €</span></div>
+    </div>
+  </section>
 
-      <a class="card" href="./configurateurs/configurateur-enseigne-drapeau.html">
-        <div>
-          <p class="title">Enseigne Drapeau</p>
-          <p class="hint">Rond ou carré, laquage, potence</p>
-        </div>
-      </a>
+</main>
 
-      <a class="card" href="./configurateurs/configurateur-totems.html">
-        <div>
-          <p class="title">Totems</p>
-          <p class="hint">Dimensions, laquage, options d’installation</p>
-        </div>
-      </a>
+<footer>
+  © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
+</footer>
 
-      <a class="card" href="./configurateurs/configurateur-lettres PVC.html">
-        <div>
-          <p class="title">Lettres PVC</p>
-          <p class="hint">Hauteur, épaisseur, finition</p>
-        </div>
-      </a>
+<script src="./js/devis-core.js"></script>
 
-      <a class="card" href="./configurateurs/configurateur-lettre-alu-alupvc.html">
-        <div>
-          <p class="title">Lettres Alu / Alu-PVC</p>
-          <p class="hint">Hauteur, finition, (éclairage si prévu)</p>
-        </div>
-      </a>
+<script>
+(function(){
+  if(!window.Devis) return;
 
-      <a class="card" href="./configurateurs/configurateur-lettre-boitier.html">
-        <div>
-          <p class="title">Lettres Boîtiers</p>
-          <p class="hint">Face Dibond rétro, fixation obligatoire</p>
-        </div>
-      </a>
+  const formatEur = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
 
-      <a class="card" href="./configurateurs/configurateur-tolerie-dibond.html">
-        <div>
-          <p class="title">Tôlerie Alu / Dibond</p>
-          <p class="hint">Au m², épaisseur, laquage</p>
-        </div>
-      </a>
-    </section>
+  const elRemise = document.getElementById('remiseInput');
+  const body = document.getElementById('bodyDevis');
+  const elHT = document.getElementById('totHT');
+  const elTVA = document.getElementById('totTVA');
+  const elTTC = document.getElementById('totTTC');
 
-    <!-- ====================== RÉCAP DEVIS (MVP lecture seule) ====================== -->
-    <section id="recap-devis" style="max-width:1100px;margin:24px auto;padding:16px;border:1px solid #eee;border-radius:12px;background:#fff;">
-      <h2 style="margin:0 0 12px;">🧾 Récapitulatif du devis</h2>
+  function render(){
+    const d = Devis.computeTotals();
 
-      <!-- Remise -->
-      <div style="display:flex;align-items:center;gap:12px;margin:8px 0 16px;">
-        <label for="remiseInput" style="font-weight:600;">Remise client (%)</label>
-        <input type="number" id="remiseInput" min="0" max="90" step="1" value="0" style="width:90px;padding:6px 8px;border:1px solid #ddd;border-radius:8px;">
-        <span style="color:#777;font-size:12px;">(appliquée au tarif public = +50%)</span>
-      </div>
+    body.innerHTML = d.lignes.length
+      ? d.lignes.map(l => `<tr>
+          <td>${l.designation}</td>
+          <td style="text-align:center;">${l.quantite}</td>
+          <td style="text-align:right;">${formatEur(l.pu_net_ht)}</td>
+          <td style="text-align:right;">${formatEur(l.total_ligne_ht)}</td>
+        </tr>`).join("")
+      : `<tr><td colspan="4" style="padding:10px;color:#777;">Aucune ligne dans le devis.</td></tr>`;
 
-      <!-- Tableau lignes -->
-      <div style="overflow:auto;">
-        <table id="tableDevis" style="width:100%;border-collapse:collapse;">
-          <thead>
-            <tr style="background:#faf7ff;">
-              <th style="text-align:left;border-bottom:1px solid #eee;padding:8px;">Désignation</th>
-              <th style="text-align:center;border-bottom:1px solid #eee;padding:8px;">Qté</th>
-              <th style="text-align:right;border-bottom:1px solid #eee;padding:8px;">PU HT (net)</th>
-              <th style="text-align:right;border-bottom:1px solid #eee;padding:8px;">Total ligne HT</th>
-            </tr>
-          </thead>
-          <tbody id="bodyDevis">
-            <tr><td colspan="4" style="padding:10px;color:#777;">Aucune ligne dans le devis.</td></tr>
-          </tbody>
-        </table>
-      </div>
+    elHT.textContent  = formatEur(d.total_ht);
+    elTVA.textContent = formatEur(d.tva);
+    elTTC.textContent = formatEur(d.total_ttc);
+  }
 
-      <!-- Totaux -->
-      <div id="totaux" style="display:flex;justify-content:flex-end;margin-top:16px;">
-        <div style="min-width:320px;">
-          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #eee;">
-            <div>Total HT</div><div id="totHT" style="font-weight:700;">0,00 €</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #eee;">
-            <div>TVA 20 %</div><div id="totTVA" style="font-weight:700;">0,00 €</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:18px;">
-            <div>Total TTC</div><div id="totTTC" style="font-weight:800;">0,00 €</div>
-          </div>
-          <div style="color:#888;font-size:12px;">Remise commerciale incluse dans les prix présentés.</div>
-        </div>
-      </div>
-    </section>
-    <!-- ==================== /RÉCAP DEVIS ==================== -->
-  </main>
-
-  <footer>
-    © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
-  </footer>
-
-  <!-- 1) Charger d'abord le moteur du devis -->
-  <script src="./js/devis-core.js"></script>
-
-  <!-- 2) Puis le script d'affichage qui l'utilise -->
-  <script>
-  (function(){
-    if(!window.Devis){ console.error("Devis non chargé"); return; }
-
-    const € = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
-
-    const elRemise = document.getElementById('remiseInput');
-    const body = document.getElementById('bodyDevis');
-    const elHT = document.getElementById('totHT');
-    const elTVA = document.getElementById('totTVA');
-    const elTTC = document.getElementById('totTTC');
-
-    function render(){
-      const vue = Devis.computeTotals(); // {lignes, total_ht, tva, total_ttc}
-
-      if (!vue.lignes.length) {
-        body.innerHTML = '<tr><td colspan="4" style="padding:10px;color:#777;">Aucune ligne dans le devis.</td></tr>';
-      } else {
-        body.innerHTML = vue.lignes.map(l => `
-          <tr>
-            <td style="padding:8px 6px;border-bottom:1px solid #f2f2f2;">${l.designation || "-"}</td>
-            <td style="padding:8px 6px;text-align:center;border-bottom:1px solid #f2f2f2;">${l.quantite}</td>
-            <td style="padding:8px 6px;text-align:right;border-bottom:1px solid #f2f2f2;">${€(l.pu_net_ht)}</td>
-            <td style="padding:8px 6px;text-align:right;border-bottom:1px solid #f2f2f2;">${€(l.total_ligne_ht)}</td>
-          </tr>
-        `).join("");
-      }
-
-      elHT.textContent  = €(vue.total_ht);
-      elTVA.textContent = €(vue.tva);
-      elTTC.textContent = €(vue.total_ttc);
-    }
-
-    elRemise.addEventListener('input', () => {
-      const v = Math.max(0, Math.min(90, Number(elRemise.value||0)));
-      elRemise.value = v;
-      Devis.setRemise(v);
-      render();
-    });
-
-    // Première peinture
+  elRemise.addEventListener('input', ()=>{
+    Devis.setRemise(Number(elRemise.value||0));
     render();
-  })();
-  </script>
+  });
+
+  render();
+})();
+</script>
+
 </body>
 </html>
