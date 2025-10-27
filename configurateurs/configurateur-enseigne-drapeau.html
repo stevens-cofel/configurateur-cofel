@@ -263,7 +263,7 @@ loadCSV();
 <button id="btnAddDevis"
   style="position:fixed;right:20px;bottom:20px;padding:10px 16px;
          background:#ffffff;border:1px solid #ccc;border-radius:10px;
-         box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;">
+         box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;font-weight:600;">
   ➕ Ajouter au devis
 </button>
 
@@ -272,16 +272,17 @@ loadCSV();
 document.getElementById("btnAddDevis").addEventListener("click", () => {
 
   // Quantité
-  const quantite = Number(document.getElementById("quantite").value || 1);
+  const quantite = Math.max(1, Number(document.getElementById("quantite").value || 1));
 
-  // Prix HT affiché → récupéré dans le span #prixHT
-  const prixText = document.getElementById("prixHT").innerText.trim();
-  const pu_interne_ht = parseFloat(prixText.replace(",", ".")) || 0;
+  // Prix total HT affiché (ex. "725,00") → convertir → diviser pour avoir le prix unitaire interne
+  const prixTotalText = document.getElementById("prixHT").innerText.trim();
+  const total_ht_affiche = parseFloat(prixTotalText.replace(",", ".")) || 0;
+  const pu_interne_ht = total_ht_affiche / quantite;
 
-  // Désignation (nom affiché dans le devis)
+  // Construction du libellé du produit
   const designation = "Enseigne Drapeau";
 
-  // Ajouter dans le devis (dans le localStorage)
+  // Enregistrement dans le devis (localStorage)
   Devis.addLine({
     type: "Enseigne Drapeau",
     designation,
@@ -289,12 +290,13 @@ document.getElementById("btnAddDevis").addEventListener("click", () => {
     pu_interne_ht
   });
 
-  alert(`✅ Ajouté au devis :
+  alert(`✅ Ajouté au devis !
 ${designation}
-Qté: ${quantite}
-Prix interne HT: ${pu_interne_ht} €`);
+Qté : ${quantite}
+PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
 });
 </script>
 
 </body>
 </html>
+
