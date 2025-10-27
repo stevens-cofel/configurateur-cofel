@@ -46,4 +46,73 @@
     line.id = uid();
     line.quantite = Number(line.quantite);
     line.pu_interne_ht = Number(line.pu_interne_ht);
-    devis.lignes.push(lin
+    devis.lignes.push(line);
+    writeStore(devis);
+    return line.id;
+  }
+  function listLines() {
+    return readStore().lignes.slice();
+  }
+  function removeLine(id) {
+    const devis = readStore();
+    const before = devis.lignes.length;
+    devis.lignes = devis.lignes.filter(l => l.id !== id);
+    writeStore(devis);
+    return before !== devis.lignes.length;
+  }
+  function updateQty(id, qty) {
+    const devis = readStore();
+    const q = Math.max(1, Math.floor(Number(qty) || 1));
+    const row = devis.lignes.find(l => l.id === id);
+    if (!row) return false;
+    row.quantite = q;
+    writeStore(devis);
+    return true;
+  }
+  function clearAll(confirm = false) {
+    if (!confirm) return false;
+    writeStore(createEmptyDevis());
+    return true;
+  }
+
+  // --- calcul
+  function computeTotals() {
+    const devis = readStore();
+    const remise = Number(devis.remise_client_pct || 0) / 100;
+
+    const lignes = devis.lignes.map((l) => {
+      const pu_public = Number(l.pu_interne_ht) * PUBLIC_FACTOR;
+      const pu_net = round2(pu_public * (1 - remise));
+      const total_ht = round2(pu_net * Number(l.quantite));
+      return { ...l, pu_net_ht: pu_net, total_ligne_ht: total_ht };
+    });
+
+    const total_ht = round2(lignes.reduce((s, x) => s + x.total_ligne_ht, 0));
+    const tva = round2(total_ht * TVA);
+    const total_ttc = round2(total_ht + tva);
+
+    return { lignes, total_ht, tva, total_ttc, remise_pct: devis.remise_client_pct };
+  }
+
+  // --- remise
+  function setRemise(pct) {
+    const devis = readStore();
+    const v = Number(pct);
+    devis.remise_client_pct = isNaN(v) ? 0 : Math.min(90, Math.max(0, v));
+    writeStore(devis);
+  }
+  function getRemise() {
+    return readStore().remise_client_pct || 0;
+  }
+
+  window.Devis = {
+    addLine,
+    listLines,
+    removeLine,
+    updateQty,
+    clearAll,
+    computeTotals,
+    setRemise,
+    getRemise
+  };
+})();
