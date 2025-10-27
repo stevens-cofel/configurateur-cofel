@@ -3,23 +3,66 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Configurateur Lettres PVC - Cofel</title>
+<title>Configurateur Lettres PVC – Cofel</title>
+
+<!-- Styles communs (mêmes que la page d’accueil, si présents) -->
+<link rel="stylesheet" href="../styles/cofel.css" />
+<link rel="stylesheet" href="../styles/cofel-config.css" />
+
 <style>
-  body{font-family:Arial, sans-serif;background:#f7f7f7;margin:0;padding:24px}
-  h1{text-align:center}
-  .wrap{max-width:760px;margin:0 auto;background:#fff;border-radius:12px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+  /* ===== Habillage Cofel (violet) — logique JS inchangée ===== */
+  body{margin:0;background:#f6f3fa;color:#2b2140;font-family:Arial, Helvetica, sans-serif}
+  .wrap{max-width:860px;margin:20px auto;background:#fff;border-radius:14px;padding:20px;box-shadow:0 10px 28px rgba(90,45,130,.12)}
+  h1{margin:0 0 12px;text-align:center}
   label{font-weight:700;display:block;margin-top:14px}
-  input,select{width:100%;padding:10px;margin-top:6px;border:1px solid #d7d7d7;border-radius:8px}
-  .options{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:10px}
-  .option-item{display:flex;align-items:center;gap:8px}
-  .result{background:#e9f5ff;border:1px solid #b3e0ff;border-radius:10px;padding:14px;margin-top:18px;text-align:center}
+  input,select{width:100%;padding:10px;margin-top:6px;border:1px solid #d8cbe8;border-radius:10px;background:#fff;min-height:44px}
+
+  .options{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px}
+  .option-item{
+    display:flex;align-items:center;gap:10px;border:1px solid #e6daf4;background:#fff;border-radius:10px;
+    padding:10px 12px;min-height:44px
+  }
+  .option-item input{transform:scale(1.1)}
+
+  .result{
+    background:#fcfaff;border:1px solid #dec5f2;border-radius:12px;padding:16px;margin-top:18px;text-align:center;
+    font-size:18px;box-shadow:0 8px 18px rgba(90,45,130,.08)
+  }
   .note{background:#fff7e6;border:1px solid #ffd38a;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
-  .muted{color:#666;font-size:12px;margin-top:8px;white-space:pre-wrap}
+  .muted{color:#7d6f8e;font-size:12px;margin-top:8px;white-space:pre-wrap}
+
+  /* Bandeau / footer (fallback si cofel.css absent) */
+  .cofel-header{background:#5a2d82;color:#fff}
+  .cofel-header .row{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 14px}
+  .cofel-back{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.35);padding:8px 12px;border-radius:10px}
+  .cofel-brand{display:flex;align-items:center;gap:10px}
+  .cofel-brand img{height:36px;border-radius:6px;object-fit:cover}
+  .cofel-title{font-size:18px;margin:0}
+  .cofel-container{max-width:1100px;margin:0 auto;padding:14px}
+  .cofel-footer{
+    margin:24px 0 0;padding:14px;text-align:center;color:#6f5b86;font-size:13px;
+    border-top:1px solid #e6daf4;background:#fbf9fe
+  }
 </style>
 </head>
 <body>
-  <h1>Configurateur Lettres PVC - Cofel</h1>
+
+<!-- Bandeau violet / retour -->
+<header class="cofel-header">
+  <div class="row">
+    <a class="cofel-back" href="../index.html">⬅ Retour aux configurateurs</a>
+    <div class="cofel-brand">
+      <img src="../assets/logo cofel.jpg" alt="Cofel" />
+      <h1 class="cofel-title">Configurateur — Lettres PVC</h1>
+    </div>
+  </div>
+</header>
+
+<div class="cofel-container">
+  <h1>Lettres PVC</h1>
+
   <div class="wrap">
+    <!-- ===== UI d’origine (inchangée) ===== -->
     <label for="hauteur">Hauteur (mm)</label>
     <input type="number" id="hauteur" placeholder="Ex : 250" min="0"/>
 
@@ -35,18 +78,18 @@
     <input type="number" id="quantite" min="1" value="1"/>
 
     <div class="options">
-      <div class="option-item">
+      <label class="option-item" for="optLaquage">
         <input type="checkbox" id="optLaquage"/>
-        <label for="optLaquage">Laquage</label>
-      </div>
-      <div class="option-item">
+        <span>Laquage</span>
+      </label>
+      <label class="option-item" for="optFixation">
         <input type="checkbox" id="optFixation"/>
-        <label for="optFixation">Fixations</label>
-      </div>
-      <div class="option-item">
+        <span>Fixations</span>
+      </label>
+      <label class="option-item" for="optRetro">
         <input type="checkbox" id="optRetro"/>
-        <label for="optRetro">Rétroéclairage</label>
-      </div>
+        <span>Rétroéclairage</span>
+      </label>
     </div>
 
     <div class="result">
@@ -60,7 +103,14 @@
 
     <div id="log" class="muted"></div>
   </div>
+</div>
 
+<!-- Pied de page -->
+<footer class="cofel-footer">
+  © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
+</footer>
+
+<!-- ===== JS d’origine (inchangé) ===== -->
 <script>
 const TVA = 0.20;
 const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20PVC.csv";
@@ -80,20 +130,18 @@ const elLog = document.getElementById('log');
 function euro(n){ return (isFinite(n)?n:0).toFixed(2).replace('.', ','); }
 function numFR(s){
   if(s===undefined||s===null) return NaN;
-  // supprime espaces insécables / fines, €
   let x = String(s).replace(/[\u00A0\u202F]/g,'').replace(/€/g,'').trim();
-  // virgule décimale -> point
   x = x.replace(',', '.');
   return parseFloat(x);
 }
 
-/* ---------- CSV parser robuste (gère les guillemets) ---------- */
+/* ---------- CSV parser robuste ---------- */
 function parseCSVLine(line, sep=','){
   const out=[]; let cur=''; let inQ=false;
   for(let i=0;i<line.length;i++){
     const ch=line[i], nx=line[i+1];
     if(ch === '"'){
-      if(inQ && nx === '"'){ cur+='"'; i++; } // "" -> "
+      if(inQ && nx === '"'){ cur+='"'; i++; }
       else inQ = !inQ;
     }else if(ch === sep && !inQ){
       out.push(cur); cur='';
@@ -106,17 +154,13 @@ function parseCSVLine(line, sep=','){
 }
 
 function normalizeWeirdCSV(text){
-  // Enlève BOM/CR, remplace guillemets doubles par simples
   let t = text.replace(/^\uFEFF/,'').replace(/\r/g,'').replace(/""/g,'"');
-  // Sépare en lignes
   let lines = t.split('\n').filter(l=>l.trim()!=='');
-  // Beaucoup de versions “une-ligne” -> extraire blocs "..." et recomposer
   if(lines.length === 1){
     const blocks=[]; const re=/"([^"]*)"/g; let m;
     while((m=re.exec(t))!==null){ blocks.push(m[1]); }
     if(blocks.length){
-      // Chaque bloc correspond à un champ successif
-      const perLine = blocks[0].split(',').length; // nb d'entêtes
+      const perLine = blocks[0].split(',').length;
       const out=[];
       for(let i=0;i<blocks.length;i+=perLine){
         out.push(blocks.slice(i,i+perLine).map(s=>`"${s}"`).join(','));
@@ -124,9 +168,8 @@ function normalizeWeirdCSV(text){
       lines = out;
     }
   }else{
-    // Si chaque ligne est enveloppée de guillemets, retire ceux d'enrobage
-    lines = lines.map(l=>{
-      const s=l.trim();
+    lines = lines.map(s=>{
+      s=s.trim();
       if(s.startsWith('"') && s.endsWith('"')) return s.slice(1,-1);
       return s;
     });
@@ -151,11 +194,9 @@ async function loadCSV(){
   const txt = await fetch(CSV_URL, {cache:'no-store'}).then(r=>r.text());
   const parsed = parseCSVSmart(txt);
 
-  // indices utiles
   const idx = {};
   parsed.heads.forEach((h,i)=> idx[h]=i);
 
-  // Map en structure numérique propre
   DATA = parsed.rows.map(r=>{
     const o = (key)=> r[key] ?? '';
     return {
@@ -191,7 +232,6 @@ function compute(){
   const pool = DATA.filter(r=>r.Epaisseur_mm===e).sort((a,b)=>a.Hauteur_mm-b.Hauteur_mm);
   if(!pool.length){ elHT.textContent='0,00'; elTTC.textContent='0,00'; return; }
 
-  // première hauteur >= saisie (sinon la plus grande)
   let cible = pool[0].Hauteur_mm;
   for(const r of pool){ if(h<=r.Hauteur_mm){ cible=r.Hauteur_mm; break; } cible=r.Hauteur_mm; }
   const row = pool.find(r=>r.Hauteur_mm===cible) || pool[pool.length-1];
