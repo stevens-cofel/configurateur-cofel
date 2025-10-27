@@ -61,6 +61,10 @@
 
     footer{margin-top:auto; text-align:center; padding:18px 10px; color:#7d6f8e; font-size:13px;}
     button{cursor:pointer;}
+    input[type="text"], input[type="number"]{
+      padding:8px 10px; border:1px solid #ddd; border-radius:8px; background:#fff;
+    }
+    label{font-weight:600;}
   </style>
 </head>
 <body>
@@ -76,7 +80,7 @@
 <main class="wrap">
 
   <!-- === LISTE DES CONFIGURATEURS === -->
-  <section class="grid">
+  <section class="grid" aria-label="Liste des configurateurs">
     <a class="card" href="./configurateurs/configurateur-tole-tablette.html"><div><p class="title">Tôle Tablette</p><p class="hint">Ajourage, PMMA, châssis…</p></div></a>
     <a class="card" href="./configurateurs/configurateur-rampe-lumineuse.html"><div><p class="title">Rampe Lumineuse (PLL)</p><p class="hint">LED + Laquage inclus</p></div></a>
     <a class="card" href="./configurateurs/configurateur-enseigne-drapeau.html"><div><p class="title">Enseigne Drapeau</p><p class="hint">Rond / Carré, potence</p></div></a>
@@ -87,9 +91,27 @@
     <a class="card" href="./configurateurs/configurateur-tolerie-dibond.html"><div><p class="title">Tôlerie Alu / Dibond</p></div></a>
   </section>
 
-  <!-- === RÉCAP DEVIS === -->
+  <!-- === RÉCAP DEVIS + CLIENT === -->
   <section style="background:#fff; padding:16px; border:1px solid #eee; border-radius:12px; margin-top:30px;">
     <h2>🧾 Récapitulatif du devis</h2>
+
+    <!-- Bloc client (Option B encadré) -->
+    <div style="border:1px solid #e9e2f5;border-radius:10px;padding:12px 14px;background:#fcfaff;margin:10px 0 16px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+        <div>
+          <label for="societe">Entreprise</label><br>
+          <input type="text" id="societe" placeholder="Nom de l’entreprise">
+        </div>
+        <div>
+          <label for="contact">Nom & prénom</label><br>
+          <input type="text" id="contact" placeholder="Nom Prénom">
+        </div>
+        <div>
+          <label for="chantier">Nom du chantier</label><br>
+          <input type="text" id="chantier" placeholder="Nom du chantier">
+        </div>
+      </div>
+    </div>
 
     <div style="margin:12px 0; display:flex; gap:12px; align-items:center;">
       <label>Remise client (%)</label>
@@ -141,12 +163,49 @@
 (function(){
   if(!window.Devis) return;
 
+  // ==== Helpers ====
   const fmt = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
+  const STORAGE_KEY = "devisCourant_v1"; // même clé que le core
+
+  function readStore(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }catch{ return {}; }
+  }
+  function writeStore(obj){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+  }
+  function updateClientField(key, value){
+    const state = readStore();
+    if(!state.client) state.client = {};
+    state.client[key] = value;
+    writeStore(state);
+  }
+  function getClient(){
+    const st = readStore();
+    return st.client || {};
+  }
+
+  // ==== DOM ====
   const elRemise = document.getElementById('remiseInput');
   const body = document.getElementById('bodyDevis');
   const elHT = document.getElementById('totHT');
   const elTVA = document.getElementById('totTVA');
   const elTTC = document.getElementById('totTTC');
+
+  const elSociete = document.getElementById('societe');
+  const elContact = document.getElementById('contact');
+  const elChantier = document.getElementById('chantier');
+
+  // Prefill client fields from store
+  (function hydrateClient(){
+    const c = getClient();
+    if(c.societe) elSociete.value = c.societe;
+    if(c.contact) elContact.value = c.contact;
+    if(c.chantier) elChantier.value = c.chantier;
+  })();
+
+  // Persist on input
+  [ ['societe', elSociete], ['contact', elContact], ['chantier', elChantier] ]
+    .forEach(([k,el]) => el.addEventListener('input', () => updateClientField(k, el.value)));
 
   function render(){
     const d = Devis.computeTotals();
@@ -183,7 +242,7 @@
     render();
   });
 
-  // Actions lignes (délégation)
+  // Actions lignes
   body.addEventListener('click',(e)=>{
     const tr = e.target.closest('tr[data-id]');
     if(!tr) return;
@@ -206,55 +265,100 @@
     }
   });
 
-  // Export PDF
-  document.getElementById("btnPdf").addEventListener("click", () => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-
-    const d = Devis.computeTotals();
-
-    // En-tête
-    doc.setFont("Helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("COFEL72 — Devis", 40, 50);
-
-    doc.setFont("Helvetica", "normal");
-    doc.setFontSize(11);
-    doc.text("ZA du Perquoi, 72560 Changé", 40, 70);
-    doc.text("SIRET 927 659 458 00024 — TVA FR80927659458", 40, 85);
-    doc.text("Date : " + new Date().toLocaleDateString("fr-FR"), 40, 105);
-    if (d.remise_pct > 0) {
-      doc.text("Remise appliquée : " + d.remise_pct + " %", 40, 120);
-    }
-
-    // Tableau
-    const rows = d.lignes.map(l => [
-      String(l.designation||"-"),
-      String(l.quantite),
-      (Number(l.pu_net_ht)||0).toFixed(2) + " €",
-      (Number(l.total_ligne_ht)||0).toFixed(2) + " €"
-    ]);
-
-    doc.autoTable({
-      startY: 140,
-      head: [["Désignation", "Qté", "PU HT", "Total HT"]],
-      body: rows,
-      styles: { font: "helvetica", fontSize: 10 }
+  // Util: charger image en DataURL
+  function loadImageDataURL(src){
+    return new Promise((resolve,reject)=>{
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        // On force une largeur raisonnable pour le PDF (ex: 180pt)
+        const targetW = 180;
+        const ratio = img.height / img.width;
+        canvas.width = targetW;
+        canvas.height = Math.round(targetW * ratio);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.95));
+      };
+      img.onerror = reject;
+      // même origine → OK
+      img.src = src;
     });
+  }
 
-    // Totaux
-    let y = doc.lastAutoTable ? doc.lastAutoTable.finalY + 25 : 170;
-    doc.setFont("Helvetica", "bold");
-    doc.text("Total HT : " + (Number(d.total_ht)||0).toFixed(2) + " €", 40, y);
-    doc.text("TVA 20% : " + (Number(d.tva)||0).toFixed(2) + " €", 40, y + 18);
-    doc.text("Total TTC : " + (Number(d.total_ttc)||0).toFixed(2) + " €", 40, y + 36);
+  // Export PDF
+  document.getElementById("btnPdf").addEventListener("click", async () => {
+    try{
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: "pt", format: "a4" });
 
-    // Pied de page
-    doc.setFont("Helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text("Conditions : Offre valable 30 jours. Délais et transport à confirmer. Paiement selon conditions Cofel.", 40, y + 64);
+      const d = Devis.computeTotals();
+      const client = getClient();
 
-    doc.save("Devis-Cofel.pdf");
+      // Logo
+      let yTop = 40;
+      try{
+        const logoData = await loadImageDataURL("./assets/logo cofel.jpg");
+        doc.addImage(logoData, "JPEG", 40, yTop, 180, 180 * 0.28); // largeur 180pt, ratio approximatif
+      }catch(e){
+        // si logo non trouvé, on continue sans
+      }
+
+      // En-tête texte à droite du logo
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text("DEVIS", 250, 55);
+
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(11);
+      doc.text("COFEL72 — ZA du Perquoi, 72560 Changé", 250, 75);
+      doc.text("SIRET 927 659 458 00024 — TVA FR80927659458", 250, 90);
+      doc.text("Date : " + new Date().toLocaleDateString("fr-FR"), 250, 110);
+
+      // Bloc client
+      let yClient = 140;
+      doc.setFont("Helvetica", "bold");
+      doc.text("Client", 40, yClient);
+      doc.setFont("Helvetica", "normal");
+      yClient += 18;
+      if (client.societe) doc.text("Entreprise : " + client.societe, 40, yClient), yClient += 16;
+      if (client.contact) doc.text("Contact : " + client.contact, 40, yClient), yClient += 16;
+      if (client.chantier) doc.text("Nom du chantier : " + client.chantier, 40, yClient), yClient += 16;
+      if (d.remise_pct > 0) doc.text("Remise appliquée : " + d.remise_pct + " %", 40, yClient), yClient += 16;
+
+      // Tableau
+      const rows = d.lignes.map(l => [
+        String(l.designation||"-"),
+        String(l.quantite),
+        (Number(l.pu_net_ht)||0).toFixed(2) + " €",
+        (Number(l.total_ligne_ht)||0).toFixed(2) + " €"
+      ]);
+
+      const startY = Math.max(yClient + 10, 200);
+      doc.autoTable({
+        startY,
+        head: [["Désignation", "Qté", "PU HT", "Total HT"]],
+        body: rows,
+        styles: { font: "helvetica", fontSize: 10 }
+      });
+
+      // Totaux
+      let y = doc.lastAutoTable ? doc.lastAutoTable.finalY + 25 : startY + 25;
+      doc.setFont("Helvetica", "bold");
+      doc.text("Total HT : " + (Number(d.total_ht)||0).toFixed(2) + " €", 40, y);
+      doc.text("TVA 20% : " + (Number(d.tva)||0).toFixed(2) + " €", 40, y + 18);
+      doc.text("Total TTC : " + (Number(d.total_ttc)||0).toFixed(2) + " €", 40, y + 36);
+
+      // Conditions
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text("Conditions : Offre valable 30 jours. Délais et transport à confirmer. Paiement selon conditions Cofel.", 40, y + 64);
+
+      doc.save("Devis-Cofel.pdf");
+    }catch(err){
+      alert("Erreur pendant la génération du PDF : " + err.message);
+      console.error(err);
+    }
   });
 
   // Première peinture
