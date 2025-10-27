@@ -42,24 +42,24 @@
       height:200%;
       background:radial-gradient(ellipse at 50% 30%, rgba(255,255,255,.12), transparent 60%);
     }
-    .brand{display:flex;flex-direction:column;align-items:center;gap:14px;}
-    .brand img{height:70px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25));}
-    h1{margin:0;font-size:clamp(22px,2.6vw,34px);}
-    .subtitle{margin-top:6px;color:#e8dff1;font-size:14px}
+    .brand{display:flex; flex-direction:column; align-items:center; gap:14px;}
+    .brand img{height:70px; filter:drop-shadow(0 2px 6px rgba(0,0,0,.25));}
+    h1{margin:0; font-size:clamp(22px, 2.6vw, 34px);}
+    .subtitle{margin-top:6px; color:#e8dff1; font-size:14px}
 
-    .wrap{width:100%;max-width:1120px;margin:28px auto;padding:0 18px 36px;}
-    .grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+    .wrap{width:100%; max-width:1120px; margin:28px auto; padding:0 18px 36px;}
+    .grid{display:grid; gap:18px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));}
 
     a.card{
-      display:flex;justify-content:center;align-items:center;text-align:center;
-      background:var(--card);border-radius:var(--radius);
-      padding:22px 18px;border:1px solid rgba(0,0,0,.06);box-shadow:var(--shadow);
-      text-decoration:none;color:var(--text);min-height:84px;
+      display:flex; justify-content:center; align-items:center; text-align:center;
+      background:var(--card); border-radius:var(--radius);
+      padding:22px 18px; border:1px solid rgba(0,0,0,.06); box-shadow:var(--shadow);
+      text-decoration:none; color:var(--text); min-height:84px;
       transition:0.18s;
     }
-    a.card:hover{transform:translateY(-4px);background:#fcfaff;border-color:var(--cofel-2);}
+    a.card:hover{transform:translateY(-4px); background:#fcfaff; border-color:var(--cofel-2);}
 
-    footer{margin-top:auto;text-align:center;padding:18px 10px;color:#7d6f8e;font-size:13px;}
+    footer{margin-top:auto; text-align:center; padding:18px 10px; color:#7d6f8e; font-size:13px;}
     button{cursor:pointer;}
   </style>
 </head>
@@ -88,10 +88,10 @@
   </section>
 
   <!-- === RÉCAP DEVIS === -->
-  <section style="background:#fff;padding:16px;border:1px solid #eee;border-radius:12px;margin-top:30px;">
+  <section style="background:#fff; padding:16px; border:1px solid #eee; border-radius:12px; margin-top:30px;">
     <h2>🧾 Récapitulatif du devis</h2>
 
-    <div style="margin:12px 0;display:flex;gap:12px;align-items:center;">
+    <div style="margin:12px 0; display:flex; gap:12px; align-items:center;">
       <label>Remise client (%)</label>
       <input type="number" id="remiseInput" value="0" min="0" max="90" style="width:80px;">
       <span style="color:#777;font-size:12px;">(appliquée au tarif public = +50%)</span>
@@ -117,6 +117,11 @@
       <div>TVA 20% : <span id="totTVA">0,00 €</span></div>
       <div style="font-weight:bold;font-size:18px;margin-top:6px;">Total TTC : <span id="totTTC">0,00 €</span></div>
     </div>
+
+    <button id="btnPdf"
+      style="margin-top:18px;padding:10px 18px;border-radius:8px;background:#5a2d82;color:#fff;border:none;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,0.12);">
+      📄 Exporter le devis en PDF
+    </button>
   </section>
 
 </main>
@@ -125,7 +130,12 @@
   © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
 </footer>
 
+<!-- Core devis -->
 <script src="./js/devis-core.js"></script>
+
+<!-- jsPDF pour export PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
 <script>
 (function(){
@@ -148,7 +158,7 @@
     } else {
       body.innerHTML = d.lignes.map(l => `
         <tr data-id="${l.id}">
-          <td>${l.designation}</td>
+          <td>${l.designation || "-"}</td>
           <td style="text-align:center;">${l.quantite}</td>
           <td style="text-align:right;">${fmt(l.pu_net_ht)}</td>
           <td style="text-align:right;">${fmt(l.total_ligne_ht)}</td>
@@ -165,7 +175,7 @@
     elTTC.textContent = fmt(d.total_ttc);
   }
 
-  // Gestion remise
+  // Remise
   elRemise.addEventListener('input', ()=>{
     const v = Math.max(0, Math.min(90, Number(elRemise.value||0)));
     Devis.setRemise(v);
@@ -173,7 +183,7 @@
     render();
   });
 
-  // Actions par ligne
+  // Actions lignes (délégation)
   body.addEventListener('click',(e)=>{
     const tr = e.target.closest('tr[data-id]');
     if(!tr) return;
@@ -196,6 +206,58 @@
     }
   });
 
+  // Export PDF
+  document.getElementById("btnPdf").addEventListener("click", () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+    const d = Devis.computeTotals();
+
+    // En-tête
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("COFEL72 — Devis", 40, 50);
+
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text("ZA du Perquoi, 72560 Changé", 40, 70);
+    doc.text("SIRET 927 659 458 00024 — TVA FR80927659458", 40, 85);
+    doc.text("Date : " + new Date().toLocaleDateString("fr-FR"), 40, 105);
+    if (d.remise_pct > 0) {
+      doc.text("Remise appliquée : " + d.remise_pct + " %", 40, 120);
+    }
+
+    // Tableau
+    const rows = d.lignes.map(l => [
+      String(l.designation||"-"),
+      String(l.quantite),
+      (Number(l.pu_net_ht)||0).toFixed(2) + " €",
+      (Number(l.total_ligne_ht)||0).toFixed(2) + " €"
+    ]);
+
+    doc.autoTable({
+      startY: 140,
+      head: [["Désignation", "Qté", "PU HT", "Total HT"]],
+      body: rows,
+      styles: { font: "helvetica", fontSize: 10 }
+    });
+
+    // Totaux
+    let y = doc.lastAutoTable ? doc.lastAutoTable.finalY + 25 : 170;
+    doc.setFont("Helvetica", "bold");
+    doc.text("Total HT : " + (Number(d.total_ht)||0).toFixed(2) + " €", 40, y);
+    doc.text("TVA 20% : " + (Number(d.tva)||0).toFixed(2) + " €", 40, y + 18);
+    doc.text("Total TTC : " + (Number(d.total_ttc)||0).toFixed(2) + " €", 40, y + 36);
+
+    // Pied de page
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text("Conditions : Offre valable 30 jours. Délais et transport à confirmer. Paiement selon conditions Cofel.", 40, y + 64);
+
+    doc.save("Devis-Cofel.pdf");
+  });
+
+  // Première peinture
   render();
 })();
 </script>
