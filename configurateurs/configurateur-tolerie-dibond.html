@@ -54,6 +54,13 @@
     margin-top:18px;padding:16px;background:var(--info-bg);border:1px solid var(--info-bd);
     border-radius:12px;text-align:center;font-size:18px;box-shadow:0 8px 18px rgba(90,45,130,.08)
   }
+
+  /* Bouton Ajouter au devis */
+  #btnAddDevis{
+    position:fixed;right:20px;bottom:20px;padding:10px 16px;
+    background:#ffffff;border:1px solid #ccc;border-radius:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;font-weight:600
+  }
 </style>
 </head>
 <body>
@@ -230,5 +237,109 @@ function compute(){
 toggleBlocks();
 compute();
 </script>
+
+<!-- ===== Intégration Devis ===== -->
+<script src="../js/devis-core.js"></script>
+
+<button id="btnAddDevis">➕ Ajouter au devis</button>
+
+<script>
+(function(){
+  const btn = document.getElementById('btnAddDevis');
+  if(!btn) return;
+
+  function parseTotalHT(){
+    const txt = document.getElementById('prixHT').innerText.trim(); // "1 234,56"
+    return Number(txt.replace(/\s/g,'').replace(',', '.')) || 0;
+  }
+
+  function currentMaterialLabel(){
+    const fam = document.getElementById('famille').value;
+    if (fam === 'alu') {
+      const r = document.querySelector('input[name="matAlu"]:checked');
+      if(!r) return 'Aluminium';
+      if (r.value.startsWith('alu15')) return 'Aluminium 15/10';
+      if (r.value.startsWith('alu20')) return 'Aluminium 20/10';
+      return 'Aluminium';
+    } else {
+      return 'Alu/PVC 3 mm (type Dibond)';
+    }
+  }
+
+  function currentFinishLabel(){
+    const fam = document.getElementById('famille').value;
+    if (fam === 'alu') {
+      const r = document.querySelector('input[name="matAlu"]:checked');
+      if(!r) return '';
+      if (/brut/.test(r.value)) return 'brut';
+      if (/pre/.test(r.value))  return 'prélaqué';
+      if (/laq/.test(r.value))  return 'laqué';
+      return '';
+    } else {
+      const r = document.querySelector('input[name="matDibond"]:checked');
+      if(!r) return '';
+      if (/pre/.test(r.value))  return 'prélaqué';
+      if (/laq/.test(r.value))  return 'laqué';
+      return '';
+    }
+  }
+
+  btn.addEventListener('click', () => {
+    try{
+      if(!window.Devis) throw new Error("Moteur de devis introuvable.");
+
+      const qte = Math.max(1, Number(document.getElementById('quantite').value || 1));
+      const Lmm = Math.max(0, Number(document.getElementById('largeur').value || 0));
+      const Hmm = Math.max(0, Number(document.getElementById('hauteur').value || 0));
+      if(!(Lmm>0) || !(Hmm>0)){ alert("Renseigne largeur et hauteur."); return; }
+
+      const fam = document.getElementById('famille').value; // 'alu' | 'dibond'
+      const key = (function(){
+        if (fam==='alu') {
+          const r = document.querySelector('input[name="matAlu"]:checked');
+          return r ? r.value : 'alu15_pre';
+        } else {
+          const r = document.querySelector('input[name="matDibond"]:checked');
+          return r ? r.value : 'dibond_pre';
+        }
+      })();
+
+      const prixM2 = (window.PRICE && PRICE[key]) ? Number(PRICE[key]) : 0;
+      const surface = (Math.max(0, Number(Lmm))*Math.max(0, Number(Hmm)))/1e6;
+      const unitHT = prixM2 * surface;
+      const total_ht = parseTotalHT() || (unitHT * qte);
+      if (total_ht <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
+      const pu_interne_ht = qte>0 ? (total_ht / qte) : 0;
+
+      const matLabel = currentMaterialLabel();
+      const finLabel = currentFinishLabel();
+
+      const designation = [
+        'Tôlerie / Panneau',
+        matLabel + (finLabel ? ' ' + finLabel : ''),
+        `L ${Lmm} × H ${Hmm} mm`,
+        `Surface ${surface.toFixed(3)} m²`,
+        `${prixM2.toFixed(2)} €/m²`
+      ].join(' — ');
+
+      Devis.addLine({
+        type: 'Tôlerie & Dibond',
+        designation,
+        quantite: qte,
+        pu_interne_ht: Number(pu_interne_ht.toFixed(2))
+      });
+
+      alert(`✅ Ligne ajoutée au devis !
+${designation}
+Qté : ${qte}
+PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+    }catch(err){
+      console.error(err);
+      alert('Erreur lors de l’ajout au devis : ' + err.message);
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
