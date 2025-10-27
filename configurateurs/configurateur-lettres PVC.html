@@ -43,6 +43,13 @@
     margin:24px 0 0;padding:14px;text-align:center;color:#6f5b86;font-size:13px;
     border-top:1px solid #e6daf4;background:#fbf9fe
   }
+
+  /* Bouton Ajouter au devis */
+  #btnAddDevis{
+    position:fixed;right:20px;bottom:20px;padding:10px 16px;
+    background:#ffffff;border:1px solid #ccc;border-radius:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;font-weight:600
+  }
 </style>
 </head>
 <body>
@@ -261,5 +268,62 @@ function bind(){
   compute();
 })();
 </script>
+
+<!-- ====== Intégration Devis ====== -->
+<script src="../js/devis-core.js"></script>
+
+<button id="btnAddDevis">➕ Ajouter au devis</button>
+
+<script>
+(function(){
+  const btn = document.getElementById('btnAddDevis');
+  if(!btn) return;
+
+  function parsePrixHT(){
+    const txt = document.getElementById('prixHT').innerText.trim();
+    // "1 234,56" → 1234.56
+    return Number(txt.replace(/\s/g,'').replace(',', '.')) || 0;
+  }
+
+  btn.addEventListener('click', () => {
+    try{
+      if(!window.Devis) throw new Error("Moteur de devis introuvable.");
+
+      const h = Number(document.getElementById('hauteur').value || 0);
+      const e = Number(document.getElementById('epaisseur').value || 0);
+      const q = Math.max(1, Number(document.getElementById('quantite').value || 1));
+      if(!(h>0) || !(e>0)){ alert("Renseigne la hauteur et l’épaisseur."); return; }
+
+      const opts=[];
+      if(document.getElementById('optLaquage').checked) opts.push('Laquage');
+      if(document.getElementById('optFixation').checked) opts.push('Fixations');
+      if(document.getElementById('optRetro').checked)   opts.push('Rétroéclairage');
+
+      const total_ht = parsePrixHT();
+      if (total_ht <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
+
+      const pu_interne_ht = q>0 ? total_ht / q : 0;
+
+      const designation = `Lettres PVC — H ${h} mm — Ép. ${e} mm` + (opts.length? ` — ${opts.join(' + ')}` : '');
+
+      Devis.addLine({
+        type: 'Lettres PVC',
+        designation,
+        quantite: q,
+        pu_interne_ht: Number(pu_interne_ht.toFixed(2))
+      });
+
+      alert(`✅ Ligne ajoutée au devis !
+${designation}
+Qté : ${q}
+PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+    }catch(err){
+      console.error(err);
+      alert('Erreur lors de l’ajout au devis : ' + err.message);
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
