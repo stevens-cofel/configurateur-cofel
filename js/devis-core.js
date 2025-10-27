@@ -52,6 +52,17 @@
     writeStore(devis);
   }
 
+  function listLines() {
+    const devis = readStore();
+    return devis.lignes.slice();
+  }
+
+  function clearAll(confirm = false) {
+    if (!confirm) return false;
+    writeStore(createEmptyDevis());
+    return true;
+  }
+
   function computeTotals() {
     const devis = readStore();
     const remise = Number(devis.remise_client_pct || 0) / 100;
@@ -77,6 +88,6 @@
     writeStore(devis);
   }
 
-  // Expose API
-  window.Devis = { addLine, computeTotals, setRemise };
+  // API publique
+  window.Devis = { addLine, listLines, clearAll, computeTotals, setRemise };
 })();
