@@ -254,21 +254,12 @@ async function loadCSV(){
   });
 });
 loadCSV();
-</script><!-- Bouton Ajouter au devis -->
-<button id="btnAddDevis"
-  style="position:fixed;right:20px;bottom:20px;padding:10px 16px;
-         background:#ffffff;border:1px solid #ccc;border-radius:10px;
-         box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;">
-  ➕ Ajouter au devis
-</button>
-
-<script>
 </script>
 
-<!-- 1) Charger le moteur du devis AVANT le bouton -->
+<!-- Charger le moteur de devis -->
 <script src="../js/devis-core.js"></script>
 
-<!-- 2) Bouton Ajouter au devis -->
+<!-- Bouton Ajouter au devis -->
 <button id="btnAddDevis"
   style="position:fixed;right:20px;bottom:20px;padding:10px 16px;
          background:#ffffff;border:1px solid #ccc;border-radius:10px;
@@ -276,21 +267,21 @@ loadCSV();
   ➕ Ajouter au devis
 </button>
 
-<!-- 3) Script d'ajout au devis -->
 <script>
+// === AJOUT AU DEVIS ===
 document.getElementById("btnAddDevis").addEventListener("click", () => {
 
   // Quantité
   const quantite = Number(document.getElementById("quantite").value || 1);
 
-  // Prix HT affiché → convertir format FR vers nombre
-  const prixHT = document.getElementById("prixHT").innerText.replace(",", ".");
-  const pu_interne_ht = parseFloat(prixHT) || 0;
+  // Prix HT affiché → récupéré dans le span #prixHT
+  const prixText = document.getElementById("prixHT").innerText.trim();
+  const pu_interne_ht = parseFloat(prixText.replace(",", ".")) || 0;
 
-  // Désignation
+  // Désignation (nom affiché dans le devis)
   const designation = "Enseigne Drapeau";
 
-  // Ajout au devis
+  // Ajouter dans le devis (dans le localStorage)
   Devis.addLine({
     type: "Enseigne Drapeau",
     designation,
@@ -298,15 +289,12 @@ document.getElementById("btnAddDevis").addEventListener("click", () => {
     pu_interne_ht
   });
 
-  alert(`✅ Ligne ajoutée au devis !
+  alert(`✅ Ajouté au devis :
 ${designation}
-Qté : ${quantite}
-Prix interne HT : ${pu_interne_ht} €`);
+Qté: ${quantite}
+Prix interne HT: ${pu_interne_ht} €`);
 });
 </script>
 
 </body>
 </html>
-
-
-
