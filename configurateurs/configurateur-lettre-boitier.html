@@ -34,10 +34,6 @@
   }
   .muted{color:#7d6f8e;font-size:12px;margin-top:8px;white-space:pre-wrap}
 
-  .diag{
-    margin-top:12px;border:1px dashed #cdb6e6;border-radius:12px;padding:12px;background:#fff;
-    font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:12px;display:none;white-space:pre-wrap
-  }
   .note{
     margin-top:10px;background:#fff7e6;border:1px solid #ffd38a;border-radius:10px;padding:10px;font-size:13px;color:#5a430e;display:none
   }
@@ -110,11 +106,6 @@
       <p>Prix TTC : <span id="prixTTC">0,00</span> €</p>
     </div>
 
-    <label style="margin-top:14px;display:flex;align-items:center;gap:8px;font-weight:normal">
-      <input type="checkbox" id="toggleDiag"/> Afficher le diagnostic (débogage)
-    </label>
-    <div id="diag" class="diag"></div>
-
     <div id="msg" class="muted"></div>
   </div>
 </div>
@@ -165,8 +156,6 @@ const elRanges = document.getElementById('rangesHelp');
 const elHT  = document.getElementById('prixHT');
 const elTTC = document.getElementById('prixTTC');
 const elMsg = document.getElementById('msg');
-const elDiag= document.getElementById('diag');
-const elTgD = document.getElementById('toggleDiag');
 const elDibondRule = document.getElementById('dibondRule');
 
 /* =======================
@@ -270,13 +259,14 @@ function fillFamilles(){
     FAMILLES.map((f,i)=>`<option value="${i}">${f.name}</option>`).join('');
 }
 function buildVariantUI(){
-  elVar.innerHTML = '<option value="">— (aucun filtre) —</option>';
+  const el = document.getElementById('variant');
+  el.innerHTML = '<option value="">— (aucun filtre) —</option>';
   elVarHelp.textContent = '';
   if(!MAP?.variantKey) return;
   const key = MAP.variantKey;
   const values = [...new Set(ROWS.map(r=>String(r[key]||'').trim()).filter(Boolean))].sort();
   if(!values.length) return;
-  elVar.innerHTML = '<option value="">— sélectionnez —</option>' +
+  el.innerHTML = '<option value="">— sélectionnez —</option>' +
     values.map(v=>`<option value="${v}">${v}</option>`).join('');
   elVarHelp.textContent = `Filtre sur « ${key} ».`;
 }
@@ -298,14 +288,14 @@ function buildRangesHelp(){
 /* ===== Règle info “Dibond + éclairage” ===== */
 function updateDibondRule(){
   const isDibondFamily = (CURRENT?.name||'').toLowerCase().includes('dibond');
-  const hasLighting = !!elVar.value;
+  const hasLighting = !!document.getElementById('variant').value;
   elDibondRule.style.display = (isDibondFamily && hasLighting) ? 'block' : 'none';
 }
 
 /* ===== Cœur du calcul ===== */
 function filterRowsByVariant(rows){
   if(!MAP?.variantKey) return rows;
-  const v = elVar.value;
+  const v = document.getElementById('variant').value;
   if(!v) return rows;
   return rows.filter(r => String(r[MAP.variantKey]||'').trim() === v);
 }
@@ -337,7 +327,7 @@ function compute(){
   const Q = Math.max(1, Number(elQ.value||1));
   if(!(H>0) || !ROWS.length || !MAP?.hmaxKey || !MAP?.baseKey){
     elHT.textContent='0,00'; elTTC.textContent='0,00';
-    renderDiag(null,H,Q); updateDibondRule(); return;
+    updateDibondRule(); return;
   }
   const row = findRowForHeight(H);
   const base = row ? numFR(row[MAP.baseKey]) : 0;
@@ -345,24 +335,7 @@ function compute(){
   const totalTTC = totalHT * (1+TVA);
   elHT.textContent = euro(totalHT);
   elTTC.textContent = euro(totalTTC);
-  renderDiag(row,H,Q,base,totalHT,totalTTC);
   updateDibondRule();
-}
-function renderDiag(row,H,Q,base=0,tHT=0,tTTC=0){
-  if(!elTgD.checked){ elDiag.style.display='none'; return; }
-  elDiag.style.display='block';
-  if(!row){
-    elDiag.textContent = `DIAG: H=${H} | lignes=${ROWS.length}\n→ Saisir une hauteur et choisir une famille.`;
-    return;
-  }
-  const seg = [
-    `Famille: ${CURRENT?.name||''}`,
-    MAP?.variantKey ? `Filtre ${MAP.variantKey}: ${elVar.value||'(aucun)'}` : null,
-    `Hauteur saisie: ${H} → tranche: [${MAP.hminKey? row[MAP.hminKey] : '0'} … ${row[MAP.hmaxKey]}]`,
-    `Prix unitaire: ${euro(base)} € | Qté: ${Q}`,
-    `TOTAL HT: ${euro(tHT)} € | TTC: ${euro(tTTC)} €`
-  ].filter(Boolean);
-  elDiag.textContent = seg.join('\n');
 }
 
 /* ===== LOADERS ===== */
@@ -404,8 +377,7 @@ function bind(){
   });
   elQ.addEventListener('input', compute);
   elH.addEventListener('input', compute);
-  elVar.addEventListener('change', compute);
-  elTgD.addEventListener('change', compute);
+  document.getElementById('variant').addEventListener('change', compute);
 }
 (function init(){ fillFamilles(); bind(); })();
 </script>
@@ -425,7 +397,6 @@ function bind(){
 
   function parseTotalHT(){
     const txt = document.getElementById('prixHT').innerText.trim();
-    // "1 234,56" → 1234.56
     return Number(String(txt).replace(/\s/g,'').replace(',', '.')) || 0;
   }
 
@@ -433,7 +404,6 @@ function bind(){
     try{
       if(!window.Devis) throw new Error("Moteur de devis introuvable.");
 
-      // Contrôles basiques
       const famIdx = parseInt(document.getElementById('famille').value, 10);
       if (isNaN(famIdx)) { alert("Choisis d'abord une famille de lettres boîtiers."); return; }
       const familleName = (function(){ try { return (FAMILLES[famIdx] || {}).name || "Lettres boîtiers"; } catch{ return "Lettres boîtiers"; } })();
@@ -442,7 +412,7 @@ function bind(){
       const H = Number(document.getElementById('hauteur').value || 0);
       if (!(H>0)) { alert("Saisis une hauteur valide."); return; }
 
-      const variant = document.getElementById('variant').value; // éclairage choisi (optionnel)
+      const variant = document.getElementById('variant').value;
       const total_ht = parseTotalHT();
       if (total_ht <= 0) { alert("Le prix est à 0, vérifie la famille/hauteur/éclairage."); return; }
 
