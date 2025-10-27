@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Configurateur Totems – Cofel</title>
 
 <!-- Styles communs (comme la page d’accueil, si tu les as) -->
@@ -57,6 +57,13 @@
   .cofel-footer{
     margin:24px 0 0;padding:14px;text-align:center;color:#6f5b86;font-size:13px;
     border-top:1px solid #e6daf4;background:#fbf9fe
+  }
+
+  /* Bouton Ajouter au devis */
+  #btnAddDevis{
+    position:fixed;right:20px;bottom:20px;padding:10px 16px;
+    background:#ffffff;border:1px solid #ccc;border-radius:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;font-weight:700
   }
 </style>
 </head>
@@ -200,7 +207,6 @@ const elTTC  = document.getElementById('prixTTC');
 const elMsg  = document.getElementById('msg');
 
 /* ------- HELPERS ------- */
-// Extrait un nombre même si la cellule contient "1 500 mm", "1,500", etc.
 function num(v){
   const s = String(v ?? '').replace(/\u202F/g,'').replace(/\s/g,'').replace(',', '.');
   const m = s.match(/-?\d+(\.\d+)?/);
@@ -291,7 +297,6 @@ function populateHL(){
 }
 
 function renderOptionsCheckboxes(){
-  // familles d’options (ex.: Platine, Panier de crosses…)
   const families = [...new Set(OPTIONS.map(o=>o.typeOption))].filter(Boolean).sort();
   if(!families.length){
     elOptsBox.innerHTML = '<div class="opt-row"><em>Aucune option disponible.</em></div>';
@@ -299,7 +304,7 @@ function renderOptionsCheckboxes(){
   }
   const h = num(elH.value);
   const isValid = (fam)=>{
-    if(!h) return false; // rien tant que hauteur non choisie
+    if(!h) return false;
     const rows = OPTIONS.filter(o =>
       o.typeOption===fam &&
       !isNaN(o.hmin) && !isNaN(o.hmax) &&
@@ -320,12 +325,10 @@ function renderOptionsCheckboxes(){
     `;
   }).join('');
 
-  // écouteurs sur les cases
   [...elOptsBox.querySelectorAll('input[name="opt"]')].forEach(cb=>{
     cb.addEventListener('change', compute);
   });
 
-  // petit message d’aide
   if(!h){
     elMsg.textContent = "Choisis d’abord la hauteur pour activer les options.";
   }else{
@@ -349,7 +352,6 @@ function priceBase(){
   return row ? row.priceBase : 0;
 }
 function priceOptionsSum(){
-  // somme des prix des options cochées
   const checked = [...elOptsBox.querySelectorAll('input[name="opt"]:checked')].map(c=>c.value);
   if(!checked.length) return 0;
   const h = num(elH.value);
@@ -444,5 +446,73 @@ async function loadAll(){
 
 loadAll();
 </script>
+
+<!-- ===== Intégration devis ===== -->
+<script src="../js/devis-core.js"></script>
+<button id="btnAddDevis">➕ Ajouter au devis</button>
+
+<script>
+(function(){
+  const btn = document.getElementById('btnAddDevis');
+  if(!btn) return;
+
+  function parseHT(){
+    const t = (document.getElementById('prixHT').innerText || '0').trim();
+    // format "1 234,56"
+    return Number(t.replace(/\s/g,'').replace(',', '.')) || 0;
+  }
+  function selectedOptionsList(){
+    const cbs = [...document.querySelectorAll('#optionsBox input[name="opt"]:checked')];
+    return cbs.map(cb=>cb.value);
+  }
+
+  btn.addEventListener('click', ()=>{
+    try{
+      if(!window.Devis) throw new Error('Moteur de devis introuvable.');
+
+      const typeFace = document.getElementById('type').value || '';
+      const H = document.getElementById('hauteur').value || '';
+      const L = document.getElementById('largeur').value || '';
+      const qte = Math.max(1, parseInt(document.getElementById('quantite').value||'1',10));
+
+      if(!typeFace || !H || !L){
+        alert('Merci de sélectionner le type de face, la hauteur et la largeur.');
+        return;
+      }
+
+      const total_ht = parseHT();
+      if(total_ht <= 0){
+        alert('Le total est à 0, vérifie la configuration.');
+        return;
+      }
+
+      const pu_interne_ht = Number((total_ht / qte).toFixed(2));
+      const opts = selectedOptionsList();
+      const designation = [
+        'Totem',
+        typeFace,
+        `H ${H} mm × L ${L} mm`,
+        opts.length ? `Options: ${opts.join(', ')}` : null
+      ].filter(Boolean).join(' — ');
+
+      Devis.addLine({
+        type: 'Totem',
+        designation,
+        quantite: qte,
+        pu_interne_ht
+      });
+
+      alert(`✅ Ligne ajoutée au devis !
+${designation}
+Qté : ${qte}
+PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+    }catch(err){
+      console.error(err);
+      alert('Erreur lors de l’ajout au devis : ' + err.message);
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
