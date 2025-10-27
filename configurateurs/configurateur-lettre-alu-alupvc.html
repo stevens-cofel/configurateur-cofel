@@ -48,6 +48,13 @@
     margin:24px 0 0;padding:14px;text-align:center;color:#6f5b86;font-size:13px;
     border-top:1px solid #e6daf4;background:#fbf9fe
   }
+
+  /* Bouton devis */
+  #btnAddDevis{
+    position:fixed;right:20px;bottom:20px;padding:10px 16px;
+    background:#ffffff;border:1px solid #ccc;border-radius:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;font-weight:600
+  }
 </style>
 </head>
 <body>
@@ -330,6 +337,65 @@ async function loadCSV(){
   });
 });
 loadCSV().catch(e=>{ msg.textContent='Erreur: '+e.message; });
+</script>
+
+<!-- ========= Intégration au devis ========= -->
+<!-- 1) Moteur du devis -->
+<script src="../js/devis-core.js"></script>
+
+<!-- 2) Bouton d'ajout -->
+<button id="btnAddDevis">➕ Ajouter au devis</button>
+
+<!-- 3) Script d'ajout -->
+<script>
+(function(){
+  const btn = document.getElementById('btnAddDevis');
+  if(!btn) return;
+
+  function parsePrixHT(){
+    // Prix total HT affiché (FR) → nombre
+    const txt = document.getElementById('prixHT').innerText.trim();
+    return Number(String(txt).replace(/\s/g,'').replace(',', '.')) || 0;
+  }
+
+  btn.addEventListener('click', () => {
+    try{
+      if(!window.Devis) throw new Error("Moteur de devis introuvable.");
+
+      const categorieVal = document.getElementById('categorie').value;
+      const categorieTxt = (()=>{
+        if(categorieVal === 'alu20') return 'Lettre aluminium 20/10';
+        if(categorieVal === 'dibond3') return 'Lettre alu/PVC 3 mm (type Dibond)';
+        return 'Lettres';
+      })();
+
+      const qte = Math.max(1, Number(document.getElementById('quantite').value || 1));
+      const hauteur = Number(document.getElementById('hauteur').value || 0);
+      const fin = document.getElementById('finitionLaque').checked ? 'laqué' : 'brut';
+      const fix = document.getElementById('optFixation').checked ? ' + fixations' : '';
+
+      const total_ht = parsePrixHT();
+      const pu_interne_ht = qte > 0 ? total_ht / qte : 0; // on enregistre le PU interne
+
+      const designation = `${categorieTxt} — H ${hauteur || 'n.c.'} mm — ${fin}${fix}`;
+
+      Devis.addLine({
+        type: 'Lettres',
+        designation,
+        quantite: qte,
+        pu_interne_ht: Number(pu_interne_ht.toFixed(2))
+      });
+
+      alert(`✅ Ligne ajoutée au devis !
+${designation}
+Qté : ${qte}
+PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+    }catch(err){
+      console.error(err);
+      alert('Erreur lors de l’ajout au devis : ' + err.message);
+    }
+  });
+})();
 </script>
 </body>
 </html>
