@@ -263,33 +263,50 @@ loadCSV();
 </button>
 
 <script>
+</script>
+
+<!-- 1) Charger le moteur du devis AVANT le bouton -->
+<script src="../js/devis-core.js"></script>
+
+<!-- 2) Bouton Ajouter au devis -->
+<button id="btnAddDevis"
+  style="position:fixed;right:20px;bottom:20px;padding:10px 16px;
+         background:#ffffff;border:1px solid #ccc;border-radius:10px;
+         box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;">
+  ➕ Ajouter au devis
+</button>
+
+<!-- 3) Script d'ajout au devis -->
+<script>
 document.getElementById("btnAddDevis").addEventListener("click", () => {
-  try {
-    // 1. Récupère la quantité
-    const quantiteInput = document.querySelector('input[type="number"]');
-    const quantite = quantiteInput ? Number(quantiteInput.value) : 1;
 
-    // 2. Récupère le prix HT affiché (ex: "132,00 €")
-    const prixText = document.body.innerText.match(/Prix HT\\s*:\\s*([0-9.,]+)/i);
-    const pu_interne_ht = prixText ? parseFloat(prixText[1].replace(",", ".")) : 0;
+  // Quantité
+  const quantite = Number(document.getElementById("quantite").value || 1);
 
-    // 3. Récupère quelques infos pour le devis
-    const designation = "Enseigne Drapeau";
-    const options = ""; // tu pourras plus tard lister les cases cochées
-    const dimensions = ""; // idem si tu veux les afficher
+  // Prix HT affiché → convertir format FR vers nombre
+  const prixHT = document.getElementById("prixHT").innerText.replace(",", ".");
+  const pu_interne_ht = parseFloat(prixHT) || 0;
 
-    // 4. Ajoute la ligne au devis
-    Devis.addLine({ type: "Drapeau", designation, options, dimensions, quantite, pu_interne_ht });
+  // Désignation
+  const designation = "Enseigne Drapeau";
 
-    alert(`✅ Ligne ajoutée au devis : ${designation} (Qté ${quantite}, PU ${pu_interne_ht} € HT)\nRendez-vous sur la page de garde pour le récapitulatif.`);
-  } catch (err) {
-    console.error(err);
-    alert("Erreur lors de l’ajout au devis : " + err.message);
-  }
+  // Ajout au devis
+  Devis.addLine({
+    type: "Enseigne Drapeau",
+    designation,
+    quantite,
+    pu_interne_ht
+  });
+
+  alert(`✅ Ligne ajoutée au devis !
+${designation}
+Qté : ${quantite}
+Prix interne HT : ${pu_interne_ht} €`);
 });
 </script>
 
-</body><script src="../js/devis-core.js"></script>
+</body>
 </html>
+
 
 
