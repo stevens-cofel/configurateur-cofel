@@ -3,119 +3,155 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Configurateur Totems Cofel</title>
+<title>Configurateur Totems – Cofel</title>
+
+<!-- Styles communs Cofel -->
+<link rel="stylesheet" href="../styles/cofel.css" />
+<link rel="stylesheet" href="../styles/cofel-config.css" />
+
+<!-- Retouches locales (visuel uniquement) -->
 <style>
-  body{font-family:Arial, sans-serif;background:#f4f4f4;margin:0;padding:24px;color:#333}
-  h1{text-align:center;margin:0 0 16px}
-  .wrap{max-width:860px;margin:0 auto;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.08);padding:24px}
-  label{display:block;margin-top:14px;font-weight:700}
-  select,input{width:100%;padding:10px;margin-top:6px;border:1px solid #d7d7d7;border-radius:6px}
+  /* Harmonisation “pills” + cartes résultat */
+  .radio-row{display:flex;gap:8px;flex-wrap:wrap}
+  .radio-row label,
+  .opt-row{
+    font-weight:600;border:1px solid #ddd;border-radius:10px;
+    padding:6px 10px;display:flex;align-items:center;gap:8px;background:#fff;
+  }
+  .opt-row input[type="checkbox"]{transform:scale(1.1)}
+  .wrap{max-width:860px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.08);padding:20px}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .result{margin-top:22px;padding:16px;background:#e9f5ff;border:1px solid #b3e0ff;border-radius:8px;font-size:18px;text-align:center}
-  .muted{color:#777;font-size:12px;margin-top:8px;white-space:pre-wrap}
-  .mapping{margin:16px 0;padding:12px;border:1px solid #ffd38a;background:#fff7e6;border-radius:8px}
+  .result{
+    background:#fcfaff;border:1px solid #dec5f2;border-radius:12px;
+    padding:16px;margin:16px 0;text-align:center;font-size:18px;
+    box-shadow:0 8px 18px rgba(90,45,130,.08);
+  }
+  .muted{color:#7d6f8e;font-size:12px;white-space:pre-wrap}
+  .mapping{
+    margin:16px 0;padding:12px;border:1px solid #ffd38a;background:#fff7e6;border-radius:12px
+  }
   .mapping h3{margin:0 0 8px}
-  .btn{display:inline-block;margin-top:8px;padding:8px 12px;border:1px solid #1976d2;background:#1976d2;color:#fff;border-radius:6px;cursor:pointer}
+  .btn{
+    display:inline-block;margin-top:8px;padding:10px 14px;border:1px solid #5a2d82;
+    background:#5a2d82;color:#fff;border-radius:12px;cursor:pointer;font-weight:700;
+    box-shadow:0 8px 18px rgba(90,45,130,.18)
+  }
   .btn:disabled{opacity:.5;cursor:not-allowed}
   .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .hr{height:1px;background:#eee;margin:16px 0}
-
-  /* Options (cases à cocher) */
-  .options-wrap{margin-top:8px;border:1px solid #eee;border-radius:8px;padding:10px}
-  .opt-row{display:flex;align-items:center;gap:8px;margin:6px 0}
-  .opt-row input[type="checkbox"]{transform:scale(1.2)}
-  .opt-row span.note{color:#999;font-size:12px}
+  label{display:block;margin-top:10px;font-weight:700}
+  select,input{width:100%;padding:10px;margin-top:6px;border:1px solid #ddd;border-radius:10px}
 </style>
 </head>
 <body>
-<h1>Configurateur Totems Cofel</h1>
 
-<div class="wrap">
-  <!-- MAPPAGE TARIFS -->
-  <div id="mapTarifsBox" class="mapping" style="display:none">
-    <h3>📄 Mappage des colonnes TARIFS</h3>
-    <div class="two">
-      <div>
-        <label>Colonne “Type de face”</label>
-        <select id="mapT_Type"></select>
-      </div>
-      <div>
-        <label>Colonne “Prix base HT”</label>
-        <select id="mapT_Price"></select>
-      </div>
-      <div>
-        <label>Colonne “Hauteur (mm)”</label>
-        <select id="mapT_H"></select>
-      </div>
-      <div>
-        <label>Colonne “Largeur (mm)”</label>
-        <select id="mapT_L"></select>
-      </div>
-    </div>
-    <button id="applyMapTarifs" class="btn">Appliquer le mappage TARIFS</button>
-  </div>
-
-  <!-- MAPPAGE OPTIONS -->
-  <div id="mapOptionsBox" class="mapping" style="display:none">
-    <h3>🧩 Mappage des colonnes OPTIONS</h3>
-    <div class="two">
-      <div>
-        <label>Colonne “Type d’option” (Platine / Panier de crosses)</label>
-        <select id="mapO_Type"></select>
-      </div>
-      <div>
-        <label>Colonne “Prix unitaire HT”</label>
-        <select id="mapO_Price"></select>
-      </div>
-      <div>
-        <label>Colonne “Hauteur min (mm)”</label>
-        <select id="mapO_HMin"></select>
-      </div>
-      <div>
-        <label>Colonne “Hauteur max (mm)”</label>
-        <select id="mapO_HMax"></select>
-      </div>
-      <div>
-        <label>Colonne “Actif” (Oui/True/1)</label>
-        <select id="mapO_Actif"></select>
-      </div>
-    </div>
-    <button id="applyMapOptions" class="btn">Appliquer le mappage OPTIONS</button>
-  </div>
-
-  <div class="hr"></div>
-
-  <!-- UI CONFIG -->
-  <label for="type">Type de face</label>
-  <select id="type"><option value="">— sélectionnez —</option></select>
-
-  <div class="grid">
-    <div>
-      <label for="hauteur">Hauteur (mm)</label>
-      <select id="hauteur"><option value="">— sélectionnez —</option></select>
-    </div>
-    <div>
-      <label for="largeur">Largeur (mm)</label>
-      <select id="largeur"><option value="">— sélectionnez —</option></select>
+<!-- Bandeau violet -->
+<header class="cofel-header">
+  <div class="row">
+    <a class="cofel-back" href="../index.html">⬅ Retour aux configurateurs</a>
+    <div class="cofel-brand">
+      <img src="../assets/logo cofel.jpg" alt="Cofel" />
+      <h1 class="cofel-title">Configurateur — Totems</h1>
     </div>
   </div>
+</header>
 
-  <label>Options (multi-choix)</label>
-  <div id="optionsBox" class="options-wrap">
-    <!-- cases à cocher générées dynamiquement -->
-    <div class="opt-row"><em>Aucune option disponible tant que la hauteur n’est pas choisie.</em></div>
+<!-- Conteneur commun -->
+<div class="cofel-container">
+  <h1 style="margin:8px 0 14px">Totems</h1>
+
+  <div class="wrap">
+    <!-- MAPPAGE TARIFS -->
+    <div id="mapTarifsBox" class="mapping" style="display:none">
+      <h3>📄 Mappage des colonnes TARIFS</h3>
+      <div class="two">
+        <div>
+          <label>Colonne “Type de face”</label>
+          <select id="mapT_Type"></select>
+        </div>
+        <div>
+          <label>Colonne “Prix base HT”</label>
+          <select id="mapT_Price"></select>
+        </div>
+        <div>
+          <label>Colonne “Hauteur (mm)”</label>
+          <select id="mapT_H"></select>
+        </div>
+        <div>
+          <label>Colonne “Largeur (mm)”</label>
+          <select id="mapT_L"></select>
+        </div>
+      </div>
+      <button id="applyMapTarifs" class="btn">Appliquer le mappage TARIFS</button>
+    </div>
+
+    <!-- MAPPAGE OPTIONS -->
+    <div id="mapOptionsBox" class="mapping" style="display:none">
+      <h3>🧩 Mappage des colonnes OPTIONS</h3>
+      <div class="two">
+        <div>
+          <label>Colonne “Type d’option” (Platine / Panier de crosses)</label>
+          <select id="mapO_Type"></select>
+        </div>
+        <div>
+          <label>Colonne “Prix unitaire HT”</label>
+          <select id="mapO_Price"></select>
+        </div>
+        <div>
+          <label>Colonne “Hauteur min (mm)”</label>
+          <select id="mapO_HMin"></select>
+        </div>
+        <div>
+          <label>Colonne “Hauteur max (mm)”</label>
+          <select id="mapO_HMax"></select>
+        </div>
+        <div>
+          <label>Colonne “Actif” (Oui/True/1)</label>
+          <select id="mapO_Actif"></select>
+        </div>
+      </div>
+      <button id="applyMapOptions" class="btn">Appliquer le mappage OPTIONS</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- UI CONFIG -->
+    <label for="type">Type de face</label>
+    <select id="type"><option value="">— sélectionnez —</option></select>
+
+    <div class="grid">
+      <div>
+        <label for="hauteur">Hauteur (mm)</label>
+        <select id="hauteur"><option value="">— sélectionnez —</option></select>
+      </div>
+      <div>
+        <label for="largeur">Largeur (mm)</label>
+        <select id="largeur"><option value="">— sélectionnez —</option></select>
+      </div>
+    </div>
+
+    <label>Options (multi-choix)</label>
+    <div id="optionsBox" class="options-wrap">
+      <!-- cases à cocher générées dynamiquement -->
+      <div class="opt-row"><em>Aucune option disponible tant que la hauteur n’est pas choisie.</em></div>
+    </div>
+
+    <label for="quantite">Quantité</label>
+    <input type="number" id="quantite" value="1" min="1"/>
+
+    <div class="result">
+      <p>Prix HT : <span id="prixHT">0,00</span> €</p>
+      <p>Prix TTC : <span id="prixTTC">0,00</span> €</p>
+    </div>
+
+    <div id="msg" class="muted"></div>
   </div>
-
-  <label for="quantite">Quantité</label>
-  <input type="number" id="quantite" value="1" min="1"/>
-
-  <div class="result">
-    <p>Prix HT : <span id="prixHT">0,00</span> €</p>
-    <p>Prix TTC : <span id="prixTTC">0,00</span> €</p>
-  </div>
-
-  <div id="msg" class="muted"></div>
 </div>
+
+<!-- Pied de page -->
+<footer class="cofel-footer">
+  © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
+</footer>
 
 <script>
 /* ------- CONFIG ------- */
@@ -147,7 +183,6 @@ const elTTC  = document.getElementById('prixTTC');
 const elMsg  = document.getElementById('msg');
 
 /* ------- HELPERS ------- */
-// Extrait un nombre même si la cellule contient "1 500 mm", "1,500", etc.
 function num(v){
   const s = String(v ?? '').replace(/\u202F/g,'').replace(/\s/g,'').replace(',', '.');
   const m = s.match(/-?\d+(\.\d+)?/);
@@ -238,7 +273,6 @@ function populateHL(){
 }
 
 function renderOptionsCheckboxes(){
-  // familles d’options (ex.: Platine, Panier de crosses…)
   const families = [...new Set(OPTIONS.map(o=>o.typeOption))].filter(Boolean).sort();
   if(!families.length){
     elOptsBox.innerHTML = '<div class="opt-row"><em>Aucune option disponible.</em></div>';
@@ -246,7 +280,7 @@ function renderOptionsCheckboxes(){
   }
   const h = num(elH.value);
   const isValid = (fam)=>{
-    if(!h) return false; // rien tant que hauteur non choisie
+    if(!h) return false;
     const rows = OPTIONS.filter(o =>
       o.typeOption===fam &&
       !isNaN(o.hmin) && !isNaN(o.hmax) &&
@@ -258,7 +292,7 @@ function renderOptionsCheckboxes(){
 
   elOptsBox.innerHTML = families.map(f=>{
     const ok = isValid(f);
-    const note = ok ? '' : ` <span class="note">(non dispo pour H=${elH.value||'—'})</span>`;
+    const note = ok ? '' : ` <span class="muted">(non dispo pour H=${elH.value||'—'})</span>`;
     return `
       <label class="opt-row">
         <input type="checkbox" name="opt" value="${f}" ${ok?'':'disabled'}>
@@ -267,17 +301,15 @@ function renderOptionsCheckboxes(){
     `;
   }).join('');
 
-  // écouteurs sur les cases
   [...elOptsBox.querySelectorAll('input[name="opt"]')].forEach(cb=>{
     cb.addEventListener('change', compute);
   });
 
-  // petit message d’aide
   if(!h){
     elMsg.textContent = "Choisis d’abord la hauteur pour activer les options.";
   }else{
-    const valides = families.filter(f=>!elOptsBox.querySelector(`input[value="${f}"]`)?.disabled);
-    elMsg.textContent = `Hauteur sélectionnée: ${elH.value} | Options valides: ${valides.join(', ') || 'aucune'}`;
+    const valides = families.filter(f=>!elOptsBox.querySelector(\`input[value="\${f}"]\`)?.disabled);
+    elMsg.textContent = \`Hauteur sélectionnée: \${elH.value} | Options valides: \${valides.join(', ') || 'aucune'}\`;
   }
 }
 
@@ -296,7 +328,6 @@ function priceBase(){
   return row ? row.priceBase : 0;
 }
 function priceOptionsSum(){
-  // somme des prix des options cochées
   const checked = [...elOptsBox.querySelectorAll('input[name="opt"]:checked')].map(c=>c.value);
   if(!checked.length) return 0;
   const h = num(elH.value);
@@ -329,16 +360,15 @@ async function loadAll(){
     RAW_TARIFFS = pT.rows; RAW_HEADERS_T = pT.rawHeads; HEADS_T = pT.heads;
     RAW_OPTIONS = pO.rows; RAW_HEADERS_O = pO.rawHeads; HEADS_O = pO.heads;
 
-    // suggestions
     suggestMapTarifs(); suggestMapOptions();
 
-    // UI mapping
     const mapTarifsBox  = document.getElementById('mapTarifsBox');
     const mapOptionsBox = document.getElementById('mapOptionsBox');
 
     const setSel = (id, heads, raws, val)=>{
       const el = document.getElementById(id);
-      fillSelect(el, heads, raws);
+      el.innerHTML = '<option value="">— choisir —</option>' +
+        heads.map((k,i)=>`<option value="${k}">${raws[i]}</option>`).join('');
       if(val) el.value = val;
       return el;
     };
