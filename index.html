@@ -18,17 +18,187 @@
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background:var(--bg); color:var(--text);
-      display:flex; flex-direction:column;
+      margin:0;
+      font-family:"Segoe UI", Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      display:flex;
+      flex-direction:column;
     }
 
     header{
       background:linear-gradient(135deg,var(--cofel),var(--cofel-2));
-      color:#fff; text-align:center; padding:36px 16px 28px;
+      color:#fff;
+      text-align:center;
+      padding:36px 16px 28px;
       box-shadow:0 6px 20px rgba(0,0,0,.15);
-      position:relative; overflow:hidden;
+      position:relative;
+      overflow:hidden;
     }
     header::after{
-      content:""; position:absolute; inset:-40% -20% auto -20%;
-     
+      content:"";
+      position:absolute;
+      inset:-40% -20% auto -20%;
+      height:200%;
+      background:radial-gradient(ellipse at 50% 30%, rgba(255,255,255,.12), transparent 60%);
+    }
+    .brand{display:flex;flex-direction:column;align-items:center;gap:14px;}
+    .brand img{height:70px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25));}
+    h1{margin:0;font-size:clamp(22px,2.6vw,34px);}
+    .subtitle{margin-top:6px;color:#e8dff1;font-size:14px}
+
+    .wrap{width:100%;max-width:1120px;margin:28px auto;padding:0 18px 36px;}
+    .grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+
+    a.card{
+      display:flex;justify-content:center;align-items:center;text-align:center;
+      background:var(--card);border-radius:var(--radius);
+      padding:22px 18px;border:1px solid rgba(0,0,0,.06);box-shadow:var(--shadow);
+      text-decoration:none;color:var(--text);min-height:84px;
+      transition:0.18s;
+    }
+    a.card:hover{transform:translateY(-4px);background:#fcfaff;border-color:var(--cofel-2);}
+
+    footer{margin-top:auto;text-align:center;padding:18px 10px;color:#7d6f8e;font-size:13px;}
+    button{cursor:pointer;}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="./assets/logo cofel.jpg" alt="Logo Cofel" />
+    <h1>Configurateurs Cofel</h1>
+    <div class="subtitle">Choisissez un configurateur pour commencer votre chiffrage</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- === LISTE DES CONFIGURATEURS === -->
+  <section class="grid">
+    <a class="card" href="./configurateurs/configurateur-tole-tablette.html"><div><p class="title">Tôle Tablette</p><p class="hint">Ajourage, PMMA, châssis…</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-rampe-lumineuse.html"><div><p class="title">Rampe Lumineuse (PLL)</p><p class="hint">LED + Laquage inclus</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-enseigne-drapeau.html"><div><p class="title">Enseigne Drapeau</p><p class="hint">Rond / Carré, potence</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-totems.html"><div><p class="title">Totems</p><p class="hint">Hauteurs, laquage</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-lettres PVC.html"><div><p class="title">Lettres PVC</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-lettre-alu-alupvc.html"><div><p class="title">Lettres Alu / Alu-PVC</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-lettre-boitier.html"><div><p class="title">Lettres Boîtiers</p></div></a>
+    <a class="card" href="./configurateurs/configurateur-tolerie-dibond.html"><div><p class="title">Tôlerie Alu / Dibond</p></div></a>
+  </section>
+
+  <!-- === RÉCAP DEVIS === -->
+  <section style="background:#fff;padding:16px;border:1px solid #eee;border-radius:12px;margin-top:30px;">
+    <h2>🧾 Récapitulatif du devis</h2>
+
+    <div style="margin:12px 0;display:flex;gap:12px;align-items:center;">
+      <label>Remise client (%)</label>
+      <input type="number" id="remiseInput" value="0" min="0" max="90" style="width:80px;">
+      <span style="color:#777;font-size:12px;">(appliquée au tarif public = +50%)</span>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#faf7ff;">
+          <th>Désignation</th>
+          <th>Qté</th>
+          <th style="text-align:right;">PU HT (net)</th>
+          <th style="text-align:right;">Total HT</th>
+          <th style="text-align:center;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="bodyDevis">
+        <tr><td colspan="5" style="padding:10px;">Aucune ligne dans le devis.</td></tr>
+      </tbody>
+    </table>
+
+    <div style="text-align:right;margin-top:16px;">
+      <div>Total HT : <span id="totHT">0,00 €</span></div>
+      <div>TVA 20% : <span id="totTVA">0,00 €</span></div>
+      <div style="font-weight:bold;font-size:18px;margin-top:6px;">Total TTC : <span id="totTTC">0,00 €</span></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
+</footer>
+
+<script src="./js/devis-core.js"></script>
+
+<script>
+(function(){
+  if(!window.Devis) return;
+
+  const fmt = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
+  const elRemise = document.getElementById('remiseInput');
+  const body = document.getElementById('bodyDevis');
+  const elHT = document.getElementById('totHT');
+  const elTVA = document.getElementById('totTVA');
+  const elTTC = document.getElementById('totTTC');
+
+  function render(){
+    const d = Devis.computeTotals();
+    const storedRemise = Number(d.remise_pct||0);
+    if(Number(elRemise.value||0) !== storedRemise) elRemise.value = storedRemise;
+
+    if(!d.lignes.length){
+      body.innerHTML = '<tr><td colspan="5" style="padding:10px;color:#777;">Aucune ligne dans le devis.</td></tr>';
+    } else {
+      body.innerHTML = d.lignes.map(l => `
+        <tr data-id="${l.id}">
+          <td>${l.designation}</td>
+          <td style="text-align:center;">${l.quantite}</td>
+          <td style="text-align:right;">${fmt(l.pu_net_ht)}</td>
+          <td style="text-align:right;">${fmt(l.total_ligne_ht)}</td>
+          <td style="text-align:center;">
+            <button class="btn-qty" style="margin-right:6px;padding:4px 8px;border:1px solid #ddd;border-radius:8px;background:#fff;">📝 Qté</button>
+            <button class="btn-del" style="padding:4px 8px;border:1px solid #e6b3b3;border-radius:8px;background:#fff;color:#b00020;">🗑 Suppr.</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    elHT.textContent  = fmt(d.total_ht);
+    elTVA.textContent = fmt(d.tva);
+    elTTC.textContent = fmt(d.total_ttc);
+  }
+
+  // Gestion remise
+  elRemise.addEventListener('input', ()=>{
+    const v = Math.max(0, Math.min(90, Number(elRemise.value||0)));
+    Devis.setRemise(v);
+    elRemise.value = v;
+    render();
+  });
+
+  // Actions par ligne
+  body.addEventListener('click',(e)=>{
+    const tr = e.target.closest('tr[data-id]');
+    if(!tr) return;
+    const id = tr.getAttribute('data-id');
+
+    if(e.target.classList.contains('btn-del')){
+      if(confirm("Supprimer cette ligne du devis ?")){
+        Devis.removeLine(id);
+        render();
+      }
+    }
+
+    if(e.target.classList.contains('btn-qty')){
+      const currentQty = Number(tr.children[1].textContent||1);
+      const q = prompt("Nouvelle quantité :", currentQty);
+      if(q !== null){
+        Devis.updateQty(id, q);
+        render();
+      }
+    }
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
