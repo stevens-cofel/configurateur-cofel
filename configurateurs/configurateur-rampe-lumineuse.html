@@ -2,60 +2,126 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>Configurateur Rampe lumineuse (PLL) - Cofel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Configurateur — Rampe lumineuse (PLL) | Cofel</title>
 
-<!-- Styles communs Cofel -->
-<link rel="stylesheet" href="../styles/cofel.css" />
-<link rel="stylesheet" href="../styles/cofel-config.css" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin">
 
-<!-- Retouches locales (uniquement visuel, pas de logique) -->
 <style>
-  /* Harmonisation des radios en “pills” comme sur les autres pages */
-  .radio-row{display:flex;gap:8px;flex-wrap:wrap}
-  .radio-row label{
-    font-weight:600; border:1px solid #ddd; border-radius:10px;
-    padding:6px 10px; display:flex; align-items:center; gap:8px; background:#fff;
+  /* ===================== THEME COFEL — Violet + effet verre ===================== */
+  :root{
+    --cofel:#5a2d82; --cofel-2:#7838a7;
+    --violet-ui:#bda3ff;
+    --violet-ui-pressed:#a88fff;
+    --txt:#f5f7ff; --accent:#c9b7ff;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+    --blur:18px;
   }
-  /* Carte résultat un peu plus mise en avant */
-  .result{
-    background:#fcfaff; border:1px solid #dec5f2; border-radius:12px;
-    padding:14px; margin:16px 0; text-align:center; font-size:18px;
-    box-shadow:0 8px 18px rgba(90,45,130,.08);
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif;
+    background:
+      radial-gradient(800px 500px at 20% -10%, rgba(255,255,255,.10), transparent 60%),
+      radial-gradient(800px 500px at 110% 10%, rgba(255,255,255,.08), transparent 60%),
+      linear-gradient(135deg, var(--cofel), var(--cofel-2));
   }
-  .muted{color:#7d6f8e}
-  .sub{font-size:14px;color:#4b3b5e;margin-top:6px}
-  .hidden{display:none}
 
-  /* Bouton Ajouter au devis */
-  #btnAddDevis{
-    position:fixed;right:20px;bottom:20px;padding:10px 16px;
-    background:#ffffff;border:1px solid #ccc;border-radius:10px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;font-weight:600
+  /* HEADER */
+  .hero{position:relative;z-index:1;padding:40px 20px 24px;}
+  .hero-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .brand{
+    display:flex;align-items:center;gap:14px;
+    backdrop-filter:blur(var(--blur));
+    background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));
+    border:1px solid rgba(255,255,255,.18);
+    padding:10px 14px;border-radius:14px;box-shadow:var(--shadow);
   }
+  .brand img{height:42px;border-radius:10px;object-fit:contain}
+  .brand h1{font-size:clamp(18px,2.6vw,22px);margin:0}
+  .tagline{max-width:1200px;margin:18px auto 0;padding:0 20px;color:#e8defc}
+
+  /* PANELS */
+  .wrap{max-width:1200px;margin:26px auto;padding:0 20px 40px;}
+  .panel{
+    background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.06));
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:20px;padding:18px;box-shadow:var(--shadow);backdrop-filter:blur(var(--blur));
+    margin-bottom:18px;
+  }
+  .panel legend, .panel h2{margin:0 0 12px;font-size:clamp(18px,2.4vw,22px);color:var(--accent)}
+
+  label{font-weight:700;font-size:13px;color:var(--accent);}
+  input[type="number"]{
+    width:100%;padding:10px 12px;margin-top:6px;
+    border-radius:12px;border:1px solid rgba(255,255,255,.22);
+    background:var(--violet-ui);color:var(--txt);
+    box-shadow:var(--shadow);min-height:44px;
+  }
+
+  /* RADIO boutons (Fixations) */
+  .radio-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .radio-row label{
+    display:flex;align-items:center;gap:8px;
+    border-radius:12px;padding:10px 14px;
+    background:var(--violet-ui);
+    border:1px solid rgba(255,255,255,.22);
+    box-shadow:var(--shadow);
+    cursor:pointer;color:#fff;font-weight:600;
+  }
+  .radio-row input[type="radio"]{
+    width:18px;height:18px;accent-color:#8e6ae5;
+  }
+  .radio-row label:hover{background:var(--violet-ui-pressed)}
+
+  /* Bloc déport */
+  .hidden{display:none}
+  .muted{color:#e2d9ff;font-size:12px;margin-top:4px}
+
+  /* RESULT */
+  .result{
+    text-align:center;padding:16px;
+    background:var(--violet-ui);
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:16px;box-shadow:0 8px 22px rgba(0,0,0,.28);
+    font-size:18px;margin-top:20px;color:#fff;
+  }
+  .result b{font-size:20px}
+  .sub{font-size:14px;color:#fff;margin-top:6px}
+
+  /* BUTTONS */
+  .btn{
+    appearance:none;border:none;cursor:pointer;font-weight:700;
+    color:#0b0b0b;background:#fff;border-radius:12px;padding:10px 14px;
+    box-shadow:0 10px 24px rgba(0,0,0,.25);
+    transition:transform .16s, box-shadow .16s;
+  }
+  .btn:active{transform:translateY(1px);box-shadow:0 6px 16px rgba(0,0,0,.28);}
+  .btn-ghost{background:transparent;color:var(--txt);border:1px solid rgba(255,255,255,.24);}
+  footer{color:#f3ecff;font-size:12px;text-align:center;padding:24px 10px;opacity:.9;}
 </style>
 </head>
 <body>
 
-<!-- En-tête violet Cofel -->
-<header class="cofel-header">
-  <div class="row">
-    <a class="cofel-back" href="../index.html">⬅ Retour aux configurateurs</a>
-    <div class="cofel-brand">
+<!-- HEADER -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="brand">
       <img src="../assets/logo cofel.jpg" alt="Cofel" />
-      <h1 class="cofel-title">Configurateur — Rampe lumineuse (PLL)</h1>
+      <h1>Configurateur — Rampe lumineuse (PLL)</h1>
     </div>
+    <a class="brand" href="../index.html" style="text-decoration:none;color:inherit">⬅ Retour</a>
   </div>
-</header>
+  <div class="tagline">Calcule le prix d’une rampe lumineuse complète avec laquage inclus.</div>
+</div>
 
-<!-- Conteneur commun (largeur, marges) -->
-<div class="cofel-container">
-  <h1 style="margin:8px 0 14px">Rampe lumineuse (PLL)</h1>
-
-  <div class="wrap">
+<!-- CONTENU -->
+<main class="wrap">
+  <section class="panel">
     <fieldset>
-      <legend>Dimensions & quantité</legend>
-      <div class="grid">
+      <legend>📏 Dimensions & quantité</legend>
+      <div class="grid" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
         <div>
           <label for="longueur">Longueur de rampe (mm)</label>
           <input type="number" id="longueur" min="1" placeholder="Ex : 2500" />
@@ -68,14 +134,14 @@
       </div>
     </fieldset>
 
-    <fieldset>
-      <legend>Fixation (laquage inclus)</legend>
+    <fieldset style="margin-top:20px">
+      <legend>🧱 Fixation (laquage inclus)</legend>
       <div class="radio-row">
         <label><input type="radio" name="fixation" value="directe" checked> Fixation directe — <b>5,00 € / u</b></label>
         <label><input type="radio" name="fixation" value="platine"> Platine avec déport — <b>15,00 € / u</b></label>
       </div>
 
-      <div id="blocDeport" class="hidden" style="margin-top:8px">
+      <div id="blocDeport" class="hidden" style="margin-top:10px">
         <label for="deport">Déport souhaité (mm)</label>
         <input type="number" id="deport" min="0" step="1" placeholder="Ex : 120" />
         <div class="muted">Le déport est informatif (pas d’impact tarifaire).</div>
@@ -83,29 +149,32 @@
     </fieldset>
 
     <div class="result">
-      <div>Prix unitaire HT : <span id="prixUHT">0,00</span> €</div>
+      <div>Prix unitaire HT : <b><span id="prixUHT">0,00</span> €</b></div>
       <div class="sub">
         Longueur : <span id="lenM">0,000</span> m •
         Fixations : <span id="nbFix">0</span> u (<span id="typeFix">directe</span>)
       </div>
-      <div style="margin-top:10px">Total HT (×Qté) : <span id="prixHT">0,00</span> €</div>
-      <div>Total TTC (TVA 20%) : <span id="prixTTC">0,00</span> €</div>
+      <div style="margin-top:10px">Total HT : <b><span id="prixHT">0,00</span> €</b></div>
+      <div>Total TTC (TVA 20%) : <b><span id="prixTTC">0,00</span> €</b></div>
     </div>
-  </div>
-</div>
 
-<!-- Pied de page Cofel -->
-<footer class="cofel-footer">
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button id="btnAddDevis" class="btn">➕ Ajouter au devis</button>
+      <button id="btnReset" class="btn btn-ghost">🔄 Réinitialiser</button>
+    </div>
+  </section>
+</main>
+
+<footer>
   © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
 </footer>
 
 <script>
 /*** CONFIG ***/
 const TVA = 0.20;
-const PRICE_RAMPE_ML = 100.00; // €/m linéaire (laquage inclus)
-const PRICE_FIX_DIRECTE = 5.00; // €/u (laquage inclus)
-const PRICE_FIX_PLATINE = 15.00; // €/u (laquage inclus)
-// Affichage public : x2 (aucune mention côté client)
+const PRICE_RAMPE_ML = 100.00;
+const PRICE_FIX_DIRECTE = 5.00;
+const PRICE_FIX_PLATINE = 15.00;
 const UPLIFT_PUBLIC = 2.0;
 
 /*** DOM ***/
@@ -120,116 +189,80 @@ const elLenM = $('lenM');
 const elNbFix = $('nbFix');
 const elTypeFix = $('typeFix');
 
-/*** UTILS ***/
-function euro(n){ return (isFinite(n)?n:0).toFixed(2).replace('.', ','); }
-function round3(n){ return Math.round(n*1000)/1000; }
+function euro(n){return (isFinite(n)?n:0).toFixed(2).replace('.', ',');}
+function round3(n){return Math.round(n*1000)/1000;}
 
-/*** CALCUL ***/
 function compute(){
   const Lmm = Math.max(0, Number(elL.value||0));
-  const Lm = Lmm / 1000; // longueur en mètres
+  const Lm = Lmm / 1000;
   const Q = Math.max(1, Number(elQ.value||1));
-
-  // Type de fixation & tarif unitaire
   const fixVal = (document.querySelector('input[name="fixation"]:checked')||{}).value || 'directe';
   const fixPrice = (fixVal === 'platine') ? PRICE_FIX_PLATINE : PRICE_FIX_DIRECTE;
-
-  // Règle : 1 fixation par mètre linéaire, +1 (début/fin), minimum 2
   const nbFix = Math.max(2, Math.ceil(Lm) + 1);
+  const rampeHT = PRICE_RAMPE_ML * Lm;
+  const fixHT = fixPrice * nbFix;
+  const unitHT = (rampeHT + fixHT) * UPLIFT_PUBLIC;
+  const totalHT = unitHT * Q;
+  const totalTTC = totalHT * (1 + TVA);
 
-  // Prix rampe (ml)
-  const rampeHT_interne = PRICE_RAMPE_ML * Lm;
-
-  // Prix fixations
-  const fixHT_interne = fixPrice * nbFix;
-
-  // Unitaire (interne)
-  const unitHT_interne = rampeHT_interne + fixHT_interne;
-
-  // Conversion → affichage public (x2)
-  const unitHT_public = unitHT_interne * UPLIFT_PUBLIC;
-
-  const totalHT_public = unitHT_public * Q;
-  const totalTTC_public = totalHT_public * (1 + TVA);
-
-  // UI
   elLenM.textContent = round3(Lm).toFixed(3).replace('.', ',');
   elNbFix.textContent = nbFix;
-  elTypeFix.textContent = (fixVal === 'platine') ? 'platine' : 'directe';
-  elPrixUHT.textContent = euro(unitHT_public);
-  elPrixHT.textContent = euro(totalHT_public);
-  elPrixTTC.textContent = euro(totalTTC_public);
+  elTypeFix.textContent = fixVal;
+  elPrixUHT.textContent = euro(unitHT);
+  elPrixHT.textContent = euro(totalHT);
+  elPrixTTC.textContent = euro(totalTTC);
 }
 
-/*** TOGGLES ***/
 function toggleBlocks(){
   const fixVal = (document.querySelector('input[name="fixation"]:checked')||{}).value || 'directe';
   elBlocDeport.classList.toggle('hidden', fixVal!=='platine');
 }
 
-/*** EVENTS ***/
 ['input','change'].forEach(evt=>{
   [longueur, quantite, deport, ...document.querySelectorAll('input[name="fixation"]')]
-    .forEach(el => el.addEventListener(evt, ()=>{ toggleBlocks(); compute(); }));
+    .forEach(el=>el.addEventListener(evt, ()=>{toggleBlocks();compute();}));
 });
 
-/*** INIT ***/
+document.getElementById('btnReset').addEventListener('click',()=>{
+  elL.value='';elQ.value=1;document.querySelector('input[value="directe"]').checked=true;
+  $('deport').value='';toggleBlocks();compute();
+});
+
 toggleBlocks();
 compute();
 </script>
 
-<!-- ====== Intégration Devis ====== -->
 <script src="../js/devis-core.js"></script>
-
-<button id="btnAddDevis">➕ Ajouter au devis</button>
-
 <script>
 (function(){
   const btn = document.getElementById('btnAddDevis');
-  if(!btn) return;
-
-  // Récupère le total HT affiché (déjà en public x2)
+  if(!btn)return;
   function parseTotalHTPublic(){
-    const txt = document.getElementById('prixHT').innerText.trim(); // "1 234,56"
-    return Number(txt.replace(/\s/g,'').replace(',', '.')) || 0;
+    const txt=document.getElementById('prixHT').innerText.trim();
+    return Number(txt.replace(/\s/g,'').replace(',','.'))||0;
   }
-
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click',()=>{
     try{
       if(!window.Devis) throw new Error("Moteur de devis introuvable.");
-
-      const Lmm = Math.max(0, Number(document.getElementById('longueur').value || 0));
-      const qte = Math.max(1, Number(document.getElementById('quantite').value || 1));
-      if(!(Lmm>0)){ alert("Renseigne la longueur de rampe."); return; }
-
-      const fixVal = (document.querySelector('input[name="fixation"]:checked')||{}).value || 'directe';
-      const deport = Number(document.getElementById('deport')?.value || 0);
-
-      const total_ht_public = parseTotalHTPublic();
-      if (total_ht_public <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
-
-      const pu_public_ht = qte>0 ? total_ht_public / qte : 0;
-
-      const parts = [
-        `Rampe lumineuse (PLL)`,
-        `L ${Lmm} mm`,
-        `Fixation: ${fixVal}`
-      ];
-      if (fixVal === 'platine' && deport>0) parts.push(`Déport ${deport} mm`);
-      const designation = parts.join(' — ');
-
+      const Lmm=Math.max(0,Number(document.getElementById('longueur').value||0));
+      const qte=Math.max(1,Number(document.getElementById('quantite').value||1));
+      if(!(Lmm>0)){alert("Renseigne la longueur de rampe.");return;}
+      const fixVal=(document.querySelector('input[name=\"fixation\"]:checked')||{}).value||'directe';
+      const deport=Number(document.getElementById('deport')?.value||0);
+      const total_ht_public=parseTotalHTPublic();
+      if(total_ht_public<=0){alert("Le prix est à 0, vérifie les paramètres.");return;}
+      const pu_public_ht=qte>0?total_ht_public/qte:0;
+      const parts=[`Rampe lumineuse (PLL)`,`L ${Lmm} mm`,`Fixation: ${fixVal}`];
+      if(fixVal==='platine'&&deport>0)parts.push(`Déport ${deport} mm`);
+      const designation=parts.join(' — ');
       Devis.addLine({
-        type: 'Rampe lumineuse (PLL)',
+        type:'Rampe lumineuse (PLL)',
         designation,
-        quantite: qte,
-        pu_public_ht: Number(pu_public_ht.toFixed(2))
+        quantite:qte,
+        pu_public_ht:Number(pu_public_ht.toFixed(2))
       });
-
       alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${qte}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
-    }catch(err){
-      console.error(err);
-      alert('Erreur lors de l’ajout au devis : ' + err.message);
-    }
+    }catch(err){console.error(err);alert('Erreur : '+err.message);}
   });
 })();
 </script>
