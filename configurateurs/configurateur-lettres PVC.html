@@ -213,7 +213,8 @@ async function loadCSV(){
     };
   }).filter(x=>isFinite(x.Hauteur_mm)&&isFinite(x.Epaisseur_mm)&&isFinite(x.PrixBase_EUR));
 
-  elLog.textContent = `Données chargées: ${DATA.length} lignes.`;
+  /* (supprimé) – ne plus afficher : Données chargées: N lignes */
+  // elLog.textContent = `Données chargées: ${DATA.length} lignes.`;
 }
 
 function updateRetroAvailability(){
