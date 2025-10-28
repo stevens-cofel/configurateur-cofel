@@ -14,7 +14,6 @@
     --violet:#6b39a0; --violet-2:#8752c1; --violet-soft:#c9b7ff;
     --txt:#f5f7ff; --txt-dim:#e6e6ff; --accent:#c9b7ff;
     --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
-    color-scheme: dark; /* base dark pour les contrôles natifs */
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -27,9 +26,9 @@
       linear-gradient(135deg, var(--cofel), var(--cofel-2));
   }
 
-  /* ===================== FORM CONTROLS (violet homogène) ===================== */
+  /* ===================== FORM CONTROLS (inputs) ===================== */
   label{font-weight:700; font-size:12px; color:var(--accent);}
-  input[type="text"], input[type="number"], textarea, select{
+  input[type="text"], input[type="number"], textarea{
     width:100%; margin-top:6px; padding:10px 12px; border-radius:12px; outline:none;
     color:var(--txt);
     border:1px solid rgba(255,255,255,.22);
@@ -40,78 +39,102 @@
     transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
   }
   input::placeholder, textarea::placeholder{ color:#f0edff; opacity:.75; }
-  input:focus, textarea:focus, select:focus{
+  input:focus, textarea:focus{
     border-color: rgba(255,255,255,.34);
     box-shadow: 0 0 0 3px rgba(201,183,255,.25), var(--shadow);
   }
 
-  /* SELECT – flèche + menu violet (selon support navigateur) */
-  select{
-    -webkit-appearance: none; appearance: none;
-    padding-right: 28px;
-    background-image:
-      linear-gradient(45deg, transparent 50%, var(--txt) 50%),
-      linear-gradient(135deg, var(--txt) 50%, transparent 50%);
-    background-position: calc(100% - 16px) calc(50% - 4px),
-                         calc(100% - 11px) calc(50% - 4px);
-    background-size: 6px 6px, 6px 6px;
-    background-repeat: no-repeat;
-  }
-  /* Option styling (Chrome/Edge/Firefox) */
-  select option{
-    color: var(--txt);
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)),
-      linear-gradient(135deg, var(--violet-soft), var(--violet-2));
-  }
-  select option:checked,
-  select option:hover{
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.10)),
-      linear-gradient(135deg, var(--violet-soft), var(--violet-2));
+  /* ===================== CUSTOM SELECT (violet unifié) ===================== */
+  /* Le select natif reste pour la logique, mais est masqué visuellement */
+  .native-select{
+    position:absolute !important;
+    opacity:0 !important;
+    pointer-events:none !important;
+    width:0; height:0; margin:0; padding:0; border:0;
   }
 
-  /* CHECKBOX – look violet clair au lieu de noir */
-  .option-item{
-    display:flex; align-items:center; gap:10px; cursor:pointer;
+  .cselect{ position:relative; margin-top:6px; }
+  .cselect-toggle{
+    width:100%;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:10px 12px;
+    color:var(--txt);
+    border-radius:12px; cursor:pointer; user-select:none;
+    border:1px solid rgba(255,255,255,.22);
+    box-shadow: var(--shadow);
     background:
       linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)),
       linear-gradient(135deg, var(--violet-soft), var(--violet-2));
+  }
+  .cselect-toggle:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35); }
+  .cselect-label{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1}
+  .cselect-caret{
+    width:10px; height:10px; flex:0 0 auto; opacity:.9;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--txt) 50%),
+      linear-gradient(135deg, var(--txt) 50%, transparent 50%);
+    background-size:6px 6px, 6px 6px;
+    background-position:right top, right bottom;
+    background-repeat:no-repeat;
+    transform: translateY(1px);
+  }
+  .cselect[aria-expanded="true"] .cselect-caret{ transform: rotate(180deg); }
+
+  .cselect-menu{
+    position:absolute; left:0; right:0; top:calc(100% + 6px);
+    z-index:1000; display:none; max-height:280px; overflow:auto; padding:6px;
+    border-radius:14px; border:1px solid rgba(255,255,255,.22);
+    box-shadow: 0 16px 40px rgba(0,0,0,.45);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06)),
+      linear-gradient(135deg, var(--violet-soft), var(--violet-2));
+  }
+  .cselect[aria-expanded="true"] .cselect-menu{ display:block; }
+
+  .cselect-option{
+    border-radius:10px; margin:4px 0; padding:10px 12px; cursor:pointer;
+    color:var(--txt);
     border:1px solid rgba(255,255,255,.18);
-    border-radius:12px; padding:10px 12px; user-select:none;
+    background: rgba(255,255,255,.08);
+  }
+  .cselect-option:hover, .cselect-option[aria-selected="true"]{
+    background: rgba(255,255,255,.18);
+    border-color: rgba(255,255,255,.28);
+  }
+  .cselect-option:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35); }
+
+  /* ===================== CHECKBOX (violet clair lisible) ===================== */
+  .option-item{
+    display:flex; align-items:center; gap:12px; cursor:pointer;
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:12px; padding:12px; user-select:none;
     box-shadow: var(--shadow);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)),
+      linear-gradient(135deg, var(--violet-soft), var(--violet-2));
   }
   .option-item input{
-    /* teinte violette cohérente (support natif moderne) */
-    accent-color: #9f86ff; /* entre --violet-soft et --violet-2 */
-    width:18px; height:18px;
+    appearance:none; -webkit-appearance:none;
+    width:20px; height:20px; border-radius:6px;
+    border:1px solid rgba(255,255,255,.5);
+    background: rgba(255,255,255,.12);
+    position:relative; display:inline-block;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.2);
   }
-  /* Fallback esthétique (si accent-color ignoré) */
-  .option-item input[type="checkbox"]{
-    -webkit-appearance: none; appearance: none;
-    border:1px solid rgba(255,255,255,.35);
-    background: rgba(255,255,255,.15);
-    border-radius:6px; position:relative;
-  }
-  .option-item input[type="checkbox"]::after{
-    content:""; position:absolute; inset:2px;
-    border-radius:4px; background: transparent;
-    transition: background .15s ease;
-  }
-  .option-item input[type="checkbox"]:checked{
+  .option-item input:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35), inset 0 1px 2px rgba(0,0,0,.2); }
+  .option-item input:checked{
     background:
       linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,.10)),
       linear-gradient(135deg, var(--violet-2), #a993ff);
-    border-color: rgba(255,255,255,.6);
+    border-color: rgba(255,255,255,.8);
   }
-  .option-item input[type="checkbox"]:checked::after{
-    background: radial-gradient(circle at 50% 50%, #ffffff 0 45%, transparent 46%);
-  }
-  .option-item input:focus-visible{
-    outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35);
+  .option-item input:checked::after{
+    content:""; position:absolute; inset:3px 5px 5px 3px;
+    border-right:3px solid #fff; border-bottom:3px solid #fff;
+    transform: rotate(45deg);
   }
 
-  /* ===================== HERO ===================== */
+  /* ===================== HERO & LAYOUT ===================== */
   .hero{position:relative; z-index:1; padding:40px 20px 24px;}
   .hero-inner{
     max-width:1200px; margin:0 auto;
@@ -128,8 +151,6 @@
   .brand img{height:42px; width:auto; object-fit:contain; border-radius:10px}
   .brand h1{font-size: clamp(18px, 2.6vw, 22px); margin:0; letter-spacing:.2px; font-weight:700;}
   .tagline{max-width:1200px;margin:18px auto 0;padding:0 20px;color:var(--txt-dim)}
-
-  /* ===================== LAYOUT ===================== */
   .wrap{max-width:1200px; margin:26px auto; padding:0 20px 40px; position:relative; z-index:1;}
   .panel{
     background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
@@ -198,14 +219,38 @@
       <div class="card grid">
         <div>
           <label for="forme">Forme</label>
-          <select id="forme"><option value="">(choisir)</option></select>
+
+          <!-- Natif (masqué visuellement) -->
+          <select id="forme" class="native-select"><option value="">(choisir)</option></select>
+
+          <!-- Custom -->
+          <div class="cselect" data-bind="forme" aria-haspopup="listbox" aria-expanded="false">
+            <button type="button" class="cselect-toggle">
+              <span class="cselect-label">(choisir)</span>
+              <span class="cselect-caret" aria-hidden="true"></span>
+            </button>
+            <div class="cselect-menu" role="listbox"></div>
+          </div>
+
           <div id="noteForme" class="muted"></div>
         </div>
+
         <div>
           <label for="dimension">Dimension</label>
-          <select id="dimension"><option value="">(choisir la dimension)</option></select>
+
+          <select id="dimension" class="native-select"><option value="">(choisir la dimension)</option></select>
+
+          <div class="cselect" data-bind="dimension" aria-haspopup="listbox" aria-expanded="false">
+            <button type="button" class="cselect-toggle">
+              <span class="cselect-label">(choisir la dimension)</span>
+              <span class="cselect-caret" aria-hidden="true"></span>
+            </button>
+            <div class="cselect-menu" role="listbox"></div>
+          </div>
+
           <div id="helpDim" class="muted"></div>
         </div>
+
         <div>
           <label for="quantite">Quantité</label>
           <input type="number" id="quantite" min="1" value="1" />
@@ -325,12 +370,101 @@
 
   function distinct(v){return [...new Set(v)]}
 
+  /* ===== Custom Select: construction + sync ===== */
+  const customSelects = new Map();
+
+  function buildCustomFromNative(native){
+    const wrap = document.querySelector('.cselect[data-bind="'+native.id+'"]');
+    if(!wrap) return;
+    const toggle = wrap.querySelector('.cselect-toggle');
+    const labelSpan = wrap.querySelector('.cselect-label');
+    const menu = wrap.querySelector('.cselect-menu');
+    wrap.setAttribute('aria-expanded','false');
+    menu.innerHTML = '';
+
+    Array.from(native.options).forEach(opt=>{
+      const div=document.createElement('div');
+      div.className='cselect-option'; div.setAttribute('role','option'); div.tabIndex=-1;
+      div.dataset.value=opt.value; div.textContent=opt.textContent;
+      if(opt.selected) div.setAttribute('aria-selected','true');
+      div.addEventListener('click', ()=>{
+        setNativeValue(native, opt.value);
+        closeMenu(wrap);
+      });
+      div.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setNativeValue(native, opt.value); closeMenu(wrap); }
+      });
+      menu.appendChild(div);
+    });
+
+    // Label initial
+    const sel = native.selectedOptions[0] || native.options[0];
+    labelSpan.textContent = sel ? sel.textContent : '';
+
+    // Toggle handlers
+    toggle.onclick = ()=>{
+      const expanded = wrap.getAttribute('aria-expanded')==='true';
+      expanded ? closeMenu(wrap) : openMenu(wrap);
+    };
+    toggle.onkeydown = (e)=>{
+      const expanded = wrap.getAttribute('aria-expanded')==='true';
+      if((e.key==='ArrowDown' || e.key==='ArrowUp') && !expanded){
+        e.preventDefault(); openMenu(wrap);
+        focusFirst(menu, e.key==='ArrowDown');
+      } else if(e.key==='Enter' || e.key===' '){
+        e.preventDefault(); toggle.click();
+      } else if(e.key==='Escape' && expanded){
+        closeMenu(wrap);
+      }
+    };
+
+    document.addEventListener('click', (e)=>{ if(!wrap.contains(e.target)) closeMenu(wrap); });
+
+    customSelects.set(native.id, { wrap, toggle, labelSpan, menu, native });
+  }
+
+  function setNativeValue(native, val){
+    if(native.value !== val){
+      native.value = val;
+      native.dispatchEvent(new Event('change', { bubbles:true }));
+    }
+    const api = customSelects.get(native.id);
+    if(api){
+      api.labelSpan.textContent = native.selectedOptions[0]?.textContent || '';
+      Array.from(api.menu.children).forEach(n=>{
+        if(n.classList.contains('cselect-option')){
+          n.setAttribute('aria-selected', n.dataset.value===val ? 'true' : 'false');
+        }
+      });
+    }
+  }
+  function openMenu(wrap){
+    wrap.setAttribute('aria-expanded','true');
+    const sel = wrap.querySelector('.cselect-option[aria-selected="true"]') || wrap.querySelector('.cselect-option');
+    sel && sel.focus();
+  }
+  function closeMenu(wrap){
+    wrap.setAttribute('aria-expanded','false');
+    wrap.querySelector('.cselect-toggle')?.focus();
+  }
+  function focusFirst(menu, fromTop=true){
+    const opts = Array.from(menu.querySelectorAll('.cselect-option'));
+    if(!opts.length) return;
+    (fromTop ? opts[0] : opts[opts.length-1]).focus();
+  }
+  function rebuildCustom(native){
+    // re-construit le menu après mise à jour des options
+    buildCustomFromNative(native);
+  }
+
+  /* ===== UI data ===== */
   function populateFormes(){
     const formes = distinct(ROWS.map(r=>String(r[MAP.FORME]||'').toLowerCase()).filter(Boolean))
                   .sort((a,b)=>a.localeCompare(b));
     elForme.innerHTML='<option value="">(choisir)</option>';
     formes.forEach(v=> elForme.innerHTML+=`<option value="${v}">${v}</option>`);
     elNote.textContent = formes.length ? "" : "Aucune forme disponible dans le CSV.";
+    rebuildCustom(elForme);
   }
 
   function filteredPool(){
@@ -360,6 +494,7 @@
     elDim.innerHTML='<option value="">(choisir la dimension)</option>';
     dims.forEach(v=> elDim.innerHTML+=`<option>${v}</option>`);
     elHelpDim.textContent=dims.length?`Dimensions dispo : ${dims.slice(0,10).join(' • ')}${dims.length>10?' …':''}`:'';
+    rebuildCustom(elDim);
   }
 
   function findRow(){
@@ -423,8 +558,11 @@
     elLaq.checked=false; elAJL.checked=false; elLaq.disabled=false;
     populateFormes(); populateDimensions(); compute();
   }
-  document.getElementById("btnReset").addEventListener("click", resetAll);
 
+  /* Init */
+  buildCustomFromNative(elForme);
+  buildCustomFromNative(elDim);
+  document.getElementById("btnReset")?.addEventListener("click", resetAll);
   loadCSV();
   </script>
 
