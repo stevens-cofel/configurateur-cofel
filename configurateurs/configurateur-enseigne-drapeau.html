@@ -11,10 +11,10 @@
   /* ===================== THEME (Cofel – verre + dégradés) ===================== */
   :root{
     --cofel:#5a2d82; --cofel-2:#7838a7;
+    --violet:#6b39a0;
+    --violet-2:#8752c1;
     --txt:#f5f7ff; --txt-dim:#e6e6ff; --accent:#c9b7ff;
     --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
-    /* Corrige les menus natifs en thème sombre */
-    color-scheme: dark;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -27,40 +27,89 @@
       linear-gradient(135deg, var(--cofel), var(--cofel-2));
   }
 
-  /* ===================== FORM CONTROLS (incl. <select>) ===================== */
+  /* ===================== FORM CONTROLS ===================== */
   label{font-weight:700; font-size:12px; color:var(--accent);}
-  input[type="text"], input[type="number"], textarea, select{
+  input[type="text"], input[type="number"], textarea{
     width:100%; margin-top:6px; padding:10px 12px;
     background: rgba(255,255,255,.08); color:var(--txt);
     border:1px solid rgba(255,255,255,.18); border-radius:12px; outline:none;
     transition: border-color .18s ease, background .18s ease;
   }
   input::placeholder, textarea::placeholder{ color:#f0edff; opacity:.75; }
-  input:focus, textarea:focus, select:focus{
+  input:focus, textarea:focus{
     border-color: rgba(255,255,255,.34);
     background: rgba(255,255,255,.12);
     box-shadow: 0 0 0 3px rgba(201,183,255,.25);
   }
 
-  /* === SELECT: rend le popup lisible + ajoute une flèche custom légère === */
-  select{
-    -webkit-appearance: none; appearance: none;
-    padding-right: 28px; position: relative;
+  /* ======= SELECT CUSTOM VIOLET ======= */
+  /* Le select natif reste dans le DOM pour compatibilité, mais invisible */
+  .native-select{
+    position:absolute !important;
+    opacity:0 !important;
+    pointer-events:none !important;
+    width:0; height:0; margin:0; padding:0; border:0;
+  }
+
+  .select{
+    position:relative; margin-top:6px;
+  }
+  .select-toggle{
+    width:100%;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:10px 12px;
+    color:var(--txt);
+    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.08)), linear-gradient(135deg, var(--violet), var(--violet-2));
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:12px;
+    box-shadow: var(--shadow);
+    cursor:pointer; user-select:none;
+  }
+  .select-toggle:focus-visible{
+    outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35);
+  }
+  .select-label{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1}
+  .select-caret{
+    width:10px; height:10px; flex:0 0 auto;
     background-image:
-      linear-gradient(45deg, transparent 50%, var(--accent) 50%),
-      linear-gradient(135deg, var(--accent) 50%, transparent 50%);
-    background-position: calc(100% - 16px) calc(50% - 4px),
-                         calc(100% - 11px) calc(50% - 4px);
-    background-size: 6px 6px, 6px 6px;
-    background-repeat: no-repeat;
+      linear-gradient(45deg, transparent 50%, var(--txt) 50%),
+      linear-gradient(135deg, var(--txt) 50%, transparent 50%);
+    background-size:6px 6px, 6px 6px;
+    background-position:right top, right bottom;
+    background-repeat:no-repeat;
+    transform: translateY(1px);
+    opacity:.9;
   }
-  select option{
-    color: var(--txt);
-    background-color: #2a2440; /* fond sombre lisible */
+  .select[aria-expanded="true"] .select-caret{
+    transform: rotate(180deg);
   }
-  select option:checked,
-  select option:hover{
-    background-color: rgba(201,183,255,.25);
+
+  .select-menu{
+    position:absolute; left:0; right:0; top:calc(100% + 6px);
+    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06)), linear-gradient(135deg, var(--violet), var(--violet-2));
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:14px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.45);
+    max-height:280px; overflow:auto; padding:6px;
+    z-index:1000; display:none;
+  }
+  .select[aria-expanded="true"] .select-menu{ display:block; }
+
+  .select-option{
+    border-radius:10px;
+    padding:10px 12px;
+    cursor:pointer;
+    color:var(--txt);
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    margin:4px 0;
+  }
+  .select-option:hover, .select-option[aria-selected="true"]{
+    background: rgba(255,255,255,.18);
+    border-color: rgba(255,255,255,.28);
+  }
+  .select-option:focus-visible{
+    outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35);
   }
 
   /* ===================== HERO ===================== */
@@ -127,7 +176,6 @@
   }
   .btn:active{ transform: translateY(1px); box-shadow: 0 6px 16px rgba(0,0,0,.28); }
   .btn-ghost{ background: transparent; color: var(--txt); border:1px solid rgba(255,255,255,.24); }
-  .btn-danger{ background: transparent; color:#ffe3e3; border:1px solid rgba(255,107,107,.45); }
 
   footer{
     color:#f3ecff; font-size:12px; text-align:center; padding:24px 10px; opacity:.9;
@@ -160,14 +208,38 @@
       <div class="card grid">
         <div>
           <label for="forme">Forme</label>
-          <select id="forme"><option value="">(choisir)</option></select>
+
+          <!-- Select natif caché (conserve l’API) -->
+          <select id="forme" class="native-select"><option value="">(choisir)</option></select>
+
+          <!-- Select custom -->
+          <div class="select" data-select="forme" aria-haspopup="listbox" aria-expanded="false">
+            <button class="select-toggle" type="button" aria-label="Forme">
+              <span class="select-label">(choisir)</span>
+              <span class="select-caret" aria-hidden="true"></span>
+            </button>
+            <div class="select-menu" role="listbox"></div>
+          </div>
+
           <div id="noteForme" class="muted"></div>
         </div>
+
         <div>
           <label for="dimension">Dimension</label>
-          <select id="dimension"><option value="">(choisir la dimension)</option></select>
+
+          <select id="dimension" class="native-select"><option value="">(choisir la dimension)</option></select>
+
+          <div class="select" data-select="dimension" aria-haspopup="listbox" aria-expanded="false">
+            <button class="select-toggle" type="button" aria-label="Dimension">
+              <span class="select-label">(choisir la dimension)</span>
+              <span class="select-caret" aria-hidden="true"></span>
+            </button>
+            <div class="select-menu" role="listbox"></div>
+          </div>
+
           <div id="helpDim" class="muted"></div>
         </div>
+
         <div>
           <label for="quantite">Quantité</label>
           <input type="number" id="quantite" min="1" value="1" />
@@ -239,15 +311,15 @@
     let s=String(v).trim().replace(/€/g,'').replace(/[\u00A0\u202F]/g,'').replace(/\s+/g,'');
     if(s.includes(',') && s.includes('.')) s=s.replace(/\./g,'');
     s=s.replace(',', '.');
-    const m=s.match(/-?\d+(\.\d+)?/);
+    const m=s.match(/-?\\d+(\\.\\d+)?/); // échappement JS
     return m?parseFloat(m[0]):NaN;
   }
   function euro(n){ return (isFinite(n)?n:0).toFixed(2).replace('.', ','); }
 
   /* Robust CSV parser */
   function parseCSVAuto(text){
-    const raw = String(text || "").replace(/^\uFEFF/, "");
-    const lines = raw.split(/\r\n|\n|\r/).filter(l => l.trim() !== "");
+    const raw = String(text || "").replace(/^\\uFEFF/, "");
+    const lines = raw.split(/\\r\\n|\\n|\\r/).filter(l => l.trim() !== "");
     if (!lines.length) return { rawHeads: [], rows: [] };
     const first = lines[0];
     const sep = ((first.match(/;/g) || []).length > (first.match(/,/g) || []).length) ? ';' : ',';
@@ -287,12 +359,121 @@
 
   function distinct(v){return [...new Set(v)]}
 
+  /* ====== CUSTOM SELECT ====== */
+  const customSelects = new Map();
+
+  function buildCustomFromNative(native){
+    const wrap = document.querySelector('.select[data-select="'+native.id+'"]');
+    if(!wrap) return;
+    const toggle = wrap.querySelector('.select-toggle');
+    const labelSpan = wrap.querySelector('.select-label');
+    const menu = wrap.querySelector('.select-menu');
+    menu.innerHTML = '';
+
+    // Construire les options
+    Array.from(native.options).forEach((opt, idx) => {
+      const div = document.createElement('div');
+      div.className = 'select-option';
+      div.setAttribute('role','option');
+      div.setAttribute('tabindex','-1');
+      div.dataset.value = opt.value;
+      div.textContent = opt.textContent;
+      if(opt.selected) div.setAttribute('aria-selected','true');
+      div.addEventListener('click', () => {
+        setNativeValue(native, opt.value);
+        closeMenu(wrap);
+      });
+      div.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter' || e.key===' '){
+          e.preventDefault();
+          setNativeValue(native, opt.value);
+          closeMenu(wrap);
+        }
+      });
+      menu.appendChild(div);
+      if(idx===0 && !native.value){
+        // valeur par défaut (placeholder)
+        labelSpan.textContent = opt.textContent;
+      }
+      if(opt.selected){
+        labelSpan.textContent = opt.textContent;
+      }
+    });
+
+    // Toggle open/close
+    toggle.onclick = () => {
+      const expanded = wrap.getAttribute('aria-expanded') === 'true';
+      if(expanded) closeMenu(wrap); else openMenu(wrap);
+    };
+
+    // Clavier sur le bouton
+    toggle.onkeydown = (e)=>{
+      const expanded = wrap.getAttribute('aria-expanded') === 'true';
+      if((e.key==='ArrowDown' || e.key==='ArrowUp') && !expanded){
+        e.preventDefault(); openMenu(wrap);
+        focusFirst(menu, e.key==='ArrowDown');
+      } else if(e.key==='Enter' || e.key===' '){
+        e.preventDefault(); toggle.click();
+      } else if(e.key==='Escape' && expanded){
+        closeMenu(wrap);
+      }
+    };
+
+    // Click extérieur
+    document.addEventListener('click', (e)=>{
+      if(!wrap.contains(e.target)) closeMenu(wrap);
+    });
+
+    // Store
+    customSelects.set(native.id, { wrap, toggle, labelSpan, menu, native });
+  }
+
+  function setNativeValue(native, val){
+    if(native.value !== val){
+      native.value = val;
+      native.dispatchEvent(new Event('change', { bubbles:true }));
+    }
+    // Sync visuel
+    const api = customSelects.get(native.id);
+    if(api){
+      api.labelSpan.textContent = native.selectedOptions[0]?.textContent || '';
+      Array.from(api.menu.children).forEach(n=>{
+        if(n.classList.contains('select-option')){
+          n.setAttribute('aria-selected', n.dataset.value===val ? 'true' : 'false');
+        }
+      });
+    }
+  }
+
+  function openMenu(wrap){
+    wrap.setAttribute('aria-expanded','true');
+    // Focus première option sélectionnée
+    const sel = wrap.querySelector('.select-option[aria-selected="true"]') || wrap.querySelector('.select-option');
+    sel && sel.focus();
+  }
+  function closeMenu(wrap){
+    wrap.setAttribute('aria-expanded','false');
+    const btn = wrap.querySelector('.select-toggle'); btn && btn.focus();
+  }
+  function focusFirst(menu, fromTop=true){
+    const opts = Array.from(menu.querySelectorAll('.select-option'));
+    if(!opts.length) return;
+    (fromTop ? opts[0] : opts[opts.length-1]).focus();
+  }
+
+  function rebuildCustom(native){
+    // Recrée les options après mise à jour du <select> natif
+    buildCustomFromNative(native);
+  }
+
+  /* ====== UI / DATA ====== */
   function populateFormes(){
     const formes = distinct(ROWS.map(r=>String(r[MAP.FORME]||'').toLowerCase()).filter(Boolean))
                   .sort((a,b)=>a.localeCompare(b));
     elForme.innerHTML='<option value="">(choisir)</option>';
     formes.forEach(v=> elForme.innerHTML+=`<option value="${v}">${v}</option>`);
     elNote.textContent = formes.length ? "" : "Aucune forme disponible dans le CSV.";
+    rebuildCustom(elForme);
   }
 
   function filteredPool(){
@@ -322,6 +503,7 @@
     elDim.innerHTML='<option value="">(choisir la dimension)</option>';
     dims.forEach(v=> elDim.innerHTML+=`<option>${v}</option>`);
     elHelpDim.textContent=dims.length?`Dimensions dispo : ${dims.slice(0,10).join(' • ')}${dims.length>10?' …':''}`:'';
+    rebuildCustom(elDim);
   }
 
   function findRow(){
@@ -370,7 +552,7 @@
     }catch(e){ elMsg.textContent="Erreur CSV : "+e.message; }
   }
 
-  /* Events (références explicites, pas d’IDs implicites) */
+  /* Events */
   ["input","change"].forEach(evt=>{
     [elForme, elQ, elLaq, elAJL, elDim].forEach(el=>{
       el.addEventListener(evt,e=>{
@@ -385,8 +567,11 @@
     elLaq.checked=false; elAJL.checked=false; elLaq.disabled=false;
     populateFormes(); populateDimensions(); compute();
   }
-  document.getElementById("btnReset").addEventListener("click", resetAll);
+  document.getElementById("btnReset")?.addEventListener("click", resetAll);
 
+  /* Init */
+  buildCustomFromNative(elForme);
+  buildCustomFromNative(elDim);
   loadCSV();
   </script>
 
