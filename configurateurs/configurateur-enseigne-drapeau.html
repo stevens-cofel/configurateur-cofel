@@ -11,7 +11,10 @@
   /* ===================== THEME (Cofel – verre + dégradés) ===================== */
   :root{
     --cofel:#5a2d82; --cofel-2:#7838a7;
-    --violet:#6b39a0; --violet-2:#8752c1; --violet-soft:#c9b7ff;
+    --violet:#6b39a0; --violet-2:#8752c1; 
+    --violet-soft:#c9b7ff;                 /* accent clair */
+    --violet-ui:#bda3ff;                   /* ≈ carte violette claire (récap) */
+    --violet-ui-pressed:#a88fff;           /* état appuyé/survol */
     --txt:#f5f7ff; --txt-dim:#e6e6ff; --accent:#c9b7ff;
     --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
   }
@@ -45,14 +48,13 @@
   }
 
   /* ===================== CUSTOM SELECT (violet unifié) ===================== */
-  /* Le select natif reste pour la logique, mais est masqué visuellement */
+  /* Le <select> natif reste pour la logique, masqué visuellement */
   .native-select{
     position:absolute !important;
     opacity:0 !important;
     pointer-events:none !important;
     width:0; height:0; margin:0; padding:0; border:0;
   }
-
   .cselect{ position:relative; margin-top:6px; }
   .cselect-toggle{
     width:100%;
@@ -62,10 +64,9 @@
     border-radius:12px; cursor:pointer; user-select:none;
     border:1px solid rgba(255,255,255,.22);
     box-shadow: var(--shadow);
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)),
-      linear-gradient(135deg, var(--violet-soft), var(--violet-2));
+    background: var(--violet-ui);
   }
+  .cselect-toggle:hover{ background: var(--violet-ui-pressed); }
   .cselect-toggle:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35); }
   .cselect-label{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1}
   .cselect-caret{
@@ -80,14 +81,16 @@
   }
   .cselect[aria-expanded="true"] .cselect-caret{ transform: rotate(180deg); }
 
+  /* Menu : en “portail” (dans <body>), donc styling générique */
   .cselect-menu{
-    position:absolute; left:0; right:0; top:calc(100% + 6px);
-    z-index:1000; display:none; max-height:280px; overflow:auto; padding:6px;
+    position:fixed;                 /* au-dessus de tout */
+    left:0; top:0; width:240px;     /* dimensions définies au runtime */
+    z-index:99999;                  /* > panneaux */
+    max-height:280px; overflow:auto; padding:6px;
     border-radius:14px; border:1px solid rgba(255,255,255,.22);
     box-shadow: 0 16px 40px rgba(0,0,0,.45);
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06)),
-      linear-gradient(135deg, var(--violet-soft), var(--violet-2));
+    background: var(--violet-ui);
+    display:none;
   }
   .cselect[aria-expanded="true"] .cselect-menu{ display:block; }
 
@@ -95,38 +98,35 @@
     border-radius:10px; margin:4px 0; padding:10px 12px; cursor:pointer;
     color:var(--txt);
     border:1px solid rgba(255,255,255,.18);
-    background: rgba(255,255,255,.08);
+    background: rgba(255,255,255,.10);
   }
   .cselect-option:hover, .cselect-option[aria-selected="true"]{
-    background: rgba(255,255,255,.18);
+    background: rgba(255,255,255,.22);
     border-color: rgba(255,255,255,.28);
   }
   .cselect-option:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35); }
 
-  /* ===================== CHECKBOX (violet clair lisible) ===================== */
+  /* ===================== CHECKBOX (SOLIDE, lisible) ===================== */
   .option-item{
     display:flex; align-items:center; gap:12px; cursor:pointer;
     border:1px solid rgba(255,255,255,.22);
     border-radius:12px; padding:12px; user-select:none;
     box-shadow: var(--shadow);
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)),
-      linear-gradient(135deg, var(--violet-soft), var(--violet-2));
+    background: var(--violet-ui);   /* couleur unie, comme la grande carte */
+    color: var(--txt);
   }
   .option-item input{
     appearance:none; -webkit-appearance:none;
     width:20px; height:20px; border-radius:6px;
-    border:1px solid rgba(255,255,255,.5);
-    background: rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.6);
+    background: rgba(255,255,255,.15);
     position:relative; display:inline-block;
     box-shadow: inset 0 1px 2px rgba(0,0,0,.2);
   }
   .option-item input:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35), inset 0 1px 2px rgba(0,0,0,.2); }
   .option-item input:checked{
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,.10)),
-      linear-gradient(135deg, var(--violet-2), #a993ff);
-    border-color: rgba(255,255,255,.8);
+    background: var(--violet-2);
+    border-color: rgba(255,255,255,.9);
   }
   .option-item input:checked::after{
     content:""; position:absolute; inset:3px 5px 5px 3px;
@@ -158,6 +158,8 @@
     border-radius:20px; padding:18px; box-shadow:var(--shadow);
     backdrop-filter: blur(var(--blur));
     margin-bottom:18px;
+    position:relative; z-index:1;     /* laisse passer le menu en z-index plus haut */
+    overflow:visible;                  /* pas de clipping du menu */
   }
   .panel h2{margin:0 0 12px; font-size: clamp(18px,2.4vw,22px); letter-spacing:.2px}
   .card{
@@ -171,7 +173,7 @@
   /* Résultat */
   .result{
     text-align:center; padding:16px;
-    background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
+    background: var(--violet-ui);
     border:1px solid rgba(255,255,255,.22); border-radius:16px;
     box-shadow:0 8px 22px rgba(0,0,0,.28);
     font-size:18px;
@@ -370,7 +372,7 @@
 
   function distinct(v){return [...new Set(v)]}
 
-  /* ===== Custom Select: construction + sync ===== */
+  /* ===== Custom Select : construction + sync ===== */
   const customSelects = new Map();
 
   function buildCustomFromNative(native){
@@ -379,9 +381,8 @@
     const toggle = wrap.querySelector('.cselect-toggle');
     const labelSpan = wrap.querySelector('.cselect-label');
     const menu = wrap.querySelector('.cselect-menu');
-    wrap.setAttribute('aria-expanded','false');
+    // (Re)construction du menu
     menu.innerHTML = '';
-
     Array.from(native.options).forEach(opt=>{
       const div=document.createElement('div');
       div.className='cselect-option'; div.setAttribute('role','option'); div.tabIndex=-1;
@@ -389,37 +390,35 @@
       if(opt.selected) div.setAttribute('aria-selected','true');
       div.addEventListener('click', ()=>{
         setNativeValue(native, opt.value);
-        closeMenu(wrap);
+        closeMenu(native.id);
       });
       div.addEventListener('keydown', (e)=>{
-        if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setNativeValue(native, opt.value); closeMenu(wrap); }
+        if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setNativeValue(native, opt.value); closeMenu(native.id); }
       });
       menu.appendChild(div);
     });
 
     // Label initial
-    const sel = native.selectedOptions[0] || native.options[0];
-    labelSpan.textContent = sel ? sel.textContent : '';
+    labelSpan.textContent = (native.selectedOptions[0] || native.options[0])?.textContent || '';
 
     // Toggle handlers
-    toggle.onclick = ()=>{
+    toggle.onclick = ()=> {
       const expanded = wrap.getAttribute('aria-expanded')==='true';
-      expanded ? closeMenu(wrap) : openMenu(wrap);
+      expanded ? closeMenu(native.id) : openMenu(native.id);
     };
     toggle.onkeydown = (e)=>{
       const expanded = wrap.getAttribute('aria-expanded')==='true';
       if((e.key==='ArrowDown' || e.key==='ArrowUp') && !expanded){
-        e.preventDefault(); openMenu(wrap);
+        e.preventDefault(); openMenu(native.id);
         focusFirst(menu, e.key==='ArrowDown');
       } else if(e.key==='Enter' || e.key===' '){
         e.preventDefault(); toggle.click();
       } else if(e.key==='Escape' && expanded){
-        closeMenu(wrap);
+        closeMenu(native.id);
       }
     };
 
-    document.addEventListener('click', (e)=>{ if(!wrap.contains(e.target)) closeMenu(wrap); });
-
+    // Sauvegarde API
     customSelects.set(native.id, { wrap, toggle, labelSpan, menu, native });
   }
 
@@ -438,22 +437,60 @@
       });
     }
   }
-  function openMenu(wrap){
+
+  /* === Portail du menu dans <body> pour passer au-dessus de tout === */
+  function openMenu(id){
+    const api = customSelects.get(id); if(!api) return;
+    const {wrap, toggle, menu} = api;
     wrap.setAttribute('aria-expanded','true');
-    const sel = wrap.querySelector('.cselect-option[aria-selected="true"]') || wrap.querySelector('.cselect-option');
-    sel && sel.focus();
+
+    // Positionnement absolu dans la fenêtre
+    const r = toggle.getBoundingClientRect();
+    menu.style.left = Math.round(r.left) + 'px';
+    menu.style.top  = Math.round(r.bottom + 6) + 'px';
+    menu.style.width= Math.round(r.width) + 'px';
+
+    // Déplacer le menu dans body (portail)
+    if(menu.parentElement !== document.body){
+      document.body.appendChild(menu);
+    }
+    menu.style.display = 'block';
+
+    // Focus
+    (menu.querySelector('.cselect-option[aria-selected="true"]') || menu.querySelector('.cselect-option'))?.focus();
+
+    // Fermer au clic extérieur / scroll / resize
+    window.addEventListener('scroll', onViewportChange, {passive:true});
+    window.addEventListener('resize', onViewportChange);
+    document.addEventListener('click', onDocClick);
+    function onViewportChange(){ closeMenu(id); }
+    function onDocClick(e){ if(!wrap.contains(e.target) && !menu.contains(e.target)) closeMenu(id); }
+    // stocker handlers pour clean
+    api.__off = ()=>{ 
+      window.removeEventListener('scroll', onViewportChange);
+      window.removeEventListener('resize', onViewportChange);
+      document.removeEventListener('click', onDocClick);
+    };
   }
-  function closeMenu(wrap){
+
+  function closeMenu(id){
+    const api = customSelects.get(id); if(!api) return;
+    const {wrap, menu, __off} = api;
     wrap.setAttribute('aria-expanded','false');
-    wrap.querySelector('.cselect-toggle')?.focus();
+    menu.style.display = 'none';
+    // remettre le menu dans son wrap (propre)
+    if(menu.parentElement !== wrap){ wrap.appendChild(menu); }
+    if(typeof __off === 'function') __off();
+    api.toggle.focus();
   }
+
   function focusFirst(menu, fromTop=true){
     const opts = Array.from(menu.querySelectorAll('.cselect-option'));
     if(!opts.length) return;
     (fromTop ? opts[0] : opts[opts.length-1]).focus();
   }
+
   function rebuildCustom(native){
-    // re-construit le menu après mise à jour des options
     buildCustomFromNative(native);
   }
 
