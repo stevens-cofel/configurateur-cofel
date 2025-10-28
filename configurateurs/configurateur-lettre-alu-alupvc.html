@@ -63,7 +63,7 @@
 
   /* ===================== FORM CONTROLS ===================== */
   label{font-weight:700;font-size:13px;color:var(--accent);}
-  input[type="number"], select{
+  input[type="number"]{
     width:100%; padding:10px 12px; margin-top:6px;
     border-radius:12px; outline:none; color:var(--txt);
     border:1px solid rgba(255,255,255,.22);
@@ -73,19 +73,64 @@
     box-shadow:var(--shadow);
     transition:border-color .18s, box-shadow .18s;
   }
-  input:focus, select:focus{
+  input:focus{
     border-color:rgba(255,255,255,.34);
     box-shadow:0 0 0 3px rgba(201,183,255,.25), var(--shadow);
   }
 
-  fieldset{
-    border:1px solid rgba(255,255,255,.25);
-    border-radius:16px;
-    background:var(--violet-ui);
-    box-shadow:var(--shadow);
-    padding:10px; margin-top:10px;
+  /* ====== SELECT CUSTOM (même que le configurateur précédent) ====== */
+  .native-select{
+    position:absolute !important;
+    opacity:0 !important;
+    pointer-events:none !important;
+    width:0;height:0;margin:0;padding:0;border:0;
   }
-  fieldset legend{padding:0 6px;color:var(--txt);font-weight:700;}
+  .cselect{ position:relative; margin-top:6px; }
+  .cselect-toggle{
+    width:100%;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:10px 12px; color:var(--txt);
+    border-radius:12px; cursor:pointer; user-select:none;
+    border:1px solid rgba(255,255,255,.22);
+    box-shadow: var(--shadow);
+    background: var(--violet-ui);
+  }
+  .cselect-toggle:hover{ background: var(--violet-ui-pressed); }
+  .cselect-toggle:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35); }
+  .cselect-label{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1}
+  .cselect-caret{
+    width:10px; height:10px; flex:0 0 auto; opacity:.9;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--txt) 50%),
+      linear-gradient(135deg, var(--txt) 50%, transparent 50%);
+    background-size:6px 6px, 6px 6px;
+    background-position:right top, right bottom;
+    background-repeat:no-repeat;
+    transform: translateY(1px);
+  }
+  .cselect[aria-expanded="true"] .cselect-caret{ transform: rotate(180deg); }
+
+  /* Menu porté dans <body> */
+  .cselect-menu{
+    position:fixed; left:0; top:0; width:240px;
+    z-index:99999;
+    max-height:280px; overflow:auto; padding:6px;
+    border-radius:14px; border:1px solid rgba(255,255,255,.22);
+    box-shadow: 0 16px 40px rgba(0,0,0,.45);
+    background: var(--violet-ui);
+    display:none;
+  }
+  .cselect[aria-expanded="true"] .cselect-menu{ display:block; }
+  .cselect-option{
+    border-radius:10px; margin:4px 0; padding:10px 12px; cursor:pointer;
+    color:var(--txt);
+    border:1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.10);
+  }
+  .cselect-option:hover, .cselect-option[aria-selected="true"]{
+    background: rgba(255,255,255,.22);
+    border-color: rgba(255,255,255,.28);
+  }
 
   /* ===================== CHECKBOX / RADIO ===================== */
   .option-item{
@@ -154,11 +199,23 @@
     <div class="card grid">
       <div>
         <label for="categorie">Catégorie</label>
-        <select id="categorie">
-          <option value="alu20">Lettre aluminium 20/10</option>
+
+        <!-- Select natif masqué (logique & accessibilité) -->
+        <select id="categorie" class="native-select">
+          <option value="alu20" selected>Lettre aluminium 20/10</option>
           <option value="dibond3">Lettre alu/PVC 3 mm (type Dibond)</option>
         </select>
+
+        <!-- Select custom -->
+        <div class="cselect" data-bind="categorie" aria-haspopup="listbox" aria-expanded="false">
+          <button type="button" class="cselect-toggle">
+            <span class="cselect-label">Lettre aluminium 20/10</span>
+            <span class="cselect-caret" aria-hidden="true"></span>
+          </button>
+          <div class="cselect-menu" role="listbox"></div>
+        </div>
       </div>
+
       <div>
         <label for="quantite">Quantité</label>
         <input type="number" id="quantite" min="1" value="1" />
@@ -219,7 +276,7 @@
 <script>
 /* ===== PARAMS ===== */
 const TVA = 0.20;
-const UPLIFT_PUBLIC = 2.0; // interne → affichage (non montré à l’utilisateur)
+const UPLIFT_PUBLIC = 2.0;
 const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20alu%2020_10%20%C3%A8me%20ou%20Type%20Dibond%203%20mm.csv";
 
 /* ===== STATE / DOM ===== */
@@ -250,6 +307,107 @@ function numFR(v){
   return m ? parseFloat(m[0]) : NaN;
 }
 function euro(n){ return (isFinite(n)?n:0).toFixed(2).replace('.', ','); }
+
+/* ===== SELECT CUSTOM (construction & portail) ===== */
+const customSelects = new Map();
+
+function buildCustomFromNative(native){
+  const wrap = document.querySelector('.cselect[data-bind="'+native.id+'"]');
+  if(!wrap) return;
+  const toggle = wrap.querySelector('.cselect-toggle');
+  const labelSpan = wrap.querySelector('.cselect-label');
+  const menu = wrap.querySelector('.cselect-menu');
+
+  // (Re)construire le menu
+  menu.innerHTML = '';
+  Array.from(native.options).forEach(opt=>{
+    const div=document.createElement('div');
+    div.className='cselect-option'; div.setAttribute('role','option'); div.tabIndex=-1;
+    div.dataset.value=opt.value; div.textContent=opt.textContent;
+    if(opt.selected) div.setAttribute('aria-selected','true');
+    div.addEventListener('click', ()=>{
+      setNativeValue(native, opt.value);
+      closeMenu(native.id);
+    });
+    div.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setNativeValue(native, opt.value); closeMenu(native.id); }
+    });
+    menu.appendChild(div);
+  });
+
+  // Label initial
+  labelSpan.textContent = (native.selectedOptions[0] || native.options[0])?.textContent || '';
+
+  // Handlers
+  toggle.onclick = ()=> {
+    const expanded = wrap.getAttribute('aria-expanded')==='true';
+    expanded ? closeMenu(native.id) : openMenu(native.id);
+  };
+  toggle.onkeydown = (e)=>{
+    const expanded = wrap.getAttribute('aria-expanded')==='true';
+    if((e.key==='ArrowDown' || e.key==='ArrowUp') && !expanded){
+      e.preventDefault(); openMenu(native.id);
+      const first = menu.querySelector('.cselect-option'); first && first.focus();
+    } else if(e.key==='Enter' || e.key===' '){
+      e.preventDefault(); toggle.click();
+    } else if(e.key==='Escape' && expanded){
+      closeMenu(native.id);
+    }
+  };
+
+  customSelects.set(native.id, { wrap, toggle, labelSpan, menu, native });
+}
+
+function setNativeValue(native, val){
+  if(native.value !== val){
+    native.value = val;
+    native.dispatchEvent(new Event('change', { bubbles:true }));
+  }
+  const api = customSelects.get(native.id);
+  if(api){
+    api.labelSpan.textContent = native.selectedOptions[0]?.textContent || '';
+    Array.from(api.menu.children).forEach(n=>{
+      if(n.classList.contains('cselect-option')){
+        n.setAttribute('aria-selected', n.dataset.value===val ? 'true' : 'false');
+      }
+    });
+  }
+}
+
+function openMenu(id){
+  const api = customSelects.get(id); if(!api) return;
+  const {wrap, toggle, menu} = api;
+  wrap.setAttribute('aria-expanded','true');
+
+  // Positionner le menu (portail dans body)
+  const r = toggle.getBoundingClientRect();
+  menu.style.left  = Math.round(r.left) + 'px';
+  menu.style.top   = Math.round(r.bottom + 6) + 'px';
+  menu.style.width = Math.round(r.width) + 'px';
+  if(menu.parentElement !== document.body){ document.body.appendChild(menu); }
+  menu.style.display = 'block';
+
+  // Fermer sur scroll / resize / clic extérieur
+  const onViewport = ()=> closeMenu(id);
+  const onDocClick = (e)=>{ if(!wrap.contains(e.target) && !menu.contains(e.target)) closeMenu(id); };
+  window.addEventListener('scroll', onViewport, {passive:true});
+  window.addEventListener('resize', onViewport);
+  document.addEventListener('click', onDocClick);
+  api.__off = ()=>{
+    window.removeEventListener('scroll', onViewport);
+    window.removeEventListener('resize', onViewport);
+    document.removeEventListener('click', onDocClick);
+  };
+}
+function closeMenu(id){
+  const api = customSelects.get(id); if(!api) return;
+  const {wrap, menu, __off} = api;
+  wrap.setAttribute('aria-expanded','false');
+  menu.style.display = 'none';
+  if(menu.parentElement !== wrap){ wrap.appendChild(menu); }
+  if(typeof __off === 'function') __off();
+  api.toggle.focus();
+}
 
 /* ===== CSV ===== */
 function parseCSVAuto(text){
@@ -370,6 +528,11 @@ $("btnReset").addEventListener("click", ()=>{
   compute();
 });
 loadCSV();
+
+/* Build custom select for catégorie */
+buildCustomFromNative($("categorie"));
+$("categorie").addEventListener("change", ()=>{ /* rien de spécial ici mais on garde la synchro */ });
+
 </script>
 
 <!-- ===================== MOTEUR DE DEVIS ===================== -->
