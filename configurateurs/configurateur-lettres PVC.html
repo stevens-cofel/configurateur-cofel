@@ -120,7 +120,7 @@
 <script>
 /* ===== CONFIG ===== */
 const TVA = 0.20;
-const UPLIFT_PUBLIC = 1.5; // +50% (affichage public)
+const UPLIFT_PUBLIC = 2.0; // x2 (affichage public), aucune mention côté client
 const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20PVC.csv";
 
 let DATA = []; // {Hauteur_mm, Epaisseur_mm, PrixBase_EUR, SupLaquage_EUR, SupFixation_EUR, SupRetro_EUR}
@@ -246,7 +246,7 @@ function compute(){
   if(elFX.checked) prix += row.SupFixation_EUR;
   if(elRT.checked) prix += row.SupRetro_EUR;
 
-  // Conversion → prix public (+50 %)
+  // Conversion → prix public (x2)
   const prix_public = prix * UPLIFT_PUBLIC;
 
   const totalHT = prix_public * q;
@@ -313,10 +313,7 @@ function bind(){
         pu_public_ht: Number(pu_public_ht.toFixed(2))
       });
 
-      alert(`✅ Ligne ajoutée au devis !
-${designation}
-Qté : ${q}
-PU HT : ${pu_public_ht.toFixed(2)} €`);
+      alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${q}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
     }catch(err){
       console.error(err);
       alert('Erreur lors de l’ajout au devis : ' + err.message);
