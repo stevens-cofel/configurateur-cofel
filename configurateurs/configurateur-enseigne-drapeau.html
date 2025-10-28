@@ -13,8 +13,8 @@
     --cofel:#5a2d82; --cofel-2:#7838a7;
     --violet:#6b39a0; --violet-2:#8752c1; 
     --violet-soft:#c9b7ff;                 /* accent clair */
-    --violet-ui:#bda3ff;                   /* ≈ carte violette claire (récap) */
-    --violet-ui-pressed:#a88fff;           /* état appuyé/survol */
+    --violet-ui:#bda3ff;                   /* carte violette claire */
+    --violet-ui-pressed:#a88fff;           /* état hover/pressed */
     --txt:#f5f7ff; --txt-dim:#e6e6ff; --accent:#c9b7ff;
     --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
   }
@@ -48,7 +48,6 @@
   }
 
   /* ===================== CUSTOM SELECT (violet unifié) ===================== */
-  /* Le <select> natif reste pour la logique, masqué visuellement */
   .native-select{
     position:absolute !important;
     opacity:0 !important;
@@ -81,11 +80,11 @@
   }
   .cselect[aria-expanded="true"] .cselect-caret{ transform: rotate(180deg); }
 
-  /* Menu : en “portail” (dans <body>), donc styling générique */
+  /* Menu porté dans <body> (au-dessus de tout) */
   .cselect-menu{
-    position:fixed;                 /* au-dessus de tout */
-    left:0; top:0; width:240px;     /* dimensions définies au runtime */
-    z-index:99999;                  /* > panneaux */
+    position:fixed;
+    left:0; top:0; width:240px;
+    z-index:99999;
     max-height:280px; overflow:auto; padding:6px;
     border-radius:14px; border:1px solid rgba(255,255,255,.22);
     box-shadow: 0 16px 40px rgba(0,0,0,.45);
@@ -106,13 +105,13 @@
   }
   .cselect-option:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35); }
 
-  /* ===================== CHECKBOX (SOLIDE, lisible) ===================== */
+  /* ===================== CHECKBOX (solide lisible) ===================== */
   .option-item{
     display:flex; align-items:center; gap:12px; cursor:pointer;
     border:1px solid rgba(255,255,255,.22);
     border-radius:12px; padding:12px; user-select:none;
     box-shadow: var(--shadow);
-    background: var(--violet-ui);   /* couleur unie, comme la grande carte */
+    background: var(--violet-ui);
     color: var(--txt);
   }
   .option-item input{
@@ -158,8 +157,8 @@
     border-radius:20px; padding:18px; box-shadow:var(--shadow);
     backdrop-filter: blur(var(--blur));
     margin-bottom:18px;
-    position:relative; z-index:1;     /* laisse passer le menu en z-index plus haut */
-    overflow:visible;                  /* pas de clipping du menu */
+    position:relative; z-index:1;
+    overflow:visible;
   }
   .panel h2{margin:0 0 12px; font-size: clamp(18px,2.4vw,22px); letter-spacing:.2px}
   .card{
@@ -274,7 +273,7 @@
           <span>Ajourage + PMMA 3 mm + lumineux + laquage</span>
         </label>
       </div>
-      <div id="msg" class="muted" style="margin-top:10px"></div>
+      <!-- (plus de message CSV ici) -->
     </section>
 
     <!-- Récap prix -->
@@ -311,7 +310,7 @@
   const elForme=$("forme"), elQ=$("quantite"), elDim=$("dimension");
   const elLaq=$("optLaquage"), elAJL=$("optAjourLumi");
   const elHT=$("prixHT"), elTTC=$("prixTTC");
-  const elMsg=$("msg"), elHelpDim=$("helpDim"), elNote=$("noteForme");
+  const elHelpDim=$("helpDim"), elNote=$("noteForme");
 
   /* ===== Utils ===== */
   function normKey(k){
@@ -381,7 +380,6 @@
     const toggle = wrap.querySelector('.cselect-toggle');
     const labelSpan = wrap.querySelector('.cselect-label');
     const menu = wrap.querySelector('.cselect-menu');
-    // (Re)construction du menu
     menu.innerHTML = '';
     Array.from(native.options).forEach(opt=>{
       const div=document.createElement('div');
@@ -397,28 +395,14 @@
       });
       menu.appendChild(div);
     });
-
-    // Label initial
     labelSpan.textContent = (native.selectedOptions[0] || native.options[0])?.textContent || '';
-
-    // Toggle handlers
-    toggle.onclick = ()=> {
-      const expanded = wrap.getAttribute('aria-expanded')==='true';
-      expanded ? closeMenu(native.id) : openMenu(native.id);
-    };
+    toggle.onclick = ()=> { const expanded = wrap.getAttribute('aria-expanded')==='true'; expanded ? closeMenu(native.id) : openMenu(native.id); };
     toggle.onkeydown = (e)=>{
       const expanded = wrap.getAttribute('aria-expanded')==='true';
-      if((e.key==='ArrowDown' || e.key==='ArrowUp') && !expanded){
-        e.preventDefault(); openMenu(native.id);
-        focusFirst(menu, e.key==='ArrowDown');
-      } else if(e.key==='Enter' || e.key===' '){
-        e.preventDefault(); toggle.click();
-      } else if(e.key==='Escape' && expanded){
-        closeMenu(native.id);
-      }
+      if((e.key==='ArrowDown' || e.key==='ArrowUp') && !expanded){ e.preventDefault(); openMenu(native.id); focusFirst(menu, e.key==='ArrowDown'); }
+      else if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle.click(); }
+      else if(e.key==='Escape' && expanded){ closeMenu(native.id); }
     };
-
-    // Sauvegarde API
     customSelects.set(native.id, { wrap, toggle, labelSpan, menu, native });
   }
 
@@ -438,37 +422,27 @@
     }
   }
 
-  /* === Portail du menu dans <body> pour passer au-dessus de tout === */
   function openMenu(id){
     const api = customSelects.get(id); if(!api) return;
     const {wrap, toggle, menu} = api;
     wrap.setAttribute('aria-expanded','true');
-
-    // Positionnement absolu dans la fenêtre
     const r = toggle.getBoundingClientRect();
     menu.style.left = Math.round(r.left) + 'px';
     menu.style.top  = Math.round(r.bottom + 6) + 'px';
     menu.style.width= Math.round(r.width) + 'px';
-
-    // Déplacer le menu dans body (portail)
-    if(menu.parentElement !== document.body){
-      document.body.appendChild(menu);
-    }
+    if(menu.parentElement !== document.body){ document.body.appendChild(menu); }
     menu.style.display = 'block';
-
-    // Focus
     (menu.querySelector('.cselect-option[aria-selected="true"]') || menu.querySelector('.cselect-option'))?.focus();
 
-    // Fermer au clic extérieur / scroll / resize
-    window.addEventListener('scroll', onViewportChange, {passive:true});
-    window.addEventListener('resize', onViewportChange);
+    // handlers pour fermeture
+    const onViewport = ()=> closeMenu(id);
+    const onDocClick = (e)=>{ if(!wrap.contains(e.target) && !menu.contains(e.target)) closeMenu(id); };
+    window.addEventListener('scroll', onViewport, {passive:true});
+    window.addEventListener('resize', onViewport);
     document.addEventListener('click', onDocClick);
-    function onViewportChange(){ closeMenu(id); }
-    function onDocClick(e){ if(!wrap.contains(e.target) && !menu.contains(e.target)) closeMenu(id); }
-    // stocker handlers pour clean
-    api.__off = ()=>{ 
-      window.removeEventListener('scroll', onViewportChange);
-      window.removeEventListener('resize', onViewportChange);
+    api.__off = ()=>{
+      window.removeEventListener('scroll', onViewport);
+      window.removeEventListener('resize', onViewport);
       document.removeEventListener('click', onDocClick);
     };
   }
@@ -478,7 +452,6 @@
     const {wrap, menu, __off} = api;
     wrap.setAttribute('aria-expanded','false');
     menu.style.display = 'none';
-    // remettre le menu dans son wrap (propre)
     if(menu.parentElement !== wrap){ wrap.appendChild(menu); }
     if(typeof __off === 'function') __off();
     api.toggle.focus();
@@ -490,9 +463,7 @@
     (fromTop ? opts[0] : opts[opts.length-1]).focus();
   }
 
-  function rebuildCustom(native){
-    buildCustomFromNative(native);
-  }
+  function rebuildCustom(native){ buildCustomFromNative(native); }
 
   /* ===== UI data ===== */
   function populateFormes(){
@@ -500,7 +471,7 @@
                   .sort((a,b)=>a.localeCompare(b));
     elForme.innerHTML='<option value="">(choisir)</option>';
     formes.forEach(v=> elForme.innerHTML+=`<option value="${v}">${v}</option>`);
-    elNote.textContent = formes.length ? "" : "Aucune forme disponible dans le CSV.";
+    document.getElementById('noteForme').textContent = formes.length ? "" : "Aucune forme disponible dans le CSV.";
     rebuildCustom(elForme);
   }
 
@@ -543,7 +514,6 @@
 
   /* Compute */
   function compute(){
-    // contraintes d’UI
     if(elForme.value==='rond'){ elLaq.checked=true; elLaq.disabled=true; }
     else if(elForme.value==='carré'){ elLaq.disabled=elAJL.checked; }
     else { elLaq.disabled=false; }
@@ -552,18 +522,13 @@
     const Q=Math.max(1,Number(elQ.value||1));
     if(!row){ elHT.textContent='0,00'; elTTC.textContent='0,00'; return; }
 
-    // Prix interne depuis CSV (HT unitaire)
     let unit_interne = numFR(row[MAP.PRIX]);
     if(!isFinite(unit_interne)) unit_interne = 0;
 
-    // Conversion interne (non affichée)
     const unit_public = unit_interne * UPLIFT_PUBLIC;
-
-    // Totaux
     const totalHT = unit_public * Q;
     const totalTTC = totalHT * (1+TVA);
 
-    // Affichage
     elHT.textContent  = euro(totalHT);
     elTTC.textContent = euro(totalTTC);
   }
@@ -576,8 +541,11 @@
       const {rawHeads,rows}=parseCSVAuto(txt);
       HEADS=rawHeads; ROWS=rows; MAP=buildMapping(HEADS);
       populateFormes(); populateDimensions(); compute();
-      elMsg.textContent=`CSV OK (${rows.length} lignes)`;
-    }catch(e){ elMsg.textContent="Erreur CSV : "+e.message; }
+      /* pas d’affichage "CSV OK" */
+    }catch(e){
+      console.error(e);
+      alert("Erreur lors du chargement des données. Réessayez plus tard.");
+    }
   }
 
   /* Events */
@@ -610,12 +578,8 @@
   <script>
   document.getElementById("btnAddDevis").addEventListener("click", () => {
     const quantite = Math.max(1, Number(document.getElementById("quantite").value || 1));
-
-    // "prixHT" affiche le TOTAL HT calculé
-    const prixTotalText = document.getElementById("prixHT").innerText.trim(); // ex "725,00"
+    const prixTotalText = document.getElementById("prixHT").innerText.trim();
     const total_ht = parseFloat(prixTotalText.replace(",", ".")) || 0;
-
-    // PU HT utilisé par le devis-core
     const pu_public_ht = total_ht / quantite;
 
     const designationParts = [];
@@ -644,4 +608,3 @@ PU HT : ${pu_public_ht.toFixed(2)} €`);
 
 </body>
 </html>
-
