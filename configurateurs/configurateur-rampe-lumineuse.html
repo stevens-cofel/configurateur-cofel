@@ -105,6 +105,8 @@ const TVA = 0.20;
 const PRICE_RAMPE_ML = 100.00; // €/m linéaire (laquage inclus)
 const PRICE_FIX_DIRECTE = 5.00; // €/u (laquage inclus)
 const PRICE_FIX_PLATINE = 15.00; // €/u (laquage inclus)
+// Affichage public : x2 (aucune mention côté client)
+const UPLIFT_PUBLIC = 2.0;
 
 /*** DOM ***/
 const $ = id => document.getElementById(id);
@@ -136,23 +138,27 @@ function compute(){
   const nbFix = Math.max(2, Math.ceil(Lm) + 1);
 
   // Prix rampe (ml)
-  const rampeHT = PRICE_RAMPE_ML * Lm;
+  const rampeHT_interne = PRICE_RAMPE_ML * Lm;
 
   // Prix fixations
-  const fixHT = fixPrice * nbFix;
+  const fixHT_interne = fixPrice * nbFix;
 
-  // Unitaire / Totaux
-  const unitHT = rampeHT + fixHT;
-  const totalHT = unitHT * Q;
-  const totalTTC = totalHT * (1 + TVA);
+  // Unitaire (interne)
+  const unitHT_interne = rampeHT_interne + fixHT_interne;
+
+  // Conversion → affichage public (x2)
+  const unitHT_public = unitHT_interne * UPLIFT_PUBLIC;
+
+  const totalHT_public = unitHT_public * Q;
+  const totalTTC_public = totalHT_public * (1 + TVA);
 
   // UI
   elLenM.textContent = round3(Lm).toFixed(3).replace('.', ',');
   elNbFix.textContent = nbFix;
   elTypeFix.textContent = (fixVal === 'platine') ? 'platine' : 'directe';
-  elPrixUHT.textContent = euro(unitHT);
-  elPrixHT.textContent = euro(totalHT);
-  elPrixTTC.textContent = euro(totalTTC);
+  elPrixUHT.textContent = euro(unitHT_public);
+  elPrixHT.textContent = euro(totalHT_public);
+  elPrixTTC.textContent = euro(totalTTC_public);
 }
 
 /*** TOGGLES ***/
@@ -182,8 +188,8 @@ compute();
   const btn = document.getElementById('btnAddDevis');
   if(!btn) return;
 
-  // Récupère le total HT affiché
-  function parseTotalHT(){
+  // Récupère le total HT affiché (déjà en public x2)
+  function parseTotalHTPublic(){
     const txt = document.getElementById('prixHT').innerText.trim(); // "1 234,56"
     return Number(txt.replace(/\s/g,'').replace(',', '.')) || 0;
   }
@@ -199,10 +205,10 @@ compute();
       const fixVal = (document.querySelector('input[name="fixation"]:checked')||{}).value || 'directe';
       const deport = Number(document.getElementById('deport')?.value || 0);
 
-      const total_ht = parseTotalHT();
-      if (total_ht <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
+      const total_ht_public = parseTotalHTPublic();
+      if (total_ht_public <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
 
-      const pu_interne_ht = qte>0 ? total_ht / qte : 0;
+      const pu_public_ht = qte>0 ? total_ht_public / qte : 0;
 
       const parts = [
         `Rampe lumineuse (PLL)`,
@@ -216,13 +222,10 @@ compute();
         type: 'Rampe lumineuse (PLL)',
         designation,
         quantite: qte,
-        pu_interne_ht: Number(pu_interne_ht.toFixed(2))
+        pu_public_ht: Number(pu_public_ht.toFixed(2))
       });
 
-      alert(`✅ Ligne ajoutée au devis !
-${designation}
-Qté : ${qte}
-PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+      alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${qte}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
     }catch(err){
       console.error(err);
       alert('Erreur lors de l’ajout au devis : ' + err.message);
