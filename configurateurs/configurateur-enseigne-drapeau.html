@@ -83,7 +83,7 @@
     </div>
   </div>
 
-  <!-- Résultat -->
+  <!-- Résultat (affiche le PRIX PUBLIC) -->
   <div class="result">
     <p>Prix HT : <span id="prixHT">0,00</span> €</p>
     <p>Prix TTC : <span id="prixTTC">0,00</span> €</p>
@@ -102,6 +102,8 @@
 <script>
 /* ===== PARAMS ===== */
 const TVA = 0.20;
+// IMPORTANT : tous les prix affichés/enregistrés sont en PUBLIC
+const UPLIFT_PUBLIC = 1.5;
 const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/Enseigne%20drapeaux.csv";
 
 /* ===== STATE / DOM ===== */
@@ -217,19 +219,30 @@ function findRow(){
   return pool[0];
 }
 
-/* Compute */
+/* Compute : calcule en PRIX PUBLIC (×1,5) */
 function compute(){
+  // contraintes d’UI
   if(elForme.value==='rond'){ elLaq.checked=true; elLaq.disabled=true; }
   if(elForme.value==='carré'){ elLaq.disabled=elAJL.checked; }
 
   const row=findRow();
   const Q=Math.max(1,Number(elQ.value||1));
   if(!row){ elHT.textContent='0,00'; elTTC.textContent='0,00'; return; }
-  let unit=numFR(row[MAP.PRIX]); if(!isFinite(unit)) unit=0;
-  const totalHT = unit*Q;
-  const totalTTC = totalHT*(1+TVA);
-  elHT.textContent=euro(totalHT);
-  elTTC.textContent=euro(totalTTC);
+
+  // Prix "interne" lu depuis le CSV (supposé HT unitaire)
+  let unit_interne = numFR(row[MAP.PRIX]);
+  if(!isFinite(unit_interne)) unit_interne = 0;
+
+  // Conversion en PRIX PUBLIC
+  const unit_public = unit_interne * UPLIFT_PUBLIC;
+
+  // Totaux en PUBLIC
+  const totalHT_public = unit_public * Q;
+  const totalTTC_public = totalHT_public * (1+TVA);
+
+  // Affichage
+  elHT.textContent  = euro(totalHT_public);
+  elTTC.textContent = euro(totalTTC_public);
 }
 
 /* Load CSV */
@@ -269,34 +282,32 @@ loadCSV();
 
 <script>
 // === AJOUT AU DEVIS ===
+// On lit le prix affiché (déjà PUBLIC), on en déduit le PU PUBLIC et on envoie pu_public_ht.
 document.getElementById("btnAddDevis").addEventListener("click", () => {
-
-  // Quantité
   const quantite = Math.max(1, Number(document.getElementById("quantite").value || 1));
 
-  // Prix total HT affiché (ex. "725,00") → convertir → diviser pour avoir le prix unitaire interne
-  const prixTotalText = document.getElementById("prixHT").innerText.trim();
-  const total_ht_affiche = parseFloat(prixTotalText.replace(",", ".")) || 0;
-  const pu_interne_ht = total_ht_affiche / quantite;
+  // "prixHT" affiche le TOTAL HT PUBLIC
+  const prixTotalText = document.getElementById("prixHT").innerText.trim(); // ex "725,00"
+  const total_ht_public = parseFloat(prixTotalText.replace(",", ".")) || 0;
 
-  // Construction du libellé du produit
+  // PU PUBLIC à stocker
+  const pu_public_ht = total_ht_public / quantite;
+
   const designation = "Enseigne Drapeau";
 
-  // Enregistrement dans le devis (localStorage)
   Devis.addLine({
     type: "Enseigne Drapeau",
     designation,
     quantite,
-    pu_interne_ht
+    pu_public_ht
   });
 
   alert(`✅ Ajouté au devis !
 ${designation}
 Qté : ${quantite}
-PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+PU HT : ${pu_public_ht.toFixed(2)} €`);
 });
 </script>
 
 </body>
 </html>
-
