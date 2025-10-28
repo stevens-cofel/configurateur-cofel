@@ -176,12 +176,14 @@
   © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
 </footer>
 
-<!-- ===== JS ORIGINAL (inchangé) ===== -->
+<!-- ===== JS (adapté pour affichage PUBLIC x2) ===== -->
 <script>
 /* ------- CONFIG ------- */
 const URL_TARIFS  = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/Tarifs_Totems_.csv";
 const URL_OPTIONS = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/option%20platine%20et%20panier%20de%20crosses%20(1).csv";
 const TVA = 0.20;
+// IMPORTANT : tous les montants affichés passent en PUBLIC via x2
+const UPLIFT_PUBLIC = 2.0;
 
 /* ------- STATE ------- */
 let RAW_TARIFFS = [];
@@ -349,7 +351,7 @@ function priceBase(){
     Math.abs(num(r.h)-h)<0.001 &&
     Math.abs(num(r.l)-l)<0.001
   );
-  return row ? row.priceBase : 0;
+  return row ? row.priceBase : 0; // prix interne unitaire
 }
 function priceOptionsSum(){
   const checked = [...elOptsBox.querySelectorAll('input[name="opt"]:checked')].map(c=>c.value);
@@ -360,16 +362,20 @@ function priceOptionsSum(){
     if(!rows.length) return sum;
     const unit = Math.max(...rows.map(o=>o.priceUnit).filter(v=>!isNaN(v)));
     return sum + (isFinite(unit)?unit:0);
-  }, 0);
+  }, 0); // somme interne
 }
 function compute(){
-  const base = priceBase();
-  const opt  = priceOptionsSum();
+  const base_interne = priceBase();
+  const opt_interne  = priceOptionsSum();
   const qte  = Math.max(1, parseInt(elQte.value||'1',10));
-  const totalHT  = (base + opt) * qte;
-  const totalTTC = totalHT * (1+TVA);
-  elHT.textContent  = totalHT.toFixed(2).replace('.', ',');
-  elTTC.textContent = totalTTC.toFixed(2).replace('.', ',');
+
+  // Conversion → affichage PUBLIC (x2)
+  const unit_public  = (base_interne + opt_interne) * UPLIFT_PUBLIC;
+  const totalHT_pub  = unit_public * qte;
+  const totalTTC_pub = totalHT_pub * (1+TVA);
+
+  elHT.textContent  = totalHT_pub.toFixed(2).replace('.', ',');
+  elTTC.textContent = totalTTC_pub.toFixed(2).replace('.', ',');
 }
 
 /* ------- CHARGEMENT ------- */
@@ -447,7 +453,7 @@ async function loadAll(){
 loadAll();
 </script>
 
-<!-- ===== Intégration devis ===== -->
+<!-- ===== Intégration devis (PU PUBLIC) ===== -->
 <script src="../js/devis-core.js"></script>
 <button id="btnAddDevis">➕ Ajouter au devis</button>
 
@@ -456,10 +462,9 @@ loadAll();
   const btn = document.getElementById('btnAddDevis');
   if(!btn) return;
 
-  function parseHT(){
+  function parseHTPublic(){
     const t = (document.getElementById('prixHT').innerText || '0').trim();
-    // format "1 234,56"
-    return Number(t.replace(/\s/g,'').replace(',', '.')) || 0;
+    return Number(t.replace(/\s/g,'').replace(',', '.')) || 0; // total HT PUBLIC affiché
   }
   function selectedOptionsList(){
     const cbs = [...document.querySelectorAll('#optionsBox input[name="opt"]:checked')];
@@ -480,13 +485,13 @@ loadAll();
         return;
       }
 
-      const total_ht = parseHT();
-      if(total_ht <= 0){
+      const total_ht_public = parseHTPublic();
+      if(total_ht_public <= 0){
         alert('Le total est à 0, vérifie la configuration.');
         return;
       }
 
-      const pu_interne_ht = Number((total_ht / qte).toFixed(2));
+      const pu_public_ht = Number((total_ht_public / qte).toFixed(2));
       const opts = selectedOptionsList();
       const designation = [
         'Totem',
@@ -499,13 +504,10 @@ loadAll();
         type: 'Totem',
         designation,
         quantite: qte,
-        pu_interne_ht
+        pu_public_ht
       });
 
-      alert(`✅ Ligne ajoutée au devis !
-${designation}
-Qté : ${qte}
-PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+      alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${qte}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
     }catch(err){
       console.error(err);
       alert('Erreur lors de l’ajout au devis : ' + err.message);
