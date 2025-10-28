@@ -338,7 +338,18 @@ function closeMenu(id){
 }
 
 /* ======================= CSV & MAPPING ======================= */
-function parseCSVLine(line,sep=','){const out=[];let cur='',inQ=false;for(let i=0;i<line.length;i++){const ch=line[i],nx=line[i+1];if(ch==='"'){if(inQ&&nx==='"'){cur+='"';i++;}else inQ=!inQ;}else if(ch===sep&&!inQ){out.push(cur);cur='';}else cur+=ch;}out.push(cur);return out;}
+function parseCSVLine(line,sep=','){
+  const out=[]; let cur='', inQ=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i], nx=line[i+1];
+    if(ch==='"'){
+      if(inQ && nx==='"'){ cur+='"'; i++; } else inQ=!inQ;
+    }else if(ch===sep && !inQ){
+      out.push(cur); cur='';
+    }else cur+=ch;
+  }
+  out.push(cur); return out;
+}
 function normalizeWeirdCSV(text){
   let t=text.replace(/^\uFEFF/,'').replace(/\r/g,'');
   const manyQuotes=(t.match(/"/g)||[]).length>50, fewNewlines=(t.match(/\n/g)||[]).length<3;
@@ -359,7 +370,7 @@ function parseCSVAuto(text){
   const sep=((first.match(/;/g)||[]).length>(first.match(/,/g)||[]).length)?';':',';
   const rawHeads=parseCSVLine(lines[0],sep).map(s=>s.replace(/^"+|"+$/g,'').trim());
   const rows=lines.slice(1).map(line=>{
-    const cells=parseCSVLine(line,sep).map(s=>s.replace/^"+|"+$/g,'').trim());
+    const cells=parseCSVLine(line,sep).map(s=>s.replace(/^"+|"+$/g,'').trim());
     const o={}; rawHeads.forEach((h,i)=>o[h]=cells[i]??''); return o;
   });
   return {rawHeads,rows};
