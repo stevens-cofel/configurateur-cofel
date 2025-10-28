@@ -123,7 +123,7 @@
         ⬅ Retour aux configurateurs
       </a>
     </div>
-    <div class="tagline">Choisissez la forme, la dimension et les options. Les prix affichés sont **PUBLIC (×2)**, TVA 20 %.</div>
+    <div class="tagline">Choisissez la forme, la dimension et les options. Les montants s’actualisent automatiquement.</div>
   </div>
 
   <!-- ===================== CONTENU ===================== -->
@@ -173,7 +173,7 @@
       <div class="result">
         <p>Prix HT : <b><span id="prixHT">0,00</span> €</b></p>
         <p>Prix TTC : <b><span id="prixTTC">0,00</span> €</b></p>
-        <div class="muted">Prix affichés en **PUBLIC (×2)** — TVA 20 %</div>
+        <div class="muted">TVA 20 % incluse dans le calcul.</div>
       </div>
 
       <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
@@ -192,7 +192,7 @@
   <script>
   /* ===== PARAMS ===== */
   const TVA = 0.20;
-  // IMPORTANT : tous les prix affichés/enregistrés sont en PUBLIC (×2)
+  // NOTE: multiplicateur commercial interne (non affiché)
   const UPLIFT_PUBLIC = 2.0;
   const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/Enseigne%20drapeaux.csv";
 
@@ -215,15 +215,15 @@
     let s=String(v).trim().replace(/€/g,'').replace(/[\u00A0\u202F]/g,'').replace(/\s+/g,'');
     if(s.includes(',') && s.includes('.')) s=s.replace(/\./g,'');
     s=s.replace(',', '.');
-    const m=s.match(/-?\\d+(\\.\\d+)?/);
+    const m=s.match(/-?\d+(\.\d+)?/);
     return m?parseFloat(m[0]):NaN;
   }
   function euro(n){ return (isFinite(n)?n:0).toFixed(2).replace('.', ','); }
 
   /* Robust CSV parser */
   function parseCSVAuto(text){
-    const raw = String(text || "").replace(/^\\uFEFF/, "");
-    const lines = raw.split(/\\r\\n|\\n|\\r/).filter(l => l.trim() !== "");
+    const raw = String(text || "").replace(/^\uFEFF/, "");
+    const lines = raw.split(/\r\n|\n|\r/).filter(l => l.trim() !== "");
     if (!lines.length) return { rawHeads: [], rows: [] };
     const first = lines[0];
     const sep = ((first.match(/;/g) || []).length > (first.match(/,/g) || []).length) ? ';' : ',';
@@ -309,7 +309,7 @@
     return pool[0];
   }
 
-  /* Compute : calcule en PRIX PUBLIC (×2) */
+  /* Compute */
   function compute(){
     // contraintes d’UI
     if(elForme.value==='rond'){ elLaq.checked=true; elLaq.disabled=true; }
@@ -320,20 +320,20 @@
     const Q=Math.max(1,Number(elQ.value||1));
     if(!row){ elHT.textContent='0,00'; elTTC.textContent='0,00'; return; }
 
-    // Prix "interne" lu depuis le CSV (supposé HT unitaire)
+    // Prix interne depuis CSV (HT unitaire)
     let unit_interne = numFR(row[MAP.PRIX]);
     if(!isFinite(unit_interne)) unit_interne = 0;
 
-    // Conversion en PRIX PUBLIC (×2)
+    // Conversion commerciale (non affichée)
     const unit_public = unit_interne * UPLIFT_PUBLIC;
 
-    // Totaux en PUBLIC
-    const totalHT_public = unit_public * Q;
-    const totalTTC_public = totalHT_public * (1+TVA);
+    // Totaux
+    const totalHT = unit_public * Q;
+    const totalTTC = totalHT * (1+TVA);
 
     // Affichage
-    elHT.textContent  = euro(totalHT_public);
-    elTTC.textContent = euro(totalTTC_public);
+    elHT.textContent  = euro(totalHT);
+    elTTC.textContent = euro(totalTTC);
   }
 
   /* Load CSV */
@@ -348,11 +348,11 @@
     }catch(e){ elMsg.textContent="Erreur CSV : "+e.message; }
   }
 
-  /* Events */
+  /* Events (corrigé: on n’utilise plus d’IDs globaux implicites) */
   ["input","change"].forEach(evt=>{
-    [forme,quantite,optLaquage,optAjourLumi,dimension].forEach(el=>{
+    [elForme, elQ, elLaq, elAJL, elDim].forEach(el=>{
       el.addEventListener(evt,e=>{
-        if(e.target===forme||e.target===optLaquage||e.target===optAjourLumi) populateDimensions();
+        if(e.target===elForme || e.target===elLaq || e.target===elAJL) populateDimensions();
         compute();
       });
     });
@@ -360,11 +360,9 @@
 
   function resetAll(){
     elForme.value=""; elDim.value=""; elQ.value=1;
-    elLaq.checked=false; elAJL.checked=false;
-    elLaq.disabled=false;
+    elLaq.checked=false; elAJL.checked=false; elLaq.disabled=false;
     populateFormes(); populateDimensions(); compute();
   }
-
   document.getElementById("btnReset").addEventListener("click", resetAll);
 
   loadCSV();
@@ -373,17 +371,17 @@
   <!-- Charger le moteur de devis -->
   <script src="../js/devis-core.js"></script>
 
-  <!-- Ajouter au devis (PUBLIC ×2 → on envoie pu_public_ht) -->
+  <!-- Ajouter au devis -->
   <script>
   document.getElementById("btnAddDevis").addEventListener("click", () => {
     const quantite = Math.max(1, Number(document.getElementById("quantite").value || 1));
 
-    // "prixHT" affiche le TOTAL HT PUBLIC
+    // "prixHT" affiche le TOTAL HT calculé
     const prixTotalText = document.getElementById("prixHT").innerText.trim(); // ex "725,00"
-    const total_ht_public = parseFloat(prixTotalText.replace(",", ".")) || 0;
+    const total_ht = parseFloat(prixTotalText.replace(",", ".")) || 0;
 
-    // PU PUBLIC à stocker
-    const pu_public_ht = total_ht_public / quantite;
+    // PU HT utilisé par le devis-core (on garde la même logique que chez toi)
+    const pu_public_ht = total_ht / quantite;
 
     const designationParts = [];
     const formeVal = document.getElementById("forme").value || "";
@@ -405,7 +403,7 @@
     alert(`✅ Ajouté au devis !
 ${designation}
 Qté : ${quantite}
-PU HT (PUBLIC ×2) : ${pu_public_ht.toFixed(2)} €`);
+PU HT : ${pu_public_ht.toFixed(2)} €`);
   });
   </script>
 
