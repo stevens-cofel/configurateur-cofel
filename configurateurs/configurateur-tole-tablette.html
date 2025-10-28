@@ -9,16 +9,13 @@
 <link rel="stylesheet" href="../styles/cofel.css" />
 <link rel="stylesheet" href="../styles/cofel-config.css" />
 
-<!-- Petites retouches locales (uniquement mise en page) -->
+<!-- Retouches locales (uniquement mise en page / wording UI) -->
 <style>
-  /* Arrange les lignes radio (comme sur tes autres pages) */
   .radio-row{display:flex;gap:8px;flex-wrap:wrap}
   .radio-row label{
     font-weight:600; border:1px solid #ddd; border-radius:10px;
-    padding:6px 10px; display:flex; align-items:center; gap:8px;
-    background:#fff;
+    padding:6px 10px; display:flex; align-items:center; gap:8px; background:#fff;
   }
-  /* Carte “résultats” légèrement mise en avant */
   .result{
     background:#fcfaff; border:1px solid #dec5f2; border-radius:12px;
     padding:14px; margin:16px 0; text-align:center; font-size:18px;
@@ -27,7 +24,7 @@
   .hidden{display:none}
   .hint{font-size:12px;color:#7d6f8e}
 
-  /* Bouton Ajouter au devis */
+  /* Bouton Ajouter au devis flottant (conservé si besoin) */
   #btnAddDevis{
     position:fixed;right:20px;bottom:20px;padding:10px 16px;
     background:#ffffff;border:1px solid #ccc;border-radius:10px;
@@ -37,7 +34,7 @@
 </head>
 <body>
 
-<!-- En-tête violet Cofel, cohérent avec l’accueil -->
+<!-- En-tête violet Cofel -->
 <header class="cofel-header">
   <div class="row">
     <a class="cofel-back" href="../index.html">⬅ Retour aux configurateurs</a>
@@ -48,7 +45,6 @@
   </div>
 </header>
 
-<!-- Conteneur commun (largeur & marges cohérentes) -->
 <div class="cofel-container">
   <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
 
@@ -91,9 +87,10 @@
         <div>
           <label>Matière de la tôle tablette</label>
           <div class="radio-row" id="matiereRow">
-            <label><input type="radio" name="matiere" value="brut"> Alu 20/10 <b>brut</b> (71,50 €/m²)</label>
-            <label><input type="radio" name="matiere" value="prelaque" checked> <b>Prélaqué</b> (89,00 €/m²)</label>
-            <label><input type="radio" name="matiere" value="laque"> Alu 20/10 <b>laqué</b> (105,00 €/m²)</label>
+            <!-- PRIX VISUELS SUPPRIMÉS DANS LES LIBELLÉS -->
+            <label><input type="radio" name="matiere" value="brut"> Alu 20/10 <b>brut</b></label>
+            <label><input type="radio" name="matiere" value="prelaque" checked> <b>Prélaqué</b></label>
+            <label><input type="radio" name="matiere" value="laque"> Alu 20/10 <b>laqué</b></label>
           </div>
         </div>
         <div></div>
@@ -115,10 +112,12 @@
               <input type="number" id="pmmaSurface" min="0" step="0.001" placeholder="Ex : 0.75" style="flex:1" />
               <button class="btn" id="btnCopySurface" style="flex:0 0 auto">Copier surface tôle</button>
             </div>
-            <div class="hint">Ajourage : <b>99,00 €/m²</b> × surface PMMA. Les LED utilisent aussi cette surface.</div>
+            <!-- TEXTE MODIFIÉ : plus de prix -->
+            <div class="hint">Ajourage : /m² × surface PMMA. Les LED utilisent aussi cette surface.</div>
           </div>
           <div>
-            <label for="pmmaSel">Type de PMMA (si trouvé dans le CSV)</label>
+            <!-- "(si trouvé dans le CSV)" SUPPRIMÉ -->
+            <label for="pmmaSel">Type de PMMA</label>
             <select id="pmmaSel"><option value="">(aucun)</option></select>
           </div>
         </div>
@@ -140,20 +139,22 @@
         <label><input type="radio" name="fixation" value="aucune" checked> Aucune</label>
         <label><input type="radio" name="fixation" value="boite"> Boîte à chaussure</label>
         <label><input type="radio" name="fixation" value="chassis"> Châssis tube 30×30</label>
-        <label><input type="radio" name="fixation" value="corniere"> Cornière (6,5 €/ml sur périmètre)</label>
+        <label><input type="radio" name="fixation" value="corniere"> Cornière</label>
       </div>
 
       <div id="fixBoite" class="hidden">
         <div class="radio-row" style="margin-top:8px">
-          <label><input type="radio" name="boiteMat" value="brut" checked> Boîte en alu 20/10 <b>brut</b> (71,50 €/m²)</label>
-          <label><input type="radio" name="boiteMat" value="laque"> Boîte en alu 20/10 <b>laqué</b> (105,00 €/m²)</label>
+          <!-- PRIX VISUELS SUPPRIMÉS DANS LES LIBELLÉS -->
+          <label><input type="radio" name="boiteMat" value="brut" checked> Boîte en alu 20/10 <b>brut</b></label>
+          <label><input type="radio" name="boiteMat" value="laque"> Boîte en alu 20/10 <b>laqué</b></label>
         </div>
         <div class="hint">La boîte a la <b>même dimension</b> que la tôle (surface identique A).</div>
       </div>
 
       <div id="fixChassis" class="hidden">
+        <!-- TEXTE SANS TARIFS -->
         <div class="hint" style="margin-top:8px">
-          Linéaire châssis = <b>périmètre</b> (2×(L+H)) — <b>10,50 €/ml</b>.<br />
+          Linéaire châssis = <b>périmètre</b> (2×(L+H)).<br />
           Goussets = minimum 4, puis +4 par m² (arrondi à l’entier sup.).
         </div>
         <div style="margin-top:8px">
@@ -163,7 +164,8 @@
       </div>
 
       <div id="fixCorniere" class="hidden">
-        <div class="hint">Longueur = périmètre (2×(L+H)) — <b>6,50 €/ml</b>.</div>
+        <!-- TEXTE SANS TARIFS -->
+        <div class="hint">Longueur = périmètre (2×(L+H)).</div>
       </div>
     </fieldset>
 
@@ -185,20 +187,19 @@
 /*** CONFIG ***/
 const TVA = 0.20; // fixe 20 %
 const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/toles_tabelette";
-const CORNIERE_PRICE_ML = 6.5;   // €/ml fixe
-const CHASSIS_PRICE_ML  = 10.5;  // €/ml fixe (châssis)
-const MATERIAL_PRICE_M2 = {       // €/m² fixes pour la tôle tablette
+const CORNIERE_PRICE_ML = 6.5;   // €/ml (interne)
+const CHASSIS_PRICE_ML  = 10.5;  // €/ml (interne)
+const MATERIAL_PRICE_M2 = {       // €/m² (interne) pour la tôle tablette
   brut: 71.5,
   prelaque: 89.0,
   laque: 105.0
 };
-const BOX_PRICE_M2 = {            // €/m² fixes pour la boîte (choix indépendant)
+const BOX_PRICE_M2 = {            // €/m² (interne) pour la boîte
   brut: 71.5,
   laque: 105.0
 };
-const AJOURAGE_PRICE_M2 = 99.0;   // €/m² — appliqué sur la surface PMMA saisie
-// Affichage PUBLIC : x2 (aucune mention côté client)
-const UPLIFT_PUBLIC = 2.0;
+const AJOURAGE_PRICE_M2 = 99.0;   // €/m² (interne)
+const UPLIFT_PUBLIC = 2.0;        // affichage public x2 (non affiché)
 
 /*** STATE / DOM ***/
 const $ = id => document.getElementById(id);
@@ -209,7 +210,6 @@ const elL=$('largeur'), elH=$('hauteur'), elSurf=$('surfaceCalc');
 
 const elOptAjour=$('optAjour'), elBlockAjour=$('blockAjour');
 const elPMMA=$('pmmaSel'), elPMMASurface=$('pmmaSurface'), elBtnCopySurface=$('btnCopySurface');
-
 const elLED=$('optLED');
 
 const fixRadios=[...document.querySelectorAll('input[name="fixation"]')];
@@ -312,7 +312,9 @@ function refreshPMMACatalog(rows){
   [...pmmas.entries()].forEach(([label, val])=>{
     const o=document.createElement('option');
     o.value=label;
-    o.textContent = isFinite(val)?`${label} – ${val.toFixed(2)} €/m²`:`${label}`;
+    /* PRIX VISUELS SUPPRIMÉS : on n’affiche que le label */
+    o.textContent = label;
+    /* On conserve la donnée prix pour le calcul, via data-price */
     o.dataset.price = isFinite(val)?val:'';
     elPMMA.appendChild(o);
   });
@@ -354,7 +356,7 @@ function compute(){
   let ajourage_interne=0, pmma_interne=0, led_interne=0, pmmaSurf=0;
   if(elOptAjour.checked){
     pmmaSurf = Number(elPMMASurface.value||0); // m²
-    ajourage_interne = AJOURAGE_PRICE_M2 * Math.max(0, pmmaSurf); // 99 €/m² × surface PMMA
+    ajourage_interne = AJOURAGE_PRICE_M2 * Math.max(0, pmmaSurf); // 99 €/m² × surface PMMA (interne)
 
     const selectedPMMA = elPMMA.options[elPMMA.selectedIndex];
     let pmmaM2 = selectedPMMA && selectedPMMA.dataset.price ? Number(selectedPMMA.dataset.price) : NaN;
@@ -371,13 +373,12 @@ function compute(){
   let fix_interne=0, nbGoussets=0;
 
   if(fixVal==='boite'){
-    // Boîte : matière indépendante (brut/laqué), même surface A
     const boiteMat = (document.querySelector('input[name="boiteMat"]:checked')||{}).value || 'brut';
     const boiteM2 = BOX_PRICE_M2[boiteMat] || 0;
     fix_interne = boiteM2 * A;
 
   }else if(fixVal==='chassis'){
-    const chLinCost = CHASSIS_PRICE_ML * P; // périmètre × 10,50 €/ml
+    const chLinCost = CHASSIS_PRICE_ML * P; // périmètre × €/ml (interne)
     nbGoussets = Math.max(4, Math.ceil(4 + 4 * A)); // min 4 puis +4/m²
     let gusU = autoFindPrice(/gousset/,'u');
     if(!isFinite(gusU)) gusU = Number(elGoussetPrixU.value||0);
@@ -385,18 +386,17 @@ function compute(){
     fix_interne = chLinCost + gusCost;
 
   }else if(fixVal==='corniere'){
-    fix_interne = CORNIERE_PRICE_ML * P; // périmètre × 6,5 €/ml
+    fix_interne = CORNIERE_PRICE_ML * P; // périmètre × €/ml (interne)
   }
 
-  // ** Total interne **
+  // Total interne
   const unitHT_interne = base_interne + ajourage_interne + pmma_interne + led_interne + fix_interne;
 
-  // ** Conversion → affichage public (x2) **
+  // Conversion → affichage public (x2)
   const unitHT_public = unitHT_interne * UPLIFT_PUBLIC;
   const totalHT_public = unitHT_public * Q;
   const totalTTC_public = totalHT_public * (1+TVA);
 
-  // Affichage (PUBLIC)
   elUHT.textContent = euro(unitHT_public);
   elHT.textContent  = euro(totalHT_public);
   elTTC.textContent = euro(totalTTC_public);
@@ -421,7 +421,10 @@ function toggleBlocks(){
     ...document.querySelectorAll('input[name="boiteMat"]')
   ].forEach(el=>{
     el.addEventListener(evt, e=>{
-      if(e.target===btnCopySurface){ e.preventDefault(); pmmaSurface.value = areaM2(largeur.value, hauteur.value).toFixed(3); }
+      if(e.target===btnCopySurface){
+        e.preventDefault();
+        pmmaSurface.value = areaM2(largeur.value, hauteur.value).toFixed(3);
+      }
       toggleBlocks();
       compute();
     });
@@ -445,7 +448,7 @@ compute();
   if(!btn) return;
 
   function parseTotalHTPublic(){
-    const txt = document.getElementById('prixHT').innerText.trim(); // "1 234,56"
+    const txt = document.getElementById('prixHT').innerText.trim();
     return Number(txt.replace(/\s/g,'').replace(',', '.')) || 0;
   }
 
@@ -478,7 +481,7 @@ compute();
       if (total_ht_public <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
       const pu_public_ht = qte>0 ? (total_ht_public / qte) : 0;
 
-      // Désignation lisible
+      // Désignation
       const parts = [
         `Tôle Tablette`,
         `L ${Lmm} × H ${Hmm} mm`,
