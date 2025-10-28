@@ -120,8 +120,8 @@
    CONFIG
    ======================= */
 const TVA = 0.20;
-/* Uplift public = +50 % (non affiché) */
-const UPLIFT_PUBLIC = 1.5;
+/* Uplift public = x2 (non affiché) */
+const UPLIFT_PUBLIC = 2.0;
 
 const FAMILLES = [
   {
@@ -335,7 +335,7 @@ function compute(){
   const row = findRowForHeight(H);
   const base_interne = row ? numFR(row[MAP.baseKey]) : 0;
 
-  /* Conversion → prix public (+50 %) */
+  /* Conversion → prix public (x2) */
   const unit_public = (base_interne || 0) * UPLIFT_PUBLIC;
 
   const totalHT = unit_public * Q;
@@ -361,9 +361,7 @@ async function loadFamily(f){
   buildVariantUI();
   buildRangesHelp();
 
-  elMsg.textContent = `Fichier chargé: ${f.name}
-En-têtes: ${HEADS.join(' | ')}
-Colonnes → HauteurMin: ${MAP.hminKey||'n/a'} | HauteurMax: ${MAP.hmaxKey||'n/a'} | Prix: ${MAP.baseKey||'n/a'} | Variante: ${MAP.variantKey||'n/a'}`;
+  elMsg.textContent = `CSV OK (${ROWS.length} lignes)`;
 }
 
 /* ===== INIT & BIND ===== */
@@ -436,10 +434,7 @@ function bind(){
         pu_public_ht: Number(pu_public_ht.toFixed(2))
       });
 
-      alert(`✅ Ligne ajoutée au devis !
-${designation}
-Qté : ${qte}
-PU HT : ${pu_public_ht.toFixed(2)} €`);
+      alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${qte}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
     }catch(err){
       console.error(err);
       alert('Erreur lors de l’ajout au devis : ' + err.message);
