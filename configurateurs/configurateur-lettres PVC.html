@@ -69,7 +69,7 @@
   <h1>Lettres PVC</h1>
 
   <div class="wrap">
-    <!-- ===== UI d’origine (inchangée) ===== -->
+    <!-- ===== UI ===== -->
     <label for="hauteur">Hauteur (mm)</label>
     <input type="number" id="hauteur" placeholder="Ex : 250" min="0"/>
 
@@ -117,9 +117,10 @@
   © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
 </footer>
 
-<!-- ===== JS d’origine (inchangé) ===== -->
 <script>
+/* ===== CONFIG ===== */
 const TVA = 0.20;
+const UPLIFT_PUBLIC = 1.5; // +50% (affichage public)
 const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20PVC.csv";
 
 let DATA = []; // {Hauteur_mm, Epaisseur_mm, PrixBase_EUR, SupLaquage_EUR, SupFixation_EUR, SupRetro_EUR}
@@ -200,10 +201,6 @@ function parseCSVSmart(text){
 async function loadCSV(){
   const txt = await fetch(CSV_URL, {cache:'no-store'}).then(r=>r.text());
   const parsed = parseCSVSmart(txt);
-
-  const idx = {};
-  parsed.heads.forEach((h,i)=> idx[h]=i);
-
   DATA = parsed.rows.map(r=>{
     const o = (key)=> r[key] ?? '';
     return {
@@ -216,7 +213,7 @@ async function loadCSV(){
     };
   }).filter(x=>isFinite(x.Hauteur_mm)&&isFinite(x.Epaisseur_mm)&&isFinite(x.PrixBase_EUR));
 
-  elLog.textContent = `Données chargées: ${DATA.length} lignes. Entêtes: ${parsed.heads.join(' | ')}`;
+  elLog.textContent = `Données chargées: ${DATA.length} lignes.`;
 }
 
 function updateRetroAvailability(){
@@ -243,12 +240,16 @@ function compute(){
   for(const r of pool){ if(h<=r.Hauteur_mm){ cible=r.Hauteur_mm; break; } cible=r.Hauteur_mm; }
   const row = pool.find(r=>r.Hauteur_mm===cible) || pool[pool.length-1];
 
+  // Prix “interne”
   let prix = row.PrixBase_EUR;
   if(elLQ.checked) prix += row.SupLaquage_EUR;
   if(elFX.checked) prix += row.SupFixation_EUR;
   if(elRT.checked) prix += row.SupRetro_EUR;
 
-  const totalHT = prix * q;
+  // Conversion → prix public (+50 %)
+  const prix_public = prix * UPLIFT_PUBLIC;
+
+  const totalHT = prix_public * q;
   const totalTTC = totalHT * (1+TVA);
   elHT.textContent = euro(totalHT);
   elTTC.textContent = euro(totalTTC);
@@ -281,7 +282,6 @@ function bind(){
 
   function parsePrixHT(){
     const txt = document.getElementById('prixHT').innerText.trim();
-    // "1 234,56" → 1234.56
     return Number(txt.replace(/\s/g,'').replace(',', '.')) || 0;
   }
 
@@ -299,10 +299,10 @@ function bind(){
       if(document.getElementById('optFixation').checked) opts.push('Fixations');
       if(document.getElementById('optRetro').checked)   opts.push('Rétroéclairage');
 
-      const total_ht = parsePrixHT();
-      if (total_ht <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
+      const total_ht_public = parsePrixHT();
+      if (total_ht_public <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
 
-      const pu_interne_ht = q>0 ? total_ht / q : 0;
+      const pu_public_ht = q>0 ? total_ht_public / q : 0;
 
       const designation = `Lettres PVC — H ${h} mm — Ép. ${e} mm` + (opts.length? ` — ${opts.join(' + ')}` : '');
 
@@ -310,13 +310,13 @@ function bind(){
         type: 'Lettres PVC',
         designation,
         quantite: q,
-        pu_interne_ht: Number(pu_interne_ht.toFixed(2))
+        pu_public_ht: Number(pu_public_ht.toFixed(2))
       });
 
       alert(`✅ Ligne ajoutée au devis !
 ${designation}
 Qté : ${q}
-PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+PU HT : ${pu_public_ht.toFixed(2)} €`);
     }catch(err){
       console.error(err);
       alert('Erreur lors de l’ajout au devis : ' + err.message);
