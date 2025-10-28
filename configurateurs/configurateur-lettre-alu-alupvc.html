@@ -3,80 +3,160 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>Configurateur Lettres Aluminium 20/10 & Dibond 3 mm – Cofel</title>
+<title>Configurateur — Lettres Alu 20/10 & Dibond 3 mm | Cofel</title>
 
-<!-- Styles communs (si présents, mêmes que l’accueil) -->
-<link rel="stylesheet" href="../styles/cofel.css" />
-<link rel="stylesheet" href="../styles/cofel-config.css" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
 <style>
-  /* ===== Habillage Cofel (violet) ===== */
-  body{margin:0;background:#f6f3fa;color:#2b2140;font-family:Arial, Helvetica, sans-serif}
-  h1{margin:0 0 16px;text-align:center}
-  .wrap{max-width:860px;margin:20px auto;background:#fff;border-radius:14px;box-shadow:0 10px 28px rgba(90,45,130,.12);padding:20px}
-  label{display:block;margin-top:14px;font-weight:700}
-  input,select{width:100%;padding:10px;margin-top:6px;border:1px solid #d8cbe8;border-radius:10px;min-height:44px;background:#fff}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media (max-width:800px){.grid{grid-template-columns:1fr}}
+  /* ===================== THEME (Cofel – verre + violets) ===================== */
+  :root{
+    --cofel:#5a2d82; --cofel-2:#7838a7;
+    --violet:#6b39a0; --violet-2:#8752c1;
+    --violet-soft:#c9b7ff;
+    --violet-ui:#bda3ff;           /* violet clair des cartes */
+    --violet-ui-pressed:#a88fff;
+    --txt:#f5f7ff; --txt-dim:#e6e6ff; --accent:#c9b7ff;
+    --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif;
+    background:
+      radial-gradient(800px 500px at 20% -10%, rgba(255,255,255,.10), transparent 60%),
+      radial-gradient(800px 500px at 110% 10%, rgba(255,255,255,.08), transparent 60%),
+      linear-gradient(135deg, var(--cofel), var(--cofel-2));
+  }
 
-  fieldset{border:1px solid #e6daf4;border-radius:12px;padding:10px;margin-top:8px;background:#fcfaff}
-  fieldset legend{padding:0 8px;font-weight:700;color:#4a2a6c}
+  /* ===================== HERO ===================== */
+  .hero{position:relative;z-index:1;padding:40px 20px 24px;}
+  .hero-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .brand{
+    display:flex;align-items:center;gap:14px;
+    backdrop-filter:blur(var(--blur));
+    background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));
+    border:1px solid rgba(255,255,255,.18);
+    padding:10px 14px;border-radius:14px;box-shadow:var(--shadow);
+  }
+  .brand img{height:42px;width:auto;border-radius:10px}
+  .brand h1{font-size:clamp(18px,2.6vw,22px);margin:0}
+  .tagline{max-width:1200px;margin:18px auto 0;padding:0 20px;color:var(--txt-dim)}
+
+  /* ===================== LAYOUT / CARDS ===================== */
+  .wrap{max-width:1200px;margin:26px auto;padding:0 20px 40px;}
+  .panel{
+    background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.06));
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:20px;padding:18px;box-shadow:var(--shadow);backdrop-filter:blur(var(--blur));
+    margin-bottom:18px;
+  }
+  .panel h2{margin:0 0 12px;font-size:clamp(18px,2.4vw,22px);letter-spacing:.2px}
+  .card{
+    background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:16px;padding:14px;box-shadow:var(--shadow);
+  }
+  .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .muted{color:var(--txt-dim);font-size:12px;margin-top:6px;white-space:pre-wrap}
+  footer{color:#f3ecff;font-size:12px;text-align:center;padding:24px 10px;opacity:.9;}
+
+  /* ===================== FORM CONTROLS ===================== */
+  label{font-weight:700;font-size:13px;color:var(--accent);}
+  input[type="number"], select{
+    width:100%; padding:10px 12px; margin-top:6px;
+    border-radius:12px; outline:none; color:var(--txt);
+    border:1px solid rgba(255,255,255,.22);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)),
+      linear-gradient(135deg, var(--violet-soft), var(--violet-2));
+    box-shadow:var(--shadow);
+    transition:border-color .18s, box-shadow .18s;
+  }
+  input:focus, select:focus{
+    border-color:rgba(255,255,255,.34);
+    box-shadow:0 0 0 3px rgba(201,183,255,.25), var(--shadow);
+  }
+
+  fieldset{
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:16px;
+    background:var(--violet-ui);
+    box-shadow:var(--shadow);
+    padding:10px; margin-top:10px;
+  }
+  fieldset legend{padding:0 6px;color:var(--txt);font-weight:700;}
+
+  /* ===================== CHECKBOX / RADIO ===================== */
   .option-item{
-    display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e6daf4;border-radius:10px;background:#fff;min-height:44px;cursor:pointer
+    display:flex;align-items:center;gap:10px;cursor:pointer;
+    border-radius:12px;padding:10px 12px;
+    border:1px solid rgba(255,255,255,.25);
+    background:var(--violet-ui);
+    box-shadow:var(--shadow);
+    margin-bottom:8px;
+    color:var(--txt);
   }
-  .option-item input{transform:scale(1.1)}
+  .option-item input{
+    appearance:none;-webkit-appearance:none;
+    width:20px;height:20px;border-radius:6px;
+    border:1px solid rgba(255,255,255,.7);
+    background:rgba(255,255,255,.15);
+    position:relative;
+  }
+  .option-item input:checked{
+    background:var(--violet-2);
+    border-color:#fff;
+  }
+  .option-item input:checked::after{
+    content:"";position:absolute;inset:3px 5px 5px 3px;
+    border-right:3px solid #fff;border-bottom:3px solid #fff;transform:rotate(45deg);
+  }
 
+  /* ===================== RESULT + BUTTONS ===================== */
   .result{
-    margin-top:18px;padding:16px;background:#fcfaff;border:1px solid #dec5f2;border-radius:12px;text-align:center;font-size:18px;
-    box-shadow:0 8px 18px rgba(90,45,130,.08)
+    text-align:center;padding:16px;
+    background:var(--violet-ui);
+    border:1px solid rgba(255,255,255,.22); border-radius:16px;
+    box-shadow:0 8px 22px rgba(0,0,0,.28);
+    font-size:18px;
   }
-  .muted{color:#7d6f8e;font-size:12px;margin-top:8px;white-space:pre-wrap}
-
-  /* Bandeau / footer (fallback si cofel.css absent) */
-  .cofel-header{background:#5a2d82;color:#fff}
-  .cofel-header .row{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 14px}
-  .cofel-back{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.35);padding:8px 12px;border-radius:10px}
-  .cofel-brand{display:flex;align-items:center;gap:10px}
-  .cofel-brand img{height:36px;border-radius:6px;object-fit:cover}
-  .cofel-title{font-size:18px;margin:0}
-  .cofel-container{max-width:1100px;margin:0 auto;padding:14px}
-  .cofel-footer{
-    margin:24px 0 0;padding:14px;text-align:center;color:#6f5b86;font-size:13px;
-    border-top:1px solid #e6daf4;background:#fbf9fe
+  .result b{font-size:20px}
+  .btn{
+    appearance:none;border:none;cursor:pointer;font-weight:700;
+    color:#0b0b0b;background:#fff;border-radius:12px;padding:10px 14px;
+    box-shadow:0 10px 24px rgba(0,0,0,.25);
+    transition:transform .16s, box-shadow .16s;
   }
-
-  /* Bouton devis */
-  #btnAddDevis{
-    position:fixed;right:20px;bottom:20px;padding:10px 16px;
-    background:#ffffff;border:1px solid #ccc;border-radius:10px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;font-weight:600
-  }
+  .btn:active{transform:translateY(1px);box-shadow:0 6px 16px rgba(0,0,0,.28);}
+  .btn-ghost{background:transparent;color:var(--txt);border:1px solid rgba(255,255,255,.24);}
 </style>
 </head>
 <body>
 
-<!-- Bandeau violet / retour -->
-<header class="cofel-header">
-  <div class="row">
-    <a class="cofel-back" href="../index.html">⬅ Retour aux configurateurs</a>
-    <div class="cofel-brand">
+<!-- ===================== HERO ===================== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="brand">
       <img src="../assets/logo cofel.jpg" alt="Cofel" />
-      <h1 class="cofel-title">Configurateur — Lettres Alu 20/10 & Dibond 3 mm</h1>
+      <h1>Configurateur — Lettres Alu 20/10 & Dibond 3 mm</h1>
     </div>
+    <a class="brand" href="../index.html" style="text-decoration:none;color:inherit">⬅ Retour aux configurateurs</a>
   </div>
-</header>
+  <div class="tagline">Saisissez la hauteur, choisissez la finition et les options. Le prix se met à jour automatiquement.</div>
+</div>
 
-<div class="cofel-container">
-  <h1>Configurateur Lettres Aluminium 20/10 & Dibond 3 mm</h1>
+<!-- ===================== CONTENU ===================== -->
+<main class="wrap">
+  <section class="panel" aria-label="Paramètres">
+    <h2>⚙️ Paramètres</h2>
 
-  <div class="wrap">
-    <!-- ===== UI ===== -->
-    <div class="grid">
+    <div class="card grid">
       <div>
         <label for="categorie">Catégorie</label>
         <select id="categorie">
-          <option value="alu20">Lettre aluminium 20/10ème</option>
-          <option value="dibond3">Lettre alu/pvc 3 mm (type Dibond)</option>
+          <option value="alu20">Lettre aluminium 20/10</option>
+          <option value="dibond3">Lettre alu/PVC 3 mm (type Dibond)</option>
         </select>
       </div>
       <div>
@@ -85,22 +165,23 @@
       </div>
     </div>
 
-    <div class="grid">
+    <div class="card grid">
       <div>
         <label for="hauteur">Hauteur (mm)</label>
         <input type="number" id="hauteur" placeholder="Ex : 275" min="1" />
         <div id="helpRanges" class="muted"></div>
       </div>
+
       <div>
         <fieldset>
           <legend>Finition</legend>
           <label class="option-item">
             <input type="radio" name="finition" id="finitionBrut" value="brut" checked />
-            <span>Brut (PrixBrut_EUR)</span>
+            <span>Brut</span>
           </label>
           <label class="option-item">
             <input type="radio" name="finition" id="finitionLaque" value="laque" />
-            <span>Laqué (PrixLaque_EUR)</span>
+            <span>Laqué</span>
           </label>
         </fieldset>
 
@@ -108,58 +189,61 @@
           <legend>Supplément</legend>
           <label class="option-item">
             <input type="checkbox" id="optFixation" />
-            <span>Fixations (+ SupFixation_EUR)</span>
+            <span>Fixations</span>
           </label>
         </fieldset>
       </div>
     </div>
+  </section>
 
-    <!-- Résultat (affiche PRIX PUBLIC) -->
+  <section class="panel" aria-label="Récapitulatif">
+    <h2>🧾 Récapitulatif</h2>
     <div class="result">
-      <p>Prix HT : <span id="prixHT">0,00</span> €</p>
-      <p>Prix TTC : <span id="prixTTC">0,00</span> €</p>
+      <p>Prix HT : <b><span id="prixHT">0,00</span> €</b></p>
+      <p>Prix TTC : <b><span id="prixTTC">0,00</span> €</b></p>
+      <div class="muted">TVA 20 % incluse dans le calcul.</div>
     </div>
 
-    <div id="msg" class="muted"></div>
-  </div>
-</div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button id="btnAddDevis" class="btn">➕ Ajouter au devis</button>
+      <button id="btnReset"   class="btn btn-ghost">🔄 Réinitialiser</button>
+    </div>
+  </section>
+</main>
 
-<!-- Pied de page -->
-<footer class="cofel-footer">
+<footer>
   © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
 </footer>
 
-<!-- ===== JS ===== -->
+<!-- ===================== JS ===================== -->
 <script>
-/* ===== CONFIG ===== */
+/* ===== PARAMS ===== */
 const TVA = 0.20;
-const UPLIFT_PUBLIC = 2.0; // interne -> public (x2)
+const UPLIFT_PUBLIC = 2.0; // interne → affichage (non montré à l’utilisateur)
 const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20alu%2020_10%20%C3%A8me%20ou%20Type%20Dibond%203%20mm.csv";
 
 /* ===== STATE / DOM ===== */
 let HEADS=[], ROWS=[], MAP=null;
-const elH = document.getElementById("hauteur");
-const elQ = document.getElementById("quantite");
-const elFix = document.getElementById("optFixation");
-const elFBrut = document.getElementById("finitionBrut");
-const elFLaque = document.getElementById("finitionLaque");
-const elPrixHT = document.getElementById("prixHT");
-const elPrixTTC = document.getElementById("prixTTC");
-const elMsg = document.getElementById("msg");
-const elHelp = document.getElementById("helpRanges");
+const $ = id => document.getElementById(id);
+const elH = $("hauteur");
+const elQ = $("quantite");
+const elFix = $("optFixation");
+const elFBrut = $("finitionBrut");
+const elFLaque = $("finitionLaque");
+const elPrixHT = $("prixHT");
+const elPrixTTC = $("prixTTC");
+const elHelp = $("helpRanges");
 
-/* ===== Utils (robustes) ===== */
+/* ===== Utils ===== */
 function normKey(k){
   return String(k||'').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .replace(/[^a-z0-9]+/g,'').trim();
 }
 function numFR(v){
-  if(v===null||v===undefined) return NaN;
+  if(v==null) return NaN;
   let s = String(v).trim()
-    .replace(/€/g,'')
-    .replace(/[\u00A0\u202F]/g,'')
-    .replace(/\s+/g,'');
+    .replace(/€/g,'').replace(/[\u00A0\u202F]/g,'').replace(/\s+/g,'');
   if(s.includes(',') && s.includes('.')) s = s.replace(/\./g,'');
   s = s.replace(',', '.');
   const m = s.match(/-?\d+(\.\d+)?/);
@@ -167,68 +251,40 @@ function numFR(v){
 }
 function euro(n){ return (isFinite(n)?n:0).toFixed(2).replace('.', ','); }
 
-/* ===== CSV parser béton ===== */
-function parseCSVLine(line, sep=','){
-  const out=[]; let cur=''; let inQ=false;
-  for(let i=0;i<line.length;i++){
-    const ch=line[i], nx=line[i+1];
-    if(ch==='"'){
-      if(inQ && nx==='"'){ cur+='"'; i++; } else inQ=!inQ;
-    }else if(ch===sep && !inQ){
-      out.push(cur); cur='';
-    }else{
-      cur+=ch;
-    }
-  }
-  out.push(cur);
-  return out;
-}
-function normalizeWeirdCSV(t){
-  t=t.replace(/^\uFEFF/,'').replace(/\r/g,'');
-  const manyQuotes=(t.match(/"/g)||[]).length>50;
-  const fewNL=(t.match(/\n/g)||[]).length<3;
-  if(manyQuotes && fewNL){
-    t=t.replace(/""/g,'"');
-    const blocks=[]; const re=/"([^"]*)"/g; let m;
-    while((m=re.exec(t))!==null) blocks.push(m[1]);
-    if(!blocks.length) return t;
-    const cols=parseCSVLine(blocks[0], ',').length;
-    const lines=[];
-    for(let i=0;i<blocks.length;i+=cols){
-      lines.push(blocks.slice(i,i+cols).map(s=>`"${s}"`).join(','));
-    }
-    return lines.join('\n');
-  }
-  return t.split('\n').map(l=>{
-    const s=l.trim();
-    if(s.startsWith('"') && s.endsWith('"')) return s.slice(1,-1);
-    return s;
-  }).join('\n');
-}
+/* ===== CSV ===== */
 function parseCSVAuto(text){
-  const norm=normalizeWeirdCSV(text);
-  const lines=norm.split('\n').filter(l=>l.trim()!=='');
-  if(!lines.length) return {rawHeads:[], rows:[]};
-  const first=lines[0];
-  const sep=((first.match(/;/g)||[]).length>(first.match(/,/g)||[]).length)?';':',';
-  const rawHeads=parseCSVLine(lines[0], sep).map(s=>s.replace(/^"+|"+$/g,'').trim());
-  const rows=lines.slice(1).map(line=>{
-    const cells=parseCSVLine(line, sep).map(s=>s.replace(/^"+|"+$/g,'').trim());
-    const o={}; rawHeads.forEach((h,i)=>o[h]=cells[i]??'' ); return o;
+  const lines = text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(l=>l.trim()!=='');
+  if(!lines.length) return {rawHeads:[],rows:[]};
+  const first = lines[0];
+  const sep = ((first.match(/;/g)||[]).length > (first.match(/,/g)||[]).length) ? ';' : ',';
+  const parseLine = (line)=>{
+    const out=[]; let cur=''; let inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i], nx=line[i+1];
+      if(ch === '"'){
+        if(inQ && nx === '"'){ cur+='"'; i++; } else inQ = !inQ;
+      } else if(ch === sep && !inQ){
+        out.push(cur); cur='';
+      } else cur += ch;
+    }
+    out.push(cur); return out;
+  };
+  const rawHeads = parseLine(lines[0]).map(s=>s.replace(/^"+|"+$/g,'').trim());
+  const rows = lines.slice(1).map(line=>{
+    const cells = parseLine(line).map(s=>s.replace(/^"+|"+$/g,'').trim());
+    const o={}; rawHeads.forEach((h,i)=> o[h]=cells[i]??''); return o;
   });
   return {rawHeads, rows};
 }
-
-/* ===== Mapping auto ===== */
 function buildMapping(rawHeads){
-  const nk=rawHeads.map(normKey);
-  const find=(key)=>{ const i=nk.findIndex(k=>k===key); return i>=0?rawHeads[i]:null; };
+  const nk = rawHeads.map(normKey);
+  const find=(k)=>{const i=nk.indexOf(k); return i>=0?rawHeads[i]:null;};
   const loose=(...res)=>{ for(let i=0;i<nk.length;i++){ const k=nk[i]; if(res.every(r=>r.test(k))) return rawHeads[i]; } return null; };
 
   const hKey   = find('hauteurmm')      || loose(/hauteur/,/mm/);
-  const brutKey= find('prixbruteur')    || loose(/prix.*brut|brut/i);
-  const laqKey = find('prixlaqueeur')   || loose(/prix.*laque|laque/i);
-  const fixKey = find('supfixationeur') || loose(/fixation/);
+  const brutKey= find('prixbruteur')    || loose(/brut/);
+  const laqKey = find('prixlaqueeur')   || loose(/laque/);
+  const fixKey = find('supfixationeur') || loose(/fix/);
 
   return {hKey, brutKey, laqKey, fixKey};
 }
@@ -248,127 +304,109 @@ function pickRowForHeight(H){
   }
   return chosen.row;
 }
-
-/* ===== UI ===== */
 function showRanges(){
   const k=MAP?.hKey; if(!k){ elHelp.textContent=''; return; }
   const vals=[...new Set(ROWS.map(r=>numFR(r[k])).filter(v=>isFinite(v)))].sort((a,b)=>a-b);
-  elHelp.textContent = vals.length ? `Hauteurs disponibles (exemples) : ${vals.slice(0,12).join(' • ')}${vals.length>12?' …':''}` : '';
+  elHelp.textContent = vals.length ? `Hauteurs disponibles : ${vals.slice(0,10).join(' • ')}${vals.length>10?' …':''}` : '';
 }
 
-/* ===== Calcul (affiche PUBLIC) ===== */
+/* ===== Calcul (affichage PUBLIC) ===== */
 function compute(){
   const H = Number(elH.value||0);
   const Q = Math.max(1, Number(elQ.value||1));
   if(!(H>0) || !ROWS.length || !MAP?.hKey){
     elPrixHT.textContent='0,00'; elPrixTTC.textContent='0,00'; return;
   }
-
   const row = pickRowForHeight(H);
   if(!row){ elPrixHT.textContent='0,00'; elPrixTTC.textContent='0,00'; return; }
 
   const brut = MAP.brutKey ? numFR(row[MAP.brutKey]) : NaN;
   const laqe = MAP.laqKey  ? numFR(row[MAP.laqKey])  : NaN;
 
-  // Prix interne unitaire (selon choix de finition + fixation)
+  // prix interne unitaire selon finition
   let unit_interne = 0;
   if(elFLaque.checked && isFinite(laqe)) unit_interne = laqe;
   else if(isFinite(brut)) unit_interne = brut;
   else if(isFinite(laqe)) { unit_interne = laqe; elFLaque.checked=true; elFBrut.checked=false; }
 
+  // supplément fixation
   if(elFix.checked && MAP.fixKey){
-    const fx=numFR(row[MAP.fixKey]);
+    const fx = numFR(row[MAP.fixKey]);
     if(isFinite(fx)) unit_interne += fx;
   }
 
-  // Conversion → prix public (x2)
+  // conversion → public
   const unit_public = unit_interne * UPLIFT_PUBLIC;
 
-  const totalHT_public = unit_public * Q;
-  const totalTTC_public = totalHT_public * (1+TVA);
-  elPrixHT.textContent  = euro(totalHT_public);
-  elPrixTTC.textContent = euro(totalTTC_public);
+  const totalHT = unit_public * Q;
+  const totalTTC = totalHT * (1+TVA);
+
+  elPrixHT.textContent  = euro(totalHT);
+  elPrixTTC.textContent = euro(totalTTC);
 }
 
-/* ===== LOAD ===== */
-async function fetchText(u){
-  const r = await fetch(u, {cache:'no-store'});
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  return await r.text();
-}
+/* ===== Load CSV ===== */
 async function loadCSV(){
-  const txt = await fetchText(CSV_URL);
-  const {rawHeads, rows} = parseCSVAuto(txt);
-  HEADS = rawHeads;
-  ROWS  = rows;
-  MAP   = buildMapping(HEADS);
-
-  elMsg.textContent = `CSV OK (${ROWS.length} lignes)`;
-
-  showRanges();
-  compute();
+  try{
+    const r = await fetch(CSV_URL,{cache:'no-store'});
+    const txt = await r.text();
+    const {rawHeads, rows} = parseCSVAuto(txt);
+    HEADS=rawHeads; ROWS=rows; MAP=buildMapping(HEADS);
+    showRanges(); compute();
+  }catch(e){
+    console.error(e);
+    alert("Erreur lors du chargement des données. Réessayez plus tard.");
+  }
 }
 
-/* ===== INIT ===== */
+/* ===== INIT / EVENTS ===== */
 ["input","change"].forEach(evt=>{
-  [hauteur, quantite, optFixation, finitionBrut, finitionLaque].forEach(el=>{
+  [elH, elQ, elFix, elFBrut, elFLaque].forEach(el=>{
     el.addEventListener(evt, compute);
   });
 });
-loadCSV().catch(e=>{ msg.textContent='Erreur: '+e.message; });
+$("btnReset").addEventListener("click", ()=>{
+  elH.value=''; elQ.value=1; elFix.checked=false; elFBrut.checked=true; elFLaque.checked=false;
+  compute();
+});
+loadCSV();
 </script>
 
-<!-- ========= Intégration au devis ========= -->
+<!-- ===================== MOTEUR DE DEVIS ===================== -->
 <script src="../js/devis-core.js"></script>
-
-<button id="btnAddDevis">➕ Ajouter au devis</button>
-
 <script>
-/* Ajout au devis : on lit le TOTAL HT affiché (public) et on en déduit le PU public */
-(function(){
-  const btn = document.getElementById('btnAddDevis');
-  if(!btn) return;
+$("btnAddDevis").addEventListener("click", ()=>{
+  try{
+    if(!window.Devis) throw new Error("Moteur de devis introuvable.");
+    const qte = Math.max(1, Number($("quantite").value || 1));
+    const hauteur = Number($("hauteur").value || 0);
+    const fin = $("finitionLaque").checked ? 'laqué' : 'brut';
+    const fix = $("optFixation").checked ? ' + fixations' : '';
+    const catVal = $("categorie").value;
+    const catTxt = (catVal==='alu20') ? 'Lettre aluminium 20/10' : 'Lettre alu/PVC 3 mm (type Dibond)';
 
-  function parsePrixHTPublic(){
-    const txt = document.getElementById('prixHT').innerText.trim(); // ex "725,00"
-    return Number(String(txt).replace(/\s/g,'').replace(',', '.')) || 0;
+    const total_ht = parseFloat($("prixHT").innerText.replace(',','.')) || 0;
+    const pu_public_ht = qte>0 ? (total_ht / qte) : 0;
+
+    const designation = `${catTxt} — H ${hauteur || 'n.c.'} mm — ${fin}${fix}`;
+
+    Devis.addLine({
+      type: 'Lettres',
+      designation,
+      quantite: qte,
+      pu_public_ht: Number(pu_public_ht.toFixed(2))
+    });
+
+    alert(`✅ Ligne ajoutée au devis !
+${designation}
+Qté : ${qte}
+PU HT : ${pu_public_ht.toFixed(2)} €`);
+  }catch(err){
+    console.error(err);
+    alert('Erreur lors de l’ajout au devis : ' + err.message);
   }
-
-  btn.addEventListener('click', () => {
-    try{
-      if(!window.Devis) throw new Error("Moteur de devis introuvable.");
-
-      const catVal = document.getElementById('categorie').value;
-      const catTxt = (()=>{
-        if(catVal === 'alu20') return 'Lettre aluminium 20/10';
-        if(catVal === 'dibond3') return 'Lettre alu/PVC 3 mm (type Dibond)';
-        return 'Lettres';
-      })();
-
-      const qte = Math.max(1, Number(document.getElementById('quantite').value || 1));
-      const hauteur = Number(document.getElementById('hauteur').value || 0);
-      const fin = document.getElementById('finitionLaque').checked ? 'laqué' : 'brut';
-      const fix = document.getElementById('optFixation').checked ? ' + fixations' : '';
-
-      const total_ht_public = parsePrixHTPublic();
-      const pu_public_ht = qte > 0 ? (total_ht_public / qte) : 0;
-
-      const designation = `${catTxt} — H ${hauteur || 'n.c.'} mm — ${fin}${fix}`;
-
-      Devis.addLine({
-        type: 'Lettres',
-        designation,
-        quantite: qte,
-        pu_public_ht: Number(pu_public_ht.toFixed(2))
-      });
-
-      alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${qte}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
-    }catch(err){
-      console.error(err);
-      alert('Erreur lors de l’ajout au devis : ' + err.message);
-    }
-  });
-})();
+});
 </script>
+
 </body>
 </html>
