@@ -13,6 +13,8 @@
     --cofel:#5a2d82; --cofel-2:#7838a7;
     --txt:#f5f7ff; --txt-dim:#e6e6ff; --accent:#c9b7ff;
     --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
+    /* Corrige les menus natifs en thème sombre */
+    color-scheme: dark;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -23,6 +25,42 @@
       radial-gradient(800px 500px at 20% -10%, rgba(255,255,255,.10), transparent 60%),
       radial-gradient(800px 500px at 110% 10%, rgba(255,255,255,.08), transparent 60%),
       linear-gradient(135deg, var(--cofel), var(--cofel-2));
+  }
+
+  /* ===================== FORM CONTROLS (incl. <select>) ===================== */
+  label{font-weight:700; font-size:12px; color:var(--accent);}
+  input[type="text"], input[type="number"], textarea, select{
+    width:100%; margin-top:6px; padding:10px 12px;
+    background: rgba(255,255,255,.08); color:var(--txt);
+    border:1px solid rgba(255,255,255,.18); border-radius:12px; outline:none;
+    transition: border-color .18s ease, background .18s ease;
+  }
+  input::placeholder, textarea::placeholder{ color:#f0edff; opacity:.75; }
+  input:focus, textarea:focus, select:focus{
+    border-color: rgba(255,255,255,.34);
+    background: rgba(255,255,255,.12);
+    box-shadow: 0 0 0 3px rgba(201,183,255,.25);
+  }
+
+  /* === SELECT: rend le popup lisible + ajoute une flèche custom légère === */
+  select{
+    -webkit-appearance: none; appearance: none;
+    padding-right: 28px; position: relative;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--accent) 50%),
+      linear-gradient(135deg, var(--accent) 50%, transparent 50%);
+    background-position: calc(100% - 16px) calc(50% - 4px),
+                         calc(100% - 11px) calc(50% - 4px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+  }
+  select option{
+    color: var(--txt);
+    background-color: #2a2440; /* fond sombre lisible */
+  }
+  select option:checked,
+  select option:hover{
+    background-color: rgba(201,183,255,.25);
   }
 
   /* ===================== HERO ===================== */
@@ -53,24 +91,13 @@
     margin-bottom:18px;
   }
   .panel h2{margin:0 0 12px; font-size: clamp(18px,2.4vw,22px); letter-spacing:.2px}
-
   .card{
     background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
     border:1px solid rgba(255,255,255,.18);
     border-radius:16px; padding:14px; box-shadow:var(--shadow); backdrop-filter: blur(var(--blur));
   }
-
   .grid{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-
-  label{font-weight:700; font-size:12px; color:var(--accent);}
-  input[type="text"], input[type="number"], select, textarea{
-    width:100%; margin-top:6px; padding:10px 12px;
-    background: rgba(255,255,255,.08); color:var(--txt);
-    border:1px solid rgba(255,255,255,.18); border-radius:12px; outline:none;
-    transition: border-color .18s ease, background .18s ease;
-  }
-  input::placeholder, textarea::placeholder{ color:#f0edff; opacity:.75; }
-  input:focus, select:focus, textarea:focus{ border-color: rgba(255,255,255,.34); background: rgba(255,255,255,.12); }
+  .muted{color:var(--txt-dim); font-size:12px; margin-top:6px; white-space:pre-wrap}
 
   /* Options (cases à cocher stylées) */
   .option-item{
@@ -80,8 +107,6 @@
     border-radius:12px; padding:10px 12px; user-select:none;
   }
   .option-item input{accent-color:#ffffff}
-
-  .muted{color:var(--txt-dim); font-size:12px; margin-top:6px; white-space:pre-wrap}
 
   /* Résultat */
   .result{
@@ -192,8 +217,7 @@
   <script>
   /* ===== PARAMS ===== */
   const TVA = 0.20;
-  // NOTE: multiplicateur commercial interne (non affiché)
-  const UPLIFT_PUBLIC = 2.0;
+  const UPLIFT_PUBLIC = 2.0; // multiplicateur interne non affiché
   const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/Enseigne%20drapeaux.csv";
 
   /* ===== STATE / DOM ===== */
@@ -253,14 +277,12 @@
     const nk=rawHeads.map(normKey);
     const find=(k)=>{ const i=nk.indexOf(k); return i>=0?rawHeads[i]:null; };
     const like=(...res)=>{ for(let i=0;i<nk.length;i++){ const k=nk[i]; if(res.every(re=>re.test(k))) return rawHeads[i]; } return null; };
-    const TITRE=find('titre')||like(/titre/);
     const FORME=find('forme')||like(/forme/);
     const DIM=find('dimensionmm')||like(/dimension|dim/);
     const FIN=find('finition')||like(/fini/);
     const PRIX=find('prixeurl')||like(/prix|eur/);
-    const COM=find('commentaire')||like(/comment/);
     const OPTAJL=find('opt_ajourage+lumineux')||like(/ajour|lum/);
-    return {TITRE,FORME,DIM,FIN,PRIX,COM,OPTAJL};
+    return {FORME,DIM,FIN,PRIX,OPTAJL};
   }
 
   function distinct(v){return [...new Set(v)]}
@@ -324,7 +346,7 @@
     let unit_interne = numFR(row[MAP.PRIX]);
     if(!isFinite(unit_interne)) unit_interne = 0;
 
-    // Conversion commerciale (non affichée)
+    // Conversion interne (non affichée)
     const unit_public = unit_interne * UPLIFT_PUBLIC;
 
     // Totaux
@@ -348,7 +370,7 @@
     }catch(e){ elMsg.textContent="Erreur CSV : "+e.message; }
   }
 
-  /* Events (corrigé: on n’utilise plus d’IDs globaux implicites) */
+  /* Events (références explicites, pas d’IDs implicites) */
   ["input","change"].forEach(evt=>{
     [elForme, elQ, elLaq, elAJL, elDim].forEach(el=>{
       el.addEventListener(evt,e=>{
@@ -380,7 +402,7 @@
     const prixTotalText = document.getElementById("prixHT").innerText.trim(); // ex "725,00"
     const total_ht = parseFloat(prixTotalText.replace(",", ".")) || 0;
 
-    // PU HT utilisé par le devis-core (on garde la même logique que chez toi)
+    // PU HT utilisé par le devis-core
     const pu_public_ht = total_ht / quantite;
 
     const designationParts = [];
