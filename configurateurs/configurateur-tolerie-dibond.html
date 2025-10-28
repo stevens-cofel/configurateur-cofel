@@ -166,7 +166,7 @@
 /*** CONFIG ***/
 const TVA = 0.20;
 const PRICE = {
-  // Aluminium 15/10e
+  // Aluminium 15/10e (tarifs internes au m²)
   alu15_brut: 61.00,
   alu15_pre:  82.00,
   alu15_laq:  94.00,
@@ -178,6 +178,8 @@ const PRICE = {
   dibond_pre: 50.00,
   dibond_laq: 71.00
 };
+// Affichage PUBLIC = x2 (aucune mention côté client)
+const UPLIFT_PUBLIC = 2.0;
 
 /*** DOM ***/
 const $ = id => document.getElementById(id);
@@ -214,15 +216,19 @@ function toggleBlocks(){
 /*** CALCUL ***/
 function compute(){
   const key = selectedMaterialKey();
-  const prixM2 = PRICE[key] || 0;
+  const prixM2_interne = PRICE[key] || 0;
   const A = areaM2(elL.value, elH.value);
-  const unitHT = prixM2 * A;
+  const unitHT_interne = prixM2_interne * A;
+
+  // Conversion → affichage PUBLIC (x2)
+  const unitHT_public = unitHT_interne * UPLIFT_PUBLIC;
   const Q = Math.max(1, Number(elQ.value||1));
-  const totalHT = unitHT * Q;
-  const totalTTC = totalHT * (1 + TVA);
+  const totalHT_public = unitHT_public * Q;
+  const totalTTC_public = totalHT_public * (1 + TVA);
+
   elSurf.value   = `${A.toFixed(3).replace('.', ',')} m²`;
-  elHT.textContent  = euro(totalHT);
-  elTTC.textContent = euro(totalTTC);
+  elHT.textContent  = euro(totalHT_public);
+  elTTC.textContent = euro(totalTTC_public);
 }
 
 /*** EVENTS ***/
@@ -248,7 +254,7 @@ compute();
   const btn = document.getElementById('btnAddDevis');
   if(!btn) return;
 
-  function parseTotalHT(){
+  function parseTotalHTPublic(){
     const txt = document.getElementById('prixHT').innerText.trim(); // "1 234,56"
     return Number(txt.replace(/\s/g,'').replace(',', '.')) || 0;
   }
@@ -293,46 +299,30 @@ compute();
       const Hmm = Math.max(0, Number(document.getElementById('hauteur').value || 0));
       if(!(Lmm>0) || !(Hmm>0)){ alert("Renseigne largeur et hauteur."); return; }
 
-      const fam = document.getElementById('famille').value; // 'alu' | 'dibond'
-      const key = (function(){
-        if (fam==='alu') {
-          const r = document.querySelector('input[name="matAlu"]:checked');
-          return r ? r.value : 'alu15_pre';
-        } else {
-          const r = document.querySelector('input[name="matDibond"]:checked');
-          return r ? r.value : 'dibond_pre';
-        }
-      })();
-
-      const prixM2 = (window.PRICE && PRICE[key]) ? Number(PRICE[key]) : 0;
       const surface = (Math.max(0, Number(Lmm))*Math.max(0, Number(Hmm)))/1e6;
-      const unitHT = prixM2 * surface;
-      const total_ht = parseTotalHT() || (unitHT * qte);
-      if (total_ht <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
-      const pu_interne_ht = qte>0 ? (total_ht / qte) : 0;
-
       const matLabel = currentMaterialLabel();
       const finLabel = currentFinishLabel();
+
+      // Total & PU PUBLIC (l'affichage est déjà en public x2)
+      const total_ht_public = parseTotalHTPublic();
+      if (total_ht_public <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
+      const pu_public_ht = qte>0 ? (total_ht_public / qte) : 0;
 
       const designation = [
         'Tôlerie / Panneau',
         matLabel + (finLabel ? ' ' + finLabel : ''),
         `L ${Lmm} × H ${Hmm} mm`,
-        `Surface ${surface.toFixed(3)} m²`,
-        `${prixM2.toFixed(2)} €/m²`
+        `Surface ${surface.toFixed(3)} m²`
       ].join(' — ');
 
       Devis.addLine({
         type: 'Tôlerie & Dibond',
         designation,
         quantite: qte,
-        pu_interne_ht: Number(pu_interne_ht.toFixed(2))
+        pu_public_ht: Number(pu_public_ht.toFixed(2))
       });
 
-      alert(`✅ Ligne ajoutée au devis !
-${designation}
-Qté : ${qte}
-PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+      alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${qte}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
     }catch(err){
       console.error(err);
       alert('Erreur lors de l’ajout au devis : ' + err.message);
