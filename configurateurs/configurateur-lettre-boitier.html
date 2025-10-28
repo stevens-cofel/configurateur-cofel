@@ -120,6 +120,9 @@
    CONFIG
    ======================= */
 const TVA = 0.20;
+/* Uplift public = +50 % (non affiché) */
+const UPLIFT_PUBLIC = 1.5;
+
 const FAMILLES = [
   {
     name: "Boîtier Bâton – face PMMA blanc diffusant",
@@ -330,8 +333,12 @@ function compute(){
     updateDibondRule(); return;
   }
   const row = findRowForHeight(H);
-  const base = row ? numFR(row[MAP.baseKey]) : 0;
-  const totalHT = (base || 0) * Q;
+  const base_interne = row ? numFR(row[MAP.baseKey]) : 0;
+
+  /* Conversion → prix public (+50 %) */
+  const unit_public = (base_interne || 0) * UPLIFT_PUBLIC;
+
+  const totalHT = unit_public * Q;
   const totalTTC = totalHT * (1+TVA);
   elHT.textContent = euro(totalHT);
   elTTC.textContent = euro(totalTTC);
@@ -383,14 +390,12 @@ function bind(){
 </script>
 
 <!-- ========= Intégration au devis ========= -->
-<!-- 1) Moteur du devis -->
 <script src="../js/devis-core.js"></script>
 
-<!-- 2) Bouton d'ajout -->
 <button id="btnAddDevis">➕ Ajouter au devis</button>
 
-<!-- 3) Script d'ajout -->
 <script>
+/* Ajout au devis : lit le TOTAL HT affiché (public) et en déduit le PU public */
 (function(){
   const btn = document.getElementById('btnAddDevis');
   if(!btn) return;
@@ -406,33 +411,35 @@ function bind(){
 
       const famIdx = parseInt(document.getElementById('famille').value, 10);
       if (isNaN(famIdx)) { alert("Choisis d'abord une famille de lettres boîtiers."); return; }
-      const familleName = (function(){ try { return (FAMILLES[famIdx] || {}).name || "Lettres boîtiers"; } catch{ return "Lettres boîtiers"; } })();
+      const familleName = (() => {
+        try { return (FAMILLES[famIdx] || {}).name || "Lettres boîtiers"; }
+        catch{ return "Lettres boîtiers"; }
+      })();
 
       const qte = Math.max(1, Number(document.getElementById('quantite').value || 1));
       const H = Number(document.getElementById('hauteur').value || 0);
       if (!(H>0)) { alert("Saisis une hauteur valide."); return; }
 
       const variant = document.getElementById('variant').value;
-      const total_ht = parseTotalHT();
-      if (total_ht <= 0) { alert("Le prix est à 0, vérifie la famille/hauteur/éclairage."); return; }
+      const total_ht_public = parseTotalHT();
+      if (total_ht_public <= 0) { alert("Le prix est à 0, vérifie la famille/hauteur/éclairage."); return; }
 
-      const pu_interne_ht = qte > 0 ? total_ht / qte : 0;
+      const pu_public_ht = qte > 0 ? (total_ht_public / qte) : 0;
 
       const designation =
-        `${familleName} — H ${H} mm` +
-        (variant ? ` — Éclairage: ${variant}` : '');
+        `${familleName} — H ${H} mm` + (variant ? ` — Éclairage: ${variant}` : '');
 
       Devis.addLine({
         type: 'Lettres Boîtiers',
         designation,
         quantite: qte,
-        pu_interne_ht: Number(pu_interne_ht.toFixed(2))
+        pu_public_ht: Number(pu_public_ht.toFixed(2))
       });
 
       alert(`✅ Ligne ajoutée au devis !
 ${designation}
 Qté : ${qte}
-PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+PU HT : ${pu_public_ht.toFixed(2)} €`);
     }catch(err){
       console.error(err);
       alert('Erreur lors de l’ajout au devis : ' + err.message);
