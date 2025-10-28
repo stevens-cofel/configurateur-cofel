@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../styles/cofel-config.css" />
 
 <style>
-  /* ===== Habillage Cofel (violet) — logique JS intacte ===== */
+  /* ===== Habillage Cofel (violet) ===== */
   body{margin:0;background:#f6f3fa;color:#2b2140;font-family:Arial, Helvetica, sans-serif}
   h1{margin:0 0 16px;text-align:center}
   .wrap{max-width:860px;margin:20px auto;background:#fff;border-radius:14px;box-shadow:0 10px 28px rgba(90,45,130,.12);padding:20px}
@@ -70,7 +70,7 @@
   <h1>Configurateur Lettres Aluminium 20/10 & Dibond 3 mm</h1>
 
   <div class="wrap">
-    <!-- ===== UI d’origine ===== -->
+    <!-- ===== UI ===== -->
     <div class="grid">
       <div>
         <label for="categorie">Catégorie</label>
@@ -114,6 +114,7 @@
       </div>
     </div>
 
+    <!-- Résultat (affiche PRIX PUBLIC) -->
     <div class="result">
       <p>Prix HT : <span id="prixHT">0,00</span> €</p>
       <p>Prix TTC : <span id="prixTTC">0,00</span> €</p>
@@ -128,10 +129,11 @@
   © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
 </footer>
 
-<!-- ===== JS d’origine (ajusté : plus de diagnostic) ===== -->
+<!-- ===== JS ===== -->
 <script>
 /* ===== CONFIG ===== */
 const TVA = 0.20;
+const UPLIFT_PUBLIC = 1.5; // interne -> public (non affiché à l'utilisateur)
 const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20alu%2020_10%20%C3%A8me%20ou%20Type%20Dibond%203%20mm.csv";
 
 /* ===== STATE / DOM ===== */
@@ -249,12 +251,12 @@ function pickRowForHeight(H){
 
 /* ===== UI ===== */
 function showRanges(){
-  const k=MAP?.hKey; if(!k){ helpRanges.textContent=''; return; }
+  const k=MAP?.hKey; if(!k){ elHelp.textContent=''; return; }
   const vals=[...new Set(ROWS.map(r=>numFR(r[k])).filter(v=>isFinite(v)))].sort((a,b)=>a-b);
-  helpRanges.textContent = vals.length ? `Hauteurs disponibles (exemples) : ${vals.slice(0,12).join(' • ')}${vals.length>12?' …':''}` : '';
+  elHelp.textContent = vals.length ? `Hauteurs disponibles (exemples) : ${vals.slice(0,12).join(' • ')}${vals.length>12?' …':''}` : '';
 }
 
-/* ===== Calcul ===== */
+/* ===== Calcul (affiche PUBLIC) ===== */
 function compute(){
   const H = Number(elH.value||0);
   const Q = Math.max(1, Number(elQ.value||1));
@@ -267,20 +269,25 @@ function compute(){
 
   const brut = MAP.brutKey ? numFR(row[MAP.brutKey]) : NaN;
   const laqe = MAP.laqKey  ? numFR(row[MAP.laqKey])  : NaN;
-  let unit = 0;
-  if(elFLaque.checked && isFinite(laqe)) unit = laqe;
-  else if(isFinite(brut)) unit = brut;
-  else if(isFinite(laqe)) { unit=laqe; elFLaque.checked=true; elFBrut.checked=false; }
+
+  // Prix interne unitaire (selon choix de finition + fixation)
+  let unit_interne = 0;
+  if(elFLaque.checked && isFinite(laqe)) unit_interne = laqe;
+  else if(isFinite(brut)) unit_interne = brut;
+  else if(isFinite(laqe)) { unit_interne = laqe; elFLaque.checked=true; elFBrut.checked=false; }
 
   if(elFix.checked && MAP.fixKey){
     const fx=numFR(row[MAP.fixKey]);
-    if(isFinite(fx)) unit += fx;
+    if(isFinite(fx)) unit_interne += fx;
   }
 
-  const totalHT = unit * Q;
-  const totalTTC = totalHT * (1+TVA);
-  elPrixHT.textContent  = euro(totalHT);
-  elPrixTTC.textContent = euro(totalTTC);
+  // Conversion → prix public
+  const unit_public = unit_interne * UPLIFT_PUBLIC;
+
+  const totalHT_public = unit_public * Q;
+  const totalTTC_public = totalHT_public * (1+TVA);
+  elPrixHT.textContent  = euro(totalHT_public);
+  elPrixTTC.textContent = euro(totalTTC_public);
 }
 
 /* ===== LOAD ===== */
@@ -296,7 +303,7 @@ async function loadCSV(){
   ROWS  = rows;
   MAP   = buildMapping(HEADS);
 
-  msg.textContent =
+  elMsg.textContent =
     `CSV chargé.\nEn-têtes: ${HEADS.join(' | ')}\nColonnes → Hauteur: ${MAP.hKey||'n/a'} | Brut: ${MAP.brutKey||'n/a'} | Laqué: ${MAP.laqKey||'n/a'} | Fixation: ${MAP.fixKey||'n/a'}`;
 
   showRanges();
@@ -313,21 +320,18 @@ loadCSV().catch(e=>{ msg.textContent='Erreur: '+e.message; });
 </script>
 
 <!-- ========= Intégration au devis ========= -->
-<!-- 1) Moteur du devis -->
 <script src="../js/devis-core.js"></script>
 
-<!-- 2) Bouton d'ajout -->
 <button id="btnAddDevis">➕ Ajouter au devis</button>
 
-<!-- 3) Script d'ajout -->
 <script>
+/* Ajout au devis : on lit le TOTAL HT affiché (public) et on en déduit le PU public */
 (function(){
   const btn = document.getElementById('btnAddDevis');
   if(!btn) return;
 
-  function parsePrixHT(){
-    // Prix total HT affiché (FR) → nombre
-    const txt = document.getElementById('prixHT').innerText.trim();
+  function parsePrixHTPublic(){
+    const txt = document.getElementById('prixHT').innerText.trim(); // ex "725,00"
     return Number(String(txt).replace(/\s/g,'').replace(',', '.')) || 0;
   }
 
@@ -335,10 +339,10 @@ loadCSV().catch(e=>{ msg.textContent='Erreur: '+e.message; });
     try{
       if(!window.Devis) throw new Error("Moteur de devis introuvable.");
 
-      const categorieVal = document.getElementById('categorie').value;
-      const categorieTxt = (()=>{
-        if(categorieVal === 'alu20') return 'Lettre aluminium 20/10';
-        if(categorieVal === 'dibond3') return 'Lettre alu/PVC 3 mm (type Dibond)';
+      const catVal = document.getElementById('categorie').value;
+      const catTxt = (()=>{
+        if(catVal === 'alu20') return 'Lettre aluminium 20/10';
+        if(catVal === 'dibond3') return 'Lettre alu/PVC 3 mm (type Dibond)';
         return 'Lettres';
       })();
 
@@ -347,22 +351,22 @@ loadCSV().catch(e=>{ msg.textContent='Erreur: '+e.message; });
       const fin = document.getElementById('finitionLaque').checked ? 'laqué' : 'brut';
       const fix = document.getElementById('optFixation').checked ? ' + fixations' : '';
 
-      const total_ht = parsePrixHT();
-      const pu_interne_ht = qte > 0 ? total_ht / qte : 0; // on enregistre le PU interne
+      const total_ht_public = parsePrixHTPublic();
+      const pu_public_ht = qte > 0 ? (total_ht_public / qte) : 0;
 
-      const designation = `${categorieTxt} — H ${hauteur || 'n.c.'} mm — ${fin}${fix}`;
+      const designation = `${catTxt} — H ${hauteur || 'n.c.'} mm — ${fin}${fix}`;
 
       Devis.addLine({
         type: 'Lettres',
         designation,
         quantite: qte,
-        pu_interne_ht: Number(pu_interne_ht.toFixed(2))
+        pu_public_ht: Number(pu_public_ht.toFixed(2))
       });
 
       alert(`✅ Ligne ajoutée au devis !
 ${designation}
 Qté : ${qte}
-PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+PU HT : ${pu_public_ht.toFixed(2)} €`);
     }catch(err){
       console.error(err);
       alert('Erreur lors de l’ajout au devis : ' + err.message);
