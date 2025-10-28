@@ -359,7 +359,7 @@ function parseCSVAuto(text){
   const sep=((first.match(/;/g)||[]).length>(first.match(/,/g)||[]).length)?';':',';
   const rawHeads=parseCSVLine(lines[0],sep).map(s=>s.replace(/^"+|"+$/g,'').trim());
   const rows=lines.slice(1).map(line=>{
-    const cells=parseCSVLine(line,sep).map(s=>s.replace(/^"+|"+$/g,'').trim());
+    const cells=parseCSVLine(line,sep).map(s=>s.replace/^"+|"+$/g,'').trim());
     const o={}; rawHeads.forEach((h,i)=>o[h]=cells[i]??''); return o;
   });
   return {rawHeads,rows};
@@ -481,40 +481,30 @@ function bind(){
 
 <!-- ========= Intégration au devis ========= -->
 <script src="../js/devis-core.js"></script>
-
-<div style="position:fixed;right:20px;bottom:20px;z-index:9999;">
-  <button id="btnAddDevis" class="btn">➕ Ajouter au devis</button>
-</div>
-
 <script>
-/* Ajout au devis : lit le TOTAL HT affiché (public) et en déduit le PU public */
-(function(){
-  const btn=$("btnAddDevis");
-  function parseTotalHT(){ const txt=$("prixHT").innerText.trim(); return Number(String(txt).replace(/\s/g,'').replace(',','.'))||0; }
-  btn.addEventListener('click', ()=>{
-    try{
-      if(!window.Devis) throw new Error("Moteur de devis introuvable.");
-      const famIdx=parseInt($("famille").value,10);
-      if(isNaN(famIdx)){ alert("Choisis d'abord une famille de lettres boîtiers."); return; }
-      const familleName=(FAMILLES[famIdx]||{}).name||"Lettres boîtiers";
-      const qte=Math.max(1, Number($("quantite").value||1));
-      const H=Number($("hauteur").value||0);
-      if(!(H>0)){ alert("Saisis une hauteur valide."); return; }
-      const variant=$("variant").value;
-      const total_ht=parseTotalHT();
-      if(total_ht<=0){ alert("Le prix est à 0, vérifie la famille/hauteur/éclairage."); return; }
-      const pu_public_ht = qte>0 ? (total_ht/qte) : 0;
+document.getElementById("btnAddDevis").addEventListener("click", ()=>{
+  try{
+    if(!window.Devis) throw new Error("Moteur de devis introuvable.");
+    const famIdx=parseInt(document.getElementById("famille").value,10);
+    if(isNaN(famIdx)){ alert("Choisis d'abord une famille de lettres boîtiers."); return; }
+    const familleName=(FAMILLES[famIdx]||{}).name||"Lettres boîtiers";
+    const qte=Math.max(1, Number(document.getElementById("quantite").value||1));
+    const H=Number(document.getElementById("hauteur").value||0);
+    if(!(H>0)){ alert("Saisis une hauteur valide."); return; }
+    const variant=document.getElementById("variant").value;
+    const total_ht=parseFloat(document.getElementById("prixHT").innerText.replace(',','.'))||0;
+    if(total_ht<=0){ alert("Le prix est à 0, vérifie la famille/hauteur/éclairage."); return; }
+    const pu_public_ht = qte>0 ? (total_ht/qte) : 0;
 
-      const designation = `${familleName} — H ${H} mm` + (variant?` — Éclairage: ${variant}`:'');
-      Devis.addLine({ type:'Lettres Boîtiers', designation, quantite:qte, pu_public_ht:Number(pu_public_ht.toFixed(2)) });
+    const designation = `${familleName} — H ${H} mm` + (variant?` — Éclairage: ${variant}`:'');
+    Devis.addLine({ type:'Lettres Boîtiers', designation, quantite:qte, pu_public_ht:Number(pu_public_ht.toFixed(2)) });
 
-      alert(`✅ Ligne ajoutée au devis !
+    alert(`✅ Ligne ajoutée au devis !
 ${designation}
 Qté : ${qte}
 PU HT : ${pu_public_ht.toFixed(2)} €`);
-    }catch(err){ console.error(err); alert('Erreur lors de l’ajout au devis : '+err.message); }
-  });
-})();
+  }catch(err){ console.error(err); alert('Erreur lors de l’ajout au devis : '+err.message); }
+});
 </script>
 
 </body>
