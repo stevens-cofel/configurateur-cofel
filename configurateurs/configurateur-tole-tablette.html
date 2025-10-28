@@ -197,6 +197,8 @@ const BOX_PRICE_M2 = {            // €/m² fixes pour la boîte (choix indépe
   laque: 105.0
 };
 const AJOURAGE_PRICE_M2 = 99.0;   // €/m² — appliqué sur la surface PMMA saisie
+// Affichage PUBLIC : x2 (aucune mention côté client)
+const UPLIFT_PUBLIC = 2.0;
 
 /*** STATE / DOM ***/
 const $ = id => document.getElementById(id);
@@ -343,36 +345,36 @@ function compute(){
   const A = currentSurface();      // m² tôle
   const P = currentPerimeter();    // m périmètre
 
-  // Matière tôle (tarifs fixes)
+  // Matière tôle (tarifs internes fixes)
   const mat = (document.querySelector('input[name="matiere"]:checked')||{}).value || 'prelaque';
   const matM2 = MATERIAL_PRICE_M2[mat] ?? 0;
-  const base = matM2 * A;
+  const base_interne = matM2 * A;
 
   // Ajourage / PMMA / LED
-  let ajourage=0, pmma=0, led=0, pmmaSurf=0;
+  let ajourage_interne=0, pmma_interne=0, led_interne=0, pmmaSurf=0;
   if(elOptAjour.checked){
     pmmaSurf = Number(elPMMASurface.value||0); // m²
-    ajourage = AJOURAGE_PRICE_M2 * Math.max(0, pmmaSurf); // 99 €/m² × surface PMMA
+    ajourage_interne = AJOURAGE_PRICE_M2 * Math.max(0, pmmaSurf); // 99 €/m² × surface PMMA
 
     const selectedPMMA = elPMMA.options[elPMMA.selectedIndex];
     let pmmaM2 = selectedPMMA && selectedPMMA.dataset.price ? Number(selectedPMMA.dataset.price) : NaN;
-    if(isFinite(pmmaM2)) pmma = pmmaM2 * pmmaSurf;
+    if(isFinite(pmmaM2)) pmma_interne = pmmaM2 * pmmaSurf;
 
     if(elLED.checked){
       let ledM2 = autoFindPrice(/(led|eclairage|éclairage)/,'m2');
-      if(isFinite(ledM2)) led = ledM2 * pmmaSurf; // même surface que PMMA
+      if(isFinite(ledM2)) led_interne = ledM2 * pmmaSurf; // même surface que PMMA
     }
   }
 
   // Fixations
   const fixVal = (document.querySelector('input[name="fixation"]:checked')||{}).value || 'aucune';
-  let fix=0, nbGoussets=0;
+  let fix_interne=0, nbGoussets=0;
 
   if(fixVal==='boite'){
     // Boîte : matière indépendante (brut/laqué), même surface A
     const boiteMat = (document.querySelector('input[name="boiteMat"]:checked')||{}).value || 'brut';
     const boiteM2 = BOX_PRICE_M2[boiteMat] || 0;
-    fix = boiteM2 * A;
+    fix_interne = boiteM2 * A;
 
   }else if(fixVal==='chassis'){
     const chLinCost = CHASSIS_PRICE_ML * P; // périmètre × 10,50 €/ml
@@ -380,19 +382,24 @@ function compute(){
     let gusU = autoFindPrice(/gousset/,'u');
     if(!isFinite(gusU)) gusU = Number(elGoussetPrixU.value||0);
     const gusCost = (isFinite(gusU)?gusU:0) * nbGoussets;
-    fix = chLinCost + gusCost;
+    fix_interne = chLinCost + gusCost;
 
   }else if(fixVal==='corniere'){
-    fix = CORNIERE_PRICE_ML * P; // périmètre × 6,5 €/ml
+    fix_interne = CORNIERE_PRICE_ML * P; // périmètre × 6,5 €/ml
   }
 
-  const unitHT = base + ajourage + pmma + led + fix;
-  const totalHT = unitHT * Q;
-  const totalTTC = totalHT * (1+TVA);
+  // ** Total interne **
+  const unitHT_interne = base_interne + ajourage_interne + pmma_interne + led_interne + fix_interne;
 
-  elUHT.textContent = euro(unitHT);
-  elHT.textContent  = euro(totalHT);
-  elTTC.textContent = euro(totalTTC);
+  // ** Conversion → affichage public (x2) **
+  const unitHT_public = unitHT_interne * UPLIFT_PUBLIC;
+  const totalHT_public = unitHT_public * Q;
+  const totalTTC_public = totalHT_public * (1+TVA);
+
+  // Affichage (PUBLIC)
+  elUHT.textContent = euro(unitHT_public);
+  elHT.textContent  = euro(totalHT_public);
+  elTTC.textContent = euro(totalTTC_public);
 }
 
 /*** UI TOGGLES ***/
@@ -437,7 +444,7 @@ compute();
   const btn = document.getElementById('btnAddDevis');
   if(!btn) return;
 
-  function parseTotalHT(){
+  function parseTotalHTPublic(){
     const txt = document.getElementById('prixHT').innerText.trim(); // "1 234,56"
     return Number(txt.replace(/\s/g,'').replace(',', '.')) || 0;
   }
@@ -466,10 +473,10 @@ compute();
       const boiteMat = (document.querySelector('input[name="boiteMat"]:checked')||{}).value || '';
       const gusU = document.getElementById('goussetPrixU')?.value || '';
 
-      // Total et PU interne
-      const total_ht = parseTotalHT();
-      if (total_ht <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
-      const pu_interne_ht = qte>0 ? (total_ht / qte) : 0;
+      // Total et PU public
+      const total_ht_public = parseTotalHTPublic();
+      if (total_ht_public <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
+      const pu_public_ht = qte>0 ? (total_ht_public / qte) : 0;
 
       // Désignation lisible
       const parts = [
@@ -502,13 +509,10 @@ compute();
         type: 'Tôle Tablette',
         designation,
         quantite: qte,
-        pu_interne_ht: Number(pu_interne_ht.toFixed(2))
+        pu_public_ht: Number(pu_public_ht.toFixed(2))
       });
 
-      alert(`✅ Ligne ajoutée au devis !
-${designation}
-Qté : ${qte}
-PU interne HT : ${pu_interne_ht.toFixed(2)} €`);
+      alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${qte}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
     }catch(err){
       console.error(err);
       alert('Erreur lors de l’ajout au devis : ' + err.message);
