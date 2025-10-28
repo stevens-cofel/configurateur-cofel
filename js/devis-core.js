@@ -1,125 +1,188 @@
-(function () {
-  const STORAGE_KEY = "devisCourant_v1";
-  const PUBLIC_FACTOR = 1.5;     // +50% pour tarif public
-  const TVA = 0.20;
+/* =====================================================================
+   devis-core.js — moteur de devis unifié (SANS uplift +50 %)
+   ---------------------------------------------------------------------
+   Rôle :
+   - Stocker les lignes de devis (localStorage)
+   - Gérer la remise commerciale (en %)
+   - Calculer les totaux HT / TVA / TTC
+   - Exposer des helpers CRUD (add / list / update / remove / clear)
+   IMPORTANT : AUCUNE MAJORATION +50 % ICI. 
+               Les configurateurs doivent envoyer un PU public déjà majoré.
+   ===================================================================== */
 
-  // Utils
+(function (global) {
+  "use strict";
+
+  const STORAGE_KEY = "devisCourant_v1"; // clé unique (lignes + client + remise)
+
+  // --- Config globale ---
+  const TVA_RATE = 0.20;          // TVA fixe 20 %
+  const MAX_REM = 90;             // garde-fou pour la remise
+  const MIN_REM = 0;
+
+  // --- Utilitaires ---
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, Number(n) || 0));
+
   function uid() {
-    return "L" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-  }
-  function round2(n) {
-    return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+    // petit id lisible
+    const s = Math.random().toString(36).slice(2, 8);
+    const t = Date.now().toString(36).slice(-6);
+    return `L${s}${t}`;
   }
 
-  // Store helpers
-  function createEmptyDevis() {
-    return {
-      id: "D-" + Date.now(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      remise_client_pct: 0,
-      tva: TVA,
-      client: { societe: "", contact: "", email: "", tel: "", adresse: "" },
-      lignes: [],
-    };
-  }
   function readStore() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return createEmptyDevis();
-      const obj = JSON.parse(raw);
-      if (!obj || !Array.isArray(obj.lignes)) return createEmptyDevis();
-      return obj;
+      if (!raw) {
+        return { lignes: [], remise_pct: 0, client: {} };
+      }
+      const parsed = JSON.parse(raw);
+      // normalisation douce
+      if (!Array.isArray(parsed.lignes)) parsed.lignes = [];
+      parsed.remise_pct = clamp(parsed.remise_pct, MIN_REM, MAX_REM);
+      if (!parsed.client || typeof parsed.client !== "object") parsed.client = {};
+      return parsed;
     } catch {
-      return createEmptyDevis();
+      return { lignes: [], remise_pct: 0, client: {} };
     }
-  }
-  function writeStore(devis) {
-    devis.updated_at = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(devis));
   }
 
-  // --- API lignes ---
-  function addLine(line) {
-    const devis = readStore();
-    if (!line || !Number(line.quantite) || line.pu_interne_ht === undefined) {
-      throw new Error("Ligne invalide (quantite et pu_interne_ht requis)");
-    }
-    line.id = uid();
-    line.quantite = Math.max(1, Number(line.quantite));
-    line.pu_interne_ht = Number(line.pu_interne_ht);
-    devis.lignes.push(line);
-    writeStore(devis);
+  function writeStore(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  // --- Cœur CRUD ---
+  function addLine(payload) {
+    // payload attendu minimal :
+    // { designation, quantite, pu_interne_ht OU pu_public_ht, type?, options?, dimensions? }
+    // >>> Ici, ON STOCKE LE PRIX TEL QU’ON LE REÇOIT COMME "PU NET" (pas d’uplift).
+    const st = readStore();
+
+    const {
+      type = "",
+      designation = "-",
+      options = "",
+      dimensions = "",
+      // par convention : si le configurateur envoie pu_public_ht, on le prend.
+      // sinon, si pu_interne_ht est fourni, on le prend tel quel (TEMPORAIRE).
+      pu_public_ht,
+      pu_interne_ht,
+      quantite = 1,
+    } = payload || {};
+
+    const pu_net_ht = Number.isFinite(pu_public_ht)
+      ? Number(pu_public_ht)
+      : Number(pu_interne_ht) || 0;
+
+    const line = {
+      id: uid(),
+      type,
+      designation,
+      options,
+      dimensions,
+      quantite: Math.max(1, Number(quantite) || 1),
+      // Très important : on stocke le PU “tel quel”.
+      // Les configurateurs doivent envoyer le PU PUBLIC (+50 %) dorénavant.
+      pu_net_ht: pu_net_ht,
+    };
+
+    st.lignes.push(line);
+    writeStore(st);
     return line.id;
   }
 
   function listLines() {
-    return readStore().lignes.slice();
+    const st = readStore();
+    // Calcul “total_ligne_ht” à la volée
+    return st.lignes.map((l) => ({
+      ...l,
+      total_ligne_ht: (Number(l.pu_net_ht) || 0) * Math.max(1, Number(l.quantite) || 1),
+    }));
   }
 
-  function removeLine(id) {
-    const devis = readStore();
-    const before = devis.lignes.length;
-    devis.lignes = devis.lignes.filter(l => l.id !== id);
-    writeStore(devis);
-    return before !== devis.lignes.length;
+  function updateQty(lineId, newQty) {
+    const st = readStore();
+    const q = Math.max(1, Number(newQty) || 1);
+    const i = st.lignes.findIndex((x) => x.id === lineId);
+    if (i >= 0) {
+      st.lignes[i].quantite = q;
+      writeStore(st);
+      return true;
+    }
+    return false;
   }
 
-  function updateQty(id, qty) {
-    const devis = readStore();
-    const q = Math.max(1, Math.floor(Number(qty) || 1));
-    const row = devis.lignes.find(l => l.id === id);
-    if (!row) return false;
-    row.quantite = q;
-    writeStore(devis);
+  function removeLine(lineId) {
+    const st = readStore();
+    const before = st.lignes.length;
+    st.lignes = st.lignes.filter((l) => l.id !== lineId);
+    writeStore(st);
+    return st.lignes.length !== before;
+  }
+
+  function clearAll(hard = false) {
+    if (hard) {
+      // tout effacer (lignes + client + remise)
+      localStorage.removeItem(STORAGE_KEY);
+      return true;
+    }
+    // seulement les lignes
+    const st = readStore();
+    st.lignes = [];
+    writeStore(st);
     return true;
-  }
-
-  function clearAll(confirm = false) {
-    if (!confirm) return false;
-    writeStore(createEmptyDevis());
-    return true;
-  }
-
-  // --- Calculs ---
-  function computeTotals() {
-    const devis = readStore();
-    const remise = Number(devis.remise_client_pct || 0) / 100;
-
-    const lignes = devis.lignes.map((l) => {
-      const pu_public = Number(l.pu_interne_ht) * PUBLIC_FACTOR;
-      const pu_net = round2(pu_public * (1 - remise));
-      const total_ht = round2(pu_net * Number(l.quantite));
-      return { ...l, pu_net_ht: pu_net, total_ligne_ht: total_ht };
-    });
-
-    const total_ht = round2(lignes.reduce((s, x) => s + x.total_ligne_ht, 0));
-    const tva = round2(total_ht * TVA);
-    const total_ttc = round2(total_ht + tva);
-
-    return { lignes, total_ht, tva, total_ttc, remise_pct: devis.remise_client_pct };
   }
 
   // --- Remise ---
   function setRemise(pct) {
-    const devis = readStore();
-    const v = Number(pct);
-    devis.remise_client_pct = isNaN(v) ? 0 : Math.min(90, Math.max(0, v));
-    writeStore(devis);
-  }
-  function getRemise() {
-    return readStore().remise_client_pct || 0;
+    const st = readStore();
+    st.remise_pct = clamp(pct, MIN_REM, MAX_REM);
+    writeStore(st);
   }
 
-  // Expose
-  window.Devis = {
+  function getRemise() {
+    return readStore().remise_pct || 0;
+  }
+
+  // --- Totaux ---
+  function computeTotals() {
+    const st = readStore();
+    const remise = clamp(st.remise_pct, MIN_REM, MAX_REM);
+
+    // Somme des lignes “telles quelles” (PU déjà publics envoyés par configurateurs)
+    const lignes = listLines();
+
+    const total_ht_brut = lignes.reduce((s, l) => s + (Number(l.total_ligne_ht) || 0), 0);
+
+    // Application de la remise commerciale UNIQUEMENT ici
+    const total_ht = total_ht_brut * (1 - remise / 100);
+    const tva = total_ht * TVA_RATE;
+    const total_ttc = total_ht + tva;
+
+    return {
+      lignes,
+      remise_pct: remise,
+      total_ht_brut,
+      total_ht,
+      tva,
+      total_ttc,
+    };
+  }
+
+  // --- Exposition publique ---
+  const api = {
     addLine,
     listLines,
-    removeLine,
     updateQty,
+    removeLine,
     clearAll,
-    computeTotals,
     setRemise,
-    getRemise
+    getRemise,
+    computeTotals,
+    // constants utiles
+    TVA_RATE,
   };
-})();
+
+  // UMD
+  global.Devis = api;
+})(window);
