@@ -133,7 +133,7 @@
 <script>
 /* ===== CONFIG ===== */
 const TVA = 0.20;
-const UPLIFT_PUBLIC = 1.5; // interne -> public (non affiché à l'utilisateur)
+const UPLIFT_PUBLIC = 2.0; // interne -> public (x2)
 const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20alu%2020_10%20%C3%A8me%20ou%20Type%20Dibond%203%20mm.csv";
 
 /* ===== STATE / DOM ===== */
@@ -281,7 +281,7 @@ function compute(){
     if(isFinite(fx)) unit_interne += fx;
   }
 
-  // Conversion → prix public
+  // Conversion → prix public (x2)
   const unit_public = unit_interne * UPLIFT_PUBLIC;
 
   const totalHT_public = unit_public * Q;
@@ -303,8 +303,7 @@ async function loadCSV(){
   ROWS  = rows;
   MAP   = buildMapping(HEADS);
 
-  elMsg.textContent =
-    `CSV chargé.\nEn-têtes: ${HEADS.join(' | ')}\nColonnes → Hauteur: ${MAP.hKey||'n/a'} | Brut: ${MAP.brutKey||'n/a'} | Laqué: ${MAP.laqKey||'n/a'} | Fixation: ${MAP.fixKey||'n/a'}`;
+  elMsg.textContent = `CSV OK (${ROWS.length} lignes)`;
 
   showRanges();
   compute();
@@ -363,10 +362,7 @@ loadCSV().catch(e=>{ msg.textContent='Erreur: '+e.message; });
         pu_public_ht: Number(pu_public_ht.toFixed(2))
       });
 
-      alert(`✅ Ligne ajoutée au devis !
-${designation}
-Qté : ${qte}
-PU HT : ${pu_public_ht.toFixed(2)} €`);
+      alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${qte}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
     }catch(err){
       console.error(err);
       alert('Erreur lors de l’ajout au devis : ' + err.message);
