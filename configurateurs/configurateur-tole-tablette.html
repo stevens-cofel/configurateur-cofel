@@ -1,320 +1,232 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>Configurateur Tôle Tablette – Cofel</title>
-
 <link rel="stylesheet" href="../styles/cofel.css" />
 <link rel="stylesheet" href="../styles/cofel-config.css" />
 
+<!-- Petites retouches locales (uniquement mise en page) -->
+<!-- Retouches locales (uniquement mise en page / wording UI) -->
 <style>
-  :root {
-    --violet: #5a2d82;
-    --violet-light: rgba(149, 117, 205, 0.35);
-    --violet-bg: rgba(90, 45, 130, 0.15);
-    --txt: #ffffff;
-    --border: rgba(255,255,255,.25);
+  /* Arrange les lignes radio (comme sur tes autres pages) */
+  .radio-row{display:flex;gap:8px;flex-wrap:wrap}
+  .radio-row label{
+    font-weight:600; border:1px solid #ddd; border-radius:10px;
+    padding:6px 10px; display:flex; align-items:center; gap:8px;
+    background:#fff;
+    padding:6px 10px; display:flex; align-items:center; gap:8px; background:#fff;
   }
+  /* Carte “résultats” légèrement mise en avant */
+  .result{
+    background:#fcfaff; border:1px solid #dec5f2; border-radius:12px;
+    padding:14px; margin:16px 0; text-align:center; font-size:18px;
+@@ -27,7 +24,7 @@
+  .hidden{display:none}
+  .hint{font-size:12px;color:#7d6f8e}
 
-  body {
-    margin: 0;
-    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: radial-gradient(circle at 30% 30%, #3e2162 0%, #1c102e 100%);
-    color: var(--txt);
-    min-height: 100vh;
-  }
-
-  .cofel-header {
-    background: rgba(90, 45, 130, 0.4);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .cofel-header .row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px;
-  }
-
-  .cofel-back {
-    color: var(--txt);
-    text-decoration: none;
-    border: 1px solid var(--border);
-    padding: 8px 14px;
-    border-radius: 10px;
-    backdrop-filter: blur(10px);
-  }
-
-  .cofel-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .cofel-brand img {
-    height: 40px;
-    border-radius: 6px;
-  }
-
-  .cofel-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0;
-  }
-
-  .cofel-container {
-    max-width: 1000px;
-    margin: 20px auto;
-    padding: 20px;
-  }
-
-  h1 {
-    text-align: center;
-    font-size: 26px;
-    color: #fff;
-  }
-
-  fieldset {
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 18px;
-    margin-top: 20px;
-    background: rgba(255, 255, 255, 0.07);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  }
-
-  legend {
-    color: var(--txt);
-    font-weight: 700;
-    padding: 0 10px;
-    font-size: 16px;
-  }
-
-  label {
-    font-weight: 500;
-    display: block;
-    margin-top: 12px;
-  }
-
-  input, select {
-    width: 100%;
-    padding: 10px 12px;
-    margin-top: 6px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: rgba(255,255,255,.08);
-    color: var(--txt);
-    font-size: 15px;
-    backdrop-filter: blur(6px);
-  }
-
-  input::placeholder {
-    color: rgba(255,255,255,.5);
-  }
-
-  select option {
-    background: #3e2162;
-    color: #fff;
-  }
-
-  input:focus, select:focus {
-    outline: none;
-    border-color: var(--violet-light);
-    background: rgba(255,255,255,.15);
-  }
-
-  .radio-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  .radio-row label {
-    background: rgba(149, 117, 205, 0.2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 16px;
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-  }
-
-  .radio-row label:hover {
-    background: rgba(149, 117, 205, 0.4);
-  }
-
-  .radio-row input[type="radio"],
-  .radio-row input[type="checkbox"] {
-    accent-color: #cbb3ff;
-    width: 18px;
-    height: 18px;
-  }
-
-  .hint {
-    font-size: 13px;
-    color: rgba(255,255,255,0.7);
-    margin-top: 8px;
-  }
-
-  .hidden {
-    display: none;
-  }
-
-  .result {
-    background: rgba(149, 117, 205, 0.25);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
-    margin-top: 24px;
-    text-align: center;
-    font-size: 18px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    backdrop-filter: blur(12px);
-  }
-
-  .result span {
-    font-weight: 700;
-    color: #fff;
-  }
-
-  #btnAddDevis {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    padding: 12px 20px;
-    background: linear-gradient(135deg, #7b4de0, #9f79ff);
-    border: none;
-    border-radius: 14px;
-    color: #fff;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.3);
-    z-index: 1000;
-  }
-
-  #btnAddDevis:hover {
-    background: linear-gradient(135deg, #8b5eff, #b495ff);
-  }
-
-  .cofel-footer {
-    text-align: center;
-    padding: 20px;
-    font-size: 13px;
-    color: rgba(255,255,255,0.6);
-  }
-</style>
+  /* Bouton Ajouter au devis */
+  /* Bouton Ajouter au devis flottant (conservé si besoin) */
+  #btnAddDevis{
+    position:fixed;right:20px;bottom:20px;padding:10px 16px;
+    background:#ffffff;border:1px solid #ccc;border-radius:10px;
+@@ -37,7 +34,7 @@
 </head>
-
 <body>
 
+<!-- En-tête violet Cofel, cohérent avec l’accueil -->
+<!-- En-tête violet Cofel -->
 <header class="cofel-header">
   <div class="row">
-    <a class="cofel-back" href="../index.html">⬅ Retour</a>
-    <div class="cofel-brand">
-      <img src="../assets/logo cofel.jpg" alt="Cofel" />
-      <h1 class="cofel-title">Configurateur — Tôle Tablette</h1>
-    </div>
+    <a class="cofel-back" href="../index.html">⬅ Retour aux configurateurs</a>
+@@ -48,7 +45,6 @@ <h1 class="cofel-title">Configurateur — Tôle Tablette</h1>
   </div>
 </header>
 
+<!-- Conteneur commun (largeur & marges cohérentes) -->
 <div class="cofel-container">
-  <h1>Tôle Tablette</h1>
+  <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
 
-  <fieldset>
-    <legend>Quantité</legend>
-    <label for="quantite">Quantité</label>
-    <input type="number" id="quantite" min="1" value="1" />
-  </fieldset>
-
-  <fieldset>
-    <legend>Dimensions</legend>
-    <label for="largeur">Largeur (mm)</label>
-    <input type="number" id="largeur" placeholder="Ex : 1500" min="1" />
-    <label for="hauteur">Hauteur (mm)</label>
-    <input type="number" id="hauteur" placeholder="Ex : 500" min="1" />
-    <label>Surface tôle (auto)</label>
-    <input id="surfaceCalc" disabled value="0.000 m²" />
-    <div class="hint">Surface = (L × H) / 1 000 000</div>
-  </fieldset>
-
-  <fieldset>
-    <legend>Matière</legend>
-    <div class="radio-row">
-      <label><input type="radio" name="matiere" value="brut"> Alu 20/10 <b>brut</b></label>
-      <label><input type="radio" name="matiere" value="prelaque" checked> <b>Prélaqué</b></label>
-      <label><input type="radio" name="matiere" value="laque"> Alu 20/10 <b>laqué</b></label>
-    </div>
-  </fieldset>
-
-  <fieldset>
-    <legend>Ajourage / Remplissage</legend>
-    <label class="radio-row"><input type="checkbox" id="optAjour" /> Ajourage de la face avant</label>
-    <div id="blockAjour" class="hidden">
-      <label for="pmmaSurface">Surface PMMA à facturer (m²)</label>
-      <input type="number" id="pmmaSurface" placeholder="Ex : 0.75" step="0.001" />
-      <button id="btnCopySurface" style="margin-top:10px;padding:10px 16px;background:#7b4de0;border:none;border-radius:10px;color:#fff;cursor:pointer;">Copier surface tôle</button>
-      <div class="hint">Ajourage : /m² × surface PMMA. Les LED utilisent aussi cette surface.</div>
-      <label for="pmmaSel">Type de PMMA</label>
-      <select id="pmmaSel"><option value="">(aucun)</option></select>
-      <label class="radio-row"><input type="checkbox" id="optLED" /> Éclairage LED</label>
-    </div>
-  </fieldset>
-
-  <fieldset>
-    <legend>Fixation</legend>
-    <div class="radio-row">
-      <label><input type="radio" name="fixation" value="aucune" checked> Aucune</label>
-      <label><input type="radio" name="fixation" value="boite"> Boîte à chaussure</label>
-      <label><input type="radio" name="fixation" value="chassis"> Châssis tube 30×30</label>
-      <label><input type="radio" name="fixation" value="corniere"> Cornière</label>
-    </div>
-
-    <div id="fixBoite" class="hidden">
-      <div class="radio-row" style="margin-top:8px">
-        <label><input type="radio" name="boiteMat" value="brut" checked> Boîte alu <b>brut</b></label>
-        <label><input type="radio" name="boiteMat" value="laque"> Boîte alu <b>laqué</b></label>
+@@ -91,9 +87,10 @@ <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
+        <div>
+          <label>Matière de la tôle tablette</label>
+          <div class="radio-row" id="matiereRow">
+            <label><input type="radio" name="matiere" value="brut"> Alu 20/10 <b>brut</b> (71,50 €/m²)</label>
+            <label><input type="radio" name="matiere" value="prelaque" checked> <b>Prélaqué</b> (89,00 €/m²)</label>
+            <label><input type="radio" name="matiere" value="laque"> Alu 20/10 <b>laqué</b> (105,00 €/m²)</label>
+            <!-- PRIX VISUELS SUPPRIMÉS DANS LES LIBELLÉS -->
+            <label><input type="radio" name="matiere" value="brut"> Alu 20/10 <b>brut</b></label>
+            <label><input type="radio" name="matiere" value="prelaque" checked> <b>Prélaqué</b></label>
+            <label><input type="radio" name="matiere" value="laque"> Alu 20/10 <b>laqué</b></label>
+          </div>
+        </div>
+        <div></div>
+@@ -115,10 +112,12 @@ <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
+              <input type="number" id="pmmaSurface" min="0" step="0.001" placeholder="Ex : 0.75" style="flex:1" />
+              <button class="btn" id="btnCopySurface" style="flex:0 0 auto">Copier surface tôle</button>
+            </div>
+            <div class="hint">Ajourage : <b>99,00 €/m²</b> × surface PMMA. Les LED utilisent aussi cette surface.</div>
+            <!-- TEXTE MODIFIÉ : plus de prix -->
+            <div class="hint">Ajourage : /m² × surface PMMA. Les LED utilisent aussi cette surface.</div>
+          </div>
+          <div>
+            <label for="pmmaSel">Type de PMMA (si trouvé dans le CSV)</label>
+            <!-- "(si trouvé dans le CSV)" SUPPRIMÉ -->
+            <label for="pmmaSel">Type de PMMA</label>
+            <select id="pmmaSel"><option value="">(aucun)</option></select>
+          </div>
+        </div>
+@@ -140,20 +139,22 @@ <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
+        <label><input type="radio" name="fixation" value="aucune" checked> Aucune</label>
+        <label><input type="radio" name="fixation" value="boite"> Boîte à chaussure</label>
+        <label><input type="radio" name="fixation" value="chassis"> Châssis tube 30×30</label>
+        <label><input type="radio" name="fixation" value="corniere"> Cornière (6,5 €/ml sur périmètre)</label>
+        <label><input type="radio" name="fixation" value="corniere"> Cornière</label>
       </div>
-      <div class="hint">Même dimension que la tôle.</div>
-    </div>
 
-    <div id="fixChassis" class="hidden">
-      <div class="hint" style="margin-top:8px">
-        Linéaire châssis = périmètre (2×(L+H)).<br />Goussets = min 4, puis +4 par m².
+      <div id="fixBoite" class="hidden">
+        <div class="radio-row" style="margin-top:8px">
+          <label><input type="radio" name="boiteMat" value="brut" checked> Boîte en alu 20/10 <b>brut</b> (71,50 €/m²)</label>
+          <label><input type="radio" name="boiteMat" value="laque"> Boîte en alu 20/10 <b>laqué</b> (105,00 €/m²)</label>
+          <!-- PRIX VISUELS SUPPRIMÉS DANS LES LIBELLÉS -->
+          <label><input type="radio" name="boiteMat" value="brut" checked> Boîte en alu 20/10 <b>brut</b></label>
+          <label><input type="radio" name="boiteMat" value="laque"> Boîte en alu 20/10 <b>laqué</b></label>
+        </div>
+        <div class="hint">La boîte a la <b>même dimension</b> que la tôle (surface identique A).</div>
       </div>
-      <label for="goussetPrixU">Gousset €/u</label>
-      <input type="number" id="goussetPrixU" placeholder="€/u (auto/manuel)" min="0" step="0.01" />
-    </div>
 
-    <div id="fixCorniere" class="hidden">
-      <div class="hint">Longueur = périmètre (2×(L+H)).</div>
-    </div>
-  </fieldset>
+      <div id="fixChassis" class="hidden">
+        <!-- TEXTE SANS TARIFS -->
+        <div class="hint" style="margin-top:8px">
+          Linéaire châssis = <b>périmètre</b> (2×(L+H)) — <b>10,50 €/ml</b>.<br />
+          Linéaire châssis = <b>périmètre</b> (2×(L+H)).<br />
+          Goussets = minimum 4, puis +4 par m² (arrondi à l’entier sup.).
+        </div>
+        <div style="margin-top:8px">
+@@ -163,7 +164,8 @@ <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
+      </div>
 
-  <div class="result">
-    <p>Prix unitaire HT : <span id="prixUHT">0,00</span> €</p>
-    <p>Total HT : <span id="prixHT">0,00</span> €</p>
-    <p>Total TTC : <span id="prixTTC">0,00</span> €</p>
-  </div>
-</div>
+      <div id="fixCorniere" class="hidden">
+        <div class="hint">Longueur = périmètre (2×(L+H)) — <b>6,50 €/ml</b>.</div>
+        <!-- TEXTE SANS TARIFS -->
+        <div class="hint">Longueur = périmètre (2×(L+H)).</div>
+      </div>
+    </fieldset>
 
-<footer class="cofel-footer">
-  © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
-</footer>
+@@ -185,20 +187,19 @@ <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
+/*** CONFIG ***/
+const TVA = 0.20; // fixe 20 %
+const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/toles_tabelette";
+const CORNIERE_PRICE_ML = 6.5;   // €/ml fixe
+const CHASSIS_PRICE_ML  = 10.5;  // €/ml fixe (châssis)
+const MATERIAL_PRICE_M2 = {       // €/m² fixes pour la tôle tablette
+const CORNIERE_PRICE_ML = 6.5;   // €/ml (interne)
+const CHASSIS_PRICE_ML  = 10.5;  // €/ml (interne)
+const MATERIAL_PRICE_M2 = {       // €/m² (interne) pour la tôle tablette
+  brut: 71.5,
+  prelaque: 89.0,
+  laque: 105.0
+};
+const BOX_PRICE_M2 = {            // €/m² fixes pour la boîte (choix indépendant)
+const BOX_PRICE_M2 = {            // €/m² (interne) pour la boîte
+  brut: 71.5,
+  laque: 105.0
+};
+const AJOURAGE_PRICE_M2 = 99.0;   // €/m² — appliqué sur la surface PMMA saisie
+// Affichage PUBLIC : x2 (aucune mention côté client)
+const UPLIFT_PUBLIC = 2.0;
+const AJOURAGE_PRICE_M2 = 99.0;   // €/m² (interne)
+const UPLIFT_PUBLIC = 2.0;        // affichage public x2 (non affiché)
 
-<button id="btnAddDevis">➕ Ajouter au devis</button>
+/*** STATE / DOM ***/
+const $ = id => document.getElementById(id);
+@@ -209,7 +210,6 @@ <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
 
-<script src="../js/devis-core.js"></script>
-<script>
-// --- logique conservée (calculs, CSV, etc.) ---
-// tu peux ici coller ton JS actuel sans rien changer, tout fonctionnera identique.
-</script>
+const elOptAjour=$('optAjour'), elBlockAjour=$('blockAjour');
+const elPMMA=$('pmmaSel'), elPMMASurface=$('pmmaSurface'), elBtnCopySurface=$('btnCopySurface');
 
-</body>
-</html>
+const elLED=$('optLED');
+
+const fixRadios=[...document.querySelectorAll('input[name="fixation"]')];
+@@ -312,7 +312,9 @@ <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
+  [...pmmas.entries()].forEach(([label, val])=>{
+    const o=document.createElement('option');
+    o.value=label;
+    o.textContent = isFinite(val)?`${label} – ${val.toFixed(2)} €/m²`:`${label}`;
+    /* PRIX VISUELS SUPPRIMÉS : on n’affiche que le label */
+    o.textContent = label;
+    /* On conserve la donnée prix pour le calcul, via data-price */
+    o.dataset.price = isFinite(val)?val:'';
+    elPMMA.appendChild(o);
+  });
+@@ -354,7 +356,7 @@ <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
+  let ajourage_interne=0, pmma_interne=0, led_interne=0, pmmaSurf=0;
+  if(elOptAjour.checked){
+    pmmaSurf = Number(elPMMASurface.value||0); // m²
+    ajourage_interne = AJOURAGE_PRICE_M2 * Math.max(0, pmmaSurf); // 99 €/m² × surface PMMA
+    ajourage_interne = AJOURAGE_PRICE_M2 * Math.max(0, pmmaSurf); // 99 €/m² × surface PMMA (interne)
+
+    const selectedPMMA = elPMMA.options[elPMMA.selectedIndex];
+    let pmmaM2 = selectedPMMA && selectedPMMA.dataset.price ? Number(selectedPMMA.dataset.price) : NaN;
+@@ -371,32 +373,30 @@ <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
+  let fix_interne=0, nbGoussets=0;
+
+  if(fixVal==='boite'){
+    // Boîte : matière indépendante (brut/laqué), même surface A
+    const boiteMat = (document.querySelector('input[name="boiteMat"]:checked')||{}).value || 'brut';
+    const boiteM2 = BOX_PRICE_M2[boiteMat] || 0;
+    fix_interne = boiteM2 * A;
+
+  }else if(fixVal==='chassis'){
+    const chLinCost = CHASSIS_PRICE_ML * P; // périmètre × 10,50 €/ml
+    const chLinCost = CHASSIS_PRICE_ML * P; // périmètre × €/ml (interne)
+    nbGoussets = Math.max(4, Math.ceil(4 + 4 * A)); // min 4 puis +4/m²
+    let gusU = autoFindPrice(/gousset/,'u');
+    if(!isFinite(gusU)) gusU = Number(elGoussetPrixU.value||0);
+    const gusCost = (isFinite(gusU)?gusU:0) * nbGoussets;
+    fix_interne = chLinCost + gusCost;
+
+  }else if(fixVal==='corniere'){
+    fix_interne = CORNIERE_PRICE_ML * P; // périmètre × 6,5 €/ml
+    fix_interne = CORNIERE_PRICE_ML * P; // périmètre × €/ml (interne)
+  }
+
+  // ** Total interne **
+  // Total interne
+  const unitHT_interne = base_interne + ajourage_interne + pmma_interne + led_interne + fix_interne;
+
+  // ** Conversion → affichage public (x2) **
+  // Conversion → affichage public (x2)
+  const unitHT_public = unitHT_interne * UPLIFT_PUBLIC;
+  const totalHT_public = unitHT_public * Q;
+  const totalTTC_public = totalHT_public * (1+TVA);
+
+  // Affichage (PUBLIC)
+  elUHT.textContent = euro(unitHT_public);
+  elHT.textContent  = euro(totalHT_public);
+  elTTC.textContent = euro(totalTTC_public);
+@@ -421,7 +421,10 @@ <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
+    ...document.querySelectorAll('input[name="boiteMat"]')
+  ].forEach(el=>{
+    el.addEventListener(evt, e=>{
+      if(e.target===btnCopySurface){ e.preventDefault(); pmmaSurface.value = areaM2(largeur.value, hauteur.value).toFixed(3); }
+      if(e.target===btnCopySurface){
+        e.preventDefault();
+        pmmaSurface.value = areaM2(largeur.value, hauteur.value).toFixed(3);
+      }
+      toggleBlocks();
+      compute();
+    });
+@@ -445,7 +448,7 @@ <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
+  if(!btn) return;
+
+  function parseTotalHTPublic(){
+    const txt = document.getElementById('prixHT').innerText.trim(); // "1 234,56"
+    const txt = document.getElementById('prixHT').innerText.trim();
+    return Number(txt.replace(/\s/g,'').replace(',', '.')) || 0;
+  }
+
+@@ -478,7 +481,7 @@ <h1 style="margin:8px 0 14px">Tôle Tablette</h1>
+      if (total_ht_public <= 0){ alert("Le prix est à 0, vérifie les paramètres."); return; }
+      const pu_public_ht = qte>0 ? (total_ht_public / qte) : 0;
+
+      // Désignation lisible
+      // Désignation
+      const parts = [
+        `Tôle Tablette`,
+        `L ${Lmm} × H ${Hmm} mm`,
