@@ -24,8 +24,7 @@
     box-shadow:0 8px 18px rgba(90,45,130,.08);
   }
   .muted{color:#7d6f8e;font-size:12px;margin-top:6px;white-space:pre-wrap}
-  fieldset legend{color:#5a2d82;font-weight:800}
-</style>
+  fieldset legend{color:#5a2d82;font-weight:800}</style>
 </head>
 <body>
 
@@ -102,8 +101,8 @@
 <script>
 /* ===== PARAMS ===== */
 const TVA = 0.20;
-// IMPORTANT : tous les prix affichés/enregistrés sont en PUBLIC
-const UPLIFT_PUBLIC = 1.5;
+// IMPORTANT : tous les prix affichés/enregistrés sont en PUBLIC (×2)
+const UPLIFT_PUBLIC = 2.0; // était 1.5 → désormais +100% pour compenser une remise commerciale éventuelle de 50%
 const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/Enseigne%20drapeaux.csv";
 
 /* ===== STATE / DOM ===== */
@@ -219,7 +218,7 @@ function findRow(){
   return pool[0];
 }
 
-/* Compute : calcule en PRIX PUBLIC (×1,5) */
+/* Compute : calcule en PRIX PUBLIC (×2) */
 function compute(){
   // contraintes d’UI
   if(elForme.value==='rond'){ elLaq.checked=true; elLaq.disabled=true; }
@@ -233,7 +232,7 @@ function compute(){
   let unit_interne = numFR(row[MAP.PRIX]);
   if(!isFinite(unit_interne)) unit_interne = 0;
 
-  // Conversion en PRIX PUBLIC
+  // Conversion en PRIX PUBLIC (×2)
   const unit_public = unit_interne * UPLIFT_PUBLIC;
 
   // Totaux en PUBLIC
@@ -282,7 +281,8 @@ loadCSV();
 
 <script>
 // === AJOUT AU DEVIS ===
-// On lit le prix affiché (déjà PUBLIC), on en déduit le PU PUBLIC et on envoie pu_public_ht.
+// On lit le prix affiché (déjà PUBLIC ×2), on en déduit le PU PUBLIC et on envoie pu_public_ht.
+
 document.getElementById("btnAddDevis").addEventListener("click", () => {
   const quantite = Math.max(1, Number(document.getElementById("quantite").value || 1));
 
@@ -302,10 +302,7 @@ document.getElementById("btnAddDevis").addEventListener("click", () => {
     pu_public_ht
   });
 
-  alert(`✅ Ajouté au devis !
-${designation}
-Qté : ${quantite}
-PU HT : ${pu_public_ht.toFixed(2)} €`);
+  alert(`✅ Ajouté au devis !\n${designation}\nQté : ${quantite}\nPU HT (PUBLIC ×2) : ${pu_public_ht.toFixed(2)} €`);
 });
 </script>
 
