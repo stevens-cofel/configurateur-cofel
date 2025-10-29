@@ -5,113 +5,145 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Configurateur — Totems Cofel</title>
 
-<!-- (optionnels) si tu as déjà ces feuilles communes -->
+<!-- (Optionnel) si tu as des styles communs -->
 <link rel="stylesheet" href="../styles/cofel.css" />
 <link rel="stylesheet" href="../styles/cofel-config.css" />
 
 <style>
-:root{
-  --violet:#5a2d82;
-  --violet2:#7c5ab8;
-  --bg:#f6f3fa;
-  --txt:#2b2140;
-  --card:#fff;
-  --bd:#e6daf4;
-  --bd2:#d8cbe8;
-  --info-bg:#fcfaff;
-  --info-bd:#dec5f2;
-}
+  /* ====== DA Cofel : verre violet (même esprit que Tôle Tablette) ====== */
+  :root{
+    --violet:#5a2d82;
+    --violet-2:#7838a7;
+    --glass: rgba(255,255,255,.08);
+    --glass-hr: rgba(255,255,255,.14);
+    --txt:#f5f7ff;
+    --txt-dim:#e6e6ff;
+    --accent:#c9b7ff;
+    --radius:18px;
+    --blur:18px;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--txt);
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
+    background:
+      radial-gradient(800px 500px at 20% -10%, rgba(255,255,255,.10), transparent 60%),
+      radial-gradient(800px 500px at 110% 10%, rgba(255,255,255,.08), transparent 60%),
+      linear-gradient(135deg, var(--violet), var(--violet-2));
+  }
 
-/* ===== Reset/global ===== */
-*{box-sizing:border-box}
-body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--txt)}
-h1{margin:8px 0 14px;text-align:center}
+  /* ===== Header (cohérent accueil) ===== */
+  .cofel-header{
+    position:sticky; top:0; z-index:1000; color:#fff;
+    background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+    border-bottom:1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(var(--blur));
+  }
+  .cofel-header .row{
+    max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:16px; padding:10px 14px;
+  }
+  .cofel-back{
+    color:#fff; text-decoration:none; border:1px solid rgba(255,255,255,.35);
+    padding:8px 12px; border-radius:12px; backdrop-filter: blur(10px);
+  }
+  .cofel-brand{display:flex; align-items:center; gap:10px}
+  .cofel-brand img{height:36px; border-radius:8px; object-fit:cover}
+  .cofel-title{font-size:18px; margin:0}
+  .cofel-container{max-width:1100px; margin:0 auto; padding:18px}
 
-/* ===== Bandeau Cofel ===== */
-.cofel-header{background:var(--violet);color:#fff}
-.cofel-header .row{
-  max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 14px
-}
-.cofel-back{
-  color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.35);
-  padding:8px 12px;border-radius:10px
-}
-.cofel-brand{display:flex;align-items:center;gap:10px}
-.cofel-brand img{height:36px;border-radius:6px;object-fit:cover}
-.cofel-title{font-size:18px;margin:0}
+  h1{margin:8px 0 14px; text-align:center; letter-spacing:.2px}
 
-/* ===== Conteneur & carte ===== */
-.cofel-container{max-width:1100px;margin:0 auto;padding:14px}
-.wrap{
-  max-width:980px;margin:10px auto 24px;background:var(--card);
-  border-radius:14px;box-shadow:0 10px 28px rgba(90,45,130,.12);padding:20px
-}
+  /* ===== Cartes / fieldsets “verre” ===== */
+  fieldset{
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:20px; padding:16px; margin:16px 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+    box-shadow: var(--shadow); backdrop-filter: blur(var(--blur));
+    overflow:visible;
+  }
+  legend{
+    padding:0 10px; font-weight:800; color:#fff; letter-spacing:.2px;
+  }
+  label{font-weight:700; font-size:13px; color:var(--accent); display:block; margin-top:10px}
 
-/* ===== Form ===== */
-label{display:block;margin-top:14px;font-weight:700}
-select,input{
-  width:100%;padding:10px;margin-top:6px;border:1px solid var(--bd2);
-  border-radius:10px;min-height:44px;
-  background:rgba(255,255,255,0.92);
-  box-shadow:0 2px 6px rgba(90,45,130,.08);
-  color:var(--violet);font-weight:600;
-}
-select:focus,input:focus{outline:2px solid var(--violet2)}
-select option{background:#fff;color:#2b2140}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:820px){.grid{grid-template-columns:1fr}}
+  input[type="number"],
+  input[type="text"],
+  select{
+    width:100%; margin-top:6px; padding:12px 12px; min-height:42px;
+    background: rgba(255,255,255,.10); color:var(--txt);
+    border:1px solid rgba(255,255,255,.24); border-radius:14px; outline:none;
+    transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    position:relative; z-index:1;
+  }
+  input::placeholder{color:#f0edff; opacity:.75}
+  input:focus, select:focus{
+    border-color: rgba(255,255,255,.38);
+    background: rgba(255,255,255,.16);
+    box-shadow: 0 0 0 4px rgba(255,255,255,.08) inset;
+  }
 
-/* ===== Mapping (laisse caché en prod) ===== */
-.mapping{
-  margin:16px 0;padding:12px;border:1px solid var(--bd2);
-  background:#fff7e6;border-radius:12px
-}
-.mapping h3{margin:0 0 8px}
-.btn{
-  display:inline-block;margin-top:8px;padding:10px 14px;border:none;
-  background:var(--violet);color:#fff;border-radius:10px;cursor:pointer;
-  font-weight:700
-}
-.btn:disabled{opacity:.6;cursor:not-allowed}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.hr{height:1px;background:var(--bd2);margin:16px 0}
+  /* Menu déroulant harmonisé (fond violet pour la liste) */
+  select{ appearance:auto; }
+  select option{ background:#3c1f61; color:#fff; }
+  fieldset, .options-wrap{ position:relative; z-index:1; }
+  select:focus{ z-index:1001; }
 
-/* ===== Options ===== */
-.options-wrap{
-  margin-top:8px;border:1px solid var(--bd2);border-radius:10px;
-  padding:10px;background:#fff
-}
-.opt-row{
-  display:flex;align-items:center;gap:8px;margin:6px 0;
-  border:1px solid var(--bd2);border-radius:8px;padding:8px 10px;background:#fcfaff
-}
-.opt-row input[type="checkbox"]{transform:scale(1.2);accent-color:var(--violet2)}
-.opt-row span.note{color:#7b6f8e;font-size:12px}
+  .grid{display:grid; gap:16px}
+  @media(min-width:820px){ .grid{grid-template-columns:1fr 1fr} }
 
-/* ===== Résultats ===== */
-.result{
-  margin-top:22px;padding:16px;background:var(--info-bg);
-  border:1px solid var(--info-bd);border-radius:12px;
-  font-size:18px;text-align:center;box-shadow:0 8px 18px rgba(90,45,130,.08)
-}
+  /* Mapping (resté discret) */
+  .mapping{
+    margin:16px 0; padding:12px;
+    background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+    border:1px solid rgba(255,255,255,.18); border-radius:16px;
+  }
+  .mapping h3{margin:0 0 8px; color:#fff}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:720px){ .two{grid-template-columns:1fr} }
 
-/* ===== Footer ===== */
-.cofel-footer{
-  margin:24px 0 0;padding:14px;text-align:center;color:#6f5b86;font-size:13px;
-  border-top:1px solid var(--bd);background:#fbf9fe
-}
+  /* Options */
+  .options-wrap{
+    margin-top:8px;border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:10px;
+    background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+  }
+  .opt-row{
+    display:flex;align-items:center;gap:10px;margin:6px 0;
+    border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 12px;
+    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.08));
+  }
+  .opt-row input[type="checkbox"]{transform:scale(1.1); accent-color:#cbb3ff}
+  .opt-row .note{color:var(--txt-dim);font-size:12px}
 
-/* ===== Bouton “ajouter au devis” ===== */
-#btnAddDevis{
-  position:fixed;right:20px;bottom:20px;padding:10px 16px;
-  background:#ffffff;border:1px solid #ccc;border-radius:10px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer;z-index:999;font-weight:600
-}
+  /* Résultats */
+  .result{
+    margin-top:18px;padding:16px;text-align:center;font-size:18px;
+    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+    border:1px solid rgba(255,255,255,.24); border-radius:20px;
+    box-shadow: var(--shadow); backdrop-filter: blur(var(--blur));
+  }
+  .result span{ font-weight:800; }
+
+  /* Bouton Ajouter au devis */
+  #btnAddDevis{
+    position:fixed; right:20px; bottom:20px; padding:12px 18px;
+    background:#fff; color:#0b0b0b; border:none; border-radius:14px;
+    box-shadow:0 10px 24px rgba(0,0,0,.25); cursor:pointer; font-weight:800; z-index:2000;
+    transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+  }
+  #btnAddDevis:active{ transform: translateY(1px); box-shadow: 0 6px 16px rgba(0,0,0,.28); }
+
+  /* Footer */
+  .cofel-footer{
+    color:#f3ecff; font-size:12px; text-align:center; padding:24px 10px; opacity:.9;
+  }
+  .muted{color:var(--txt-dim);font-size:12px;margin-top:8px;white-space:pre-wrap}
 </style>
 </head>
 <body>
 
-<!-- Bandeau retour -->
+<!-- Bandeau violet / retour -->
 <header class="cofel-header">
   <div class="row">
     <a class="cofel-back" href="../index.html">⬅ Retour aux configurateurs</a>
@@ -126,6 +158,7 @@ select option{background:#fff;color:#2b2140}
   <h1>Totems Cofel</h1>
 
   <div class="wrap">
+
     <!-- ===== MAPPAGE TARIFS ===== -->
     <div id="mapTarifsBox" class="mapping" style="display:none">
       <h3>📄 Mappage des colonnes TARIFS</h3>
@@ -147,7 +180,7 @@ select option{background:#fff;color:#2b2140}
           <select id="mapT_L"></select>
         </div>
       </div>
-      <button id="applyMapTarifs" class="btn">Appliquer le mappage TARIFS</button>
+      <button id="applyMapTarifs" class="pill">Appliquer le mappage TARIFS</button>
     </div>
 
     <!-- ===== MAPPAGE OPTIONS ===== -->
@@ -175,37 +208,39 @@ select option{background:#fff;color:#2b2140}
           <select id="mapO_Actif"></select>
         </div>
       </div>
-      <button id="applyMapOptions" class="btn">Appliquer le mappage OPTIONS</button>
+      <button id="applyMapOptions" class="pill">Appliquer le mappage OPTIONS</button>
     </div>
-
-    <div class="hr"></div>
 
     <!-- ===== UI CONFIG ===== -->
-    <label for="type">Type de face</label>
-    <select id="type"><option value="">— sélectionnez —</option></select>
+    <fieldset>
+      <legend>Configuration</legend>
+      <label for="type">Type de face</label>
+      <select id="type"><option value="">— sélectionnez —</option></select>
 
-    <div class="grid">
-      <div>
-        <label for="hauteur">Hauteur (mm)</label>
-        <select id="hauteur"><option value="">— sélectionnez —</option></select>
+      <div class="grid">
+        <div>
+          <label for="hauteur">Hauteur (mm)</label>
+          <select id="hauteur"><option value="">— sélectionnez —</option></select>
+        </div>
+        <div>
+          <label for="largeur">Largeur (mm)</label>
+          <select id="largeur"><option value="">— sélectionnez —</option></select>
+        </div>
       </div>
-      <div>
-        <label for="largeur">Largeur (mm)</label>
-        <select id="largeur"><option value="">— sélectionnez —</option></select>
+
+      <label>Options (multi-choix)</label>
+      <div id="optionsBox" class="options-wrap">
+        <div class="opt-row"><em>Aucune option disponible tant que la hauteur n’est pas choisie.</em></div>
       </div>
-    </div>
 
-    <label>Options (multi-choix)</label>
-    <div id="optionsBox" class="options-wrap">
-      <div class="opt-row"><em>Aucune option disponible tant que la hauteur n’est pas choisie.</em></div>
-    </div>
+      <label for="quantite">Quantité</label>
+      <input type="number" id="quantite" value="1" min="1"/>
+    </fieldset>
 
-    <label for="quantite">Quantité</label>
-    <input type="number" id="quantite" value="1" min="1"/>
-
+    <!-- ===== Résultats ===== -->
     <div class="result">
-      <p>Total HT (tarif public) : <span id="prixHT">0,00</span> €</p>
-      <p>Total TTC (TVA 20%) : <span id="prixTTC">0,00</span> €</p>
+      <p>Prix HT : <span id="prixHT">0,00</span> €</p>
+      <p>Prix TTC : <span id="prixTTC">0,00</span> €</p>
     </div>
 
     <div id="msg" class="muted"></div>
@@ -217,18 +252,13 @@ select option{background:#fff;color:#2b2140}
   © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
 </footer>
 
-<!-- Moteur de devis -->
-<script src="../js/devis-core.js"></script>
-
-<!-- Bouton ajout devis -->
-<button id="btnAddDevis">➕ Ajouter au devis</button>
-
+<!-- ===== JS (fonctionnel, avec tarif PUBLIC x2) ===== -->
 <script>
 /* ------- CONFIG ------- */
 const URL_TARIFS  = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/Tarifs_Totems_.csv";
 const URL_OPTIONS = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/option%20platine%20et%20panier%20de%20crosses%20(1).csv";
 const TVA = 0.20;
-// IMPORTANT : affichage public (x2)
+// IMPORTANT : affichage PUBLIC = x2
 const UPLIFT_PUBLIC = 2.0;
 
 /* ------- STATE ------- */
@@ -274,8 +304,7 @@ function parseCSVAuto(text){
   const heads = rawHeads.map(h=>normalizeKey(h));
   const rows = lines.slice(1).map(line=>{
     const cells = line.split(sep).map(c=>c.replace(/^"+|"+$/g,'').trim());
-    const o={}; heads.forEach((h,i)=>o[h]=cells[i]??'' );
-    return o;
+    const o={}; heads.forEach((h,i)=>o[h]=cells[i]??''); return o;
   });
   return { rows, rawHeads, heads };
 }
@@ -344,6 +373,7 @@ function populateHL(){
   elH.innerHTML = '<option value="">— sélectionnez —</option>' + H.map(v=>`<option value="${v}">${v}</option>`).join('');
   elL.innerHTML = '<option value="">— sélectionnez —</option>' + L.map(v=>`<option value="${v}">${v}</option>`).join('');
 }
+
 function renderOptionsCheckboxes(){
   const families = [...new Set(OPTIONS.map(o=>o.typeOption))].filter(Boolean).sort();
   if(!families.length){
@@ -385,7 +415,7 @@ function renderOptionsCheckboxes(){
   }
 }
 
-/* ------- CALCUL ------- */
+/* ------- CALCUL (affichage PUBLIC x2) ------- */
 function priceBase(){
   const t = elType.value;
   const h = num(elH.value);
@@ -397,7 +427,7 @@ function priceBase(){
     Math.abs(num(r.h)-h)<0.001 &&
     Math.abs(num(r.l)-l)<0.001
   );
-  return row ? row.priceBase : 0; // prix interne unitaire
+  return row ? row.priceBase : 0; // interne
 }
 function priceOptionsSum(){
   const checked = [...elOptsBox.querySelectorAll('input[name="opt"]:checked')].map(c=>c.value);
@@ -408,19 +438,20 @@ function priceOptionsSum(){
     if(!rows.length) return sum;
     const unit = Math.max(...rows.map(o=>o.priceUnit).filter(v=>!isNaN(v)));
     return sum + (isFinite(unit)?unit:0);
-  }, 0); // somme interne
+  }, 0); // interne
 }
 function compute(){
   const base_interne = priceBase();
   const opt_interne  = priceOptionsSum();
   const qte  = Math.max(1, parseInt(elQte.value||'1',10));
 
-  // Conversion → AFFICHAGE PUBLIC (x2)
-  const totalHT_public  = (base_interne + opt_interne) * qte * UPLIFT_PUBLIC;
-  const totalTTC_public = totalHT_public * (1+TVA);
+  // → PUBLIC x2
+  const unit_public  = (base_interne + opt_interne) * UPLIFT_PUBLIC;
+  const totalHT_pub  = unit_public * qte;
+  const totalTTC_pub = totalHT_pub * (1+TVA);
 
-  elHT.textContent  = totalHT_public.toFixed(2).replace('.', ',');
-  elTTC.textContent = totalTTC_public.toFixed(2).replace('.', ',');
+  elHT.textContent  = totalHT_pub.toFixed(2).replace('.', ',');
+  elTTC.textContent = totalTTC_pub.toFixed(2).replace('.', ',');
 }
 
 /* ------- CHARGEMENT ------- */
@@ -435,35 +466,17 @@ async function loadAll(){
     RAW_TARIFFS = pT.rows; RAW_HEADERS_T = pT.rawHeads; HEADS_T = pT.heads;
     RAW_OPTIONS = pO.rows; RAW_HEADERS_O = pO.rawHeads; HEADS_O = pO.heads;
 
-    // suggestions de mappage (si besoin)
-    (function suggestMapTarifsLocal(){
-      const f = (re)=> HEADS_T.find(k=>re.test(k));
-      MAP_T.type  = MAP_T.type  || f(/type/);
-      MAP_T.h     = MAP_T.h     || f(/hauteur|height/);
-      MAP_T.l     = MAP_T.l     || f(/largeur|width/);
-      MAP_T.price = MAP_T.price || f(/prix|base|eur|ht/);
-    })();
-    (function suggestMapOptionsLocal(){
-      const f = (re)=> HEADS_O.find(k=>re.test(k));
-      MAP_O.type  = MAP_O.type  || f(/type/);
-      MAP_O.hmin  = MAP_O.hmin  || f(/min/);
-      MAP_O.hmax  = MAP_O.hmax  || f(/max/);
-      MAP_O.price = MAP_O.price || f(/prix|ht|unitaire|price/);
-      MAP_O.actif = MAP_O.actif || f(/actif|active|isactive|true|oui|1|vrai|yes/);
-    })();
+    suggestMapTarifs(); suggestMapOptions();
 
-    // si déjà mappé → appliquer direct
     const mapTarifsBox  = document.getElementById('mapTarifsBox');
     const mapOptionsBox = document.getElementById('mapOptionsBox');
 
     const setSel = (id, heads, raws, val)=>{
       const el = document.getElementById(id);
-      if(!el) return null;
       fillSelect(el, heads, raws);
       if(val) el.value = val;
       return el;
     };
-
     const sTtype  = setSel('mapT_Type',  HEADS_T, RAW_HEADERS_T, MAP_T.type);
     const sTh     = setSel('mapT_H',     HEADS_T, RAW_HEADERS_T, MAP_T.h);
     const sTl     = setSel('mapT_L',     HEADS_T, RAW_HEADERS_T, MAP_T.l);
@@ -478,8 +491,9 @@ async function loadAll(){
     mapTarifsBox.style.display  = (MAP_T.type && MAP_T.h && MAP_T.l && MAP_T.price) ? 'none' : 'block';
     mapOptionsBox.style.display = (MAP_O.type && MAP_O.hmin && MAP_O.hmax && MAP_O.price && MAP_O.actif) ? 'none' : 'block';
 
-    if(mapTarifsBox.style.display==='none'){ applyTarifs(); }
-    if(mapOptionsBox.style.display==='none'){ applyOptions(); }
+    let okT=false, okO=false;
+    if(mapTarifsBox.style.display==='none') okT=applyTarifs();
+    if(mapOptionsBox.style.display==='none') okO=applyOptions();
 
     document.getElementById('applyMapTarifs').onclick=()=>{
       MAP_T.type=sTtype.value||null; MAP_T.h=sTh.value||null; MAP_T.l=sTl.value||null; MAP_T.price=sTprice.value||null;
@@ -498,19 +512,25 @@ async function loadAll(){
     elL.addEventListener('change', compute);
     elQte.addEventListener('input', compute);
 
-    elMsg.textContent = ''; // silencieux en prod
-    if(MAP_T.type && MAP_T.h && MAP_T.l && MAP_T.price &&
-       MAP_O.type && MAP_O.hmin && MAP_O.hmax && MAP_O.price && MAP_O.actif){
-      populateHL(); renderOptionsCheckboxes(); compute();
-    }
+    elMsg.textContent =
+      `Données chargées.\n` +
+      `En-têtes TARIFS : ${RAW_HEADERS_T.join(' | ')}\n` +
+      `En-têtes OPTIONS : ${RAW_HEADERS_O.join(' | ')}`;
+
+    if(okT && okO){ populateHL(); renderOptionsCheckboxes(); compute(); }
   }catch(e){
     elMsg.textContent = "Erreur de chargement : " + e.message;
     console.error(e);
   }
 }
 loadAll();
+</script>
 
-/* ===== Intégration Devis (PU PUBLIC) ===== */
+<!-- ===== Intégration Devis (PU PUBLIC) ===== -->
+<script src="../js/devis-core.js"></script>
+<button id="btnAddDevis">➕ Ajouter au devis</button>
+
+<script>
 (function(){
   const btn = document.getElementById('btnAddDevis');
   if(!btn) return;
@@ -568,5 +588,6 @@ loadAll();
   });
 })();
 </script>
+
 </body>
 </html>
