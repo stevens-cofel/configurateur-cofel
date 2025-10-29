@@ -8,11 +8,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin">
 
 <style>
-  /* ===================== THEME (Cofel – verre + violets) ===================== */
+  /* ===================== THEME (Cofel – verre violet) ===================== */
   :root{
     --cofel:#5a2d82; --cofel-2:#7838a7;
     --violet:#6b39a0; --violet-2:#8752c1;
-    --violet-ui:#bda3ff;           /* violet clair des cartes/inputs */
+    --violet-ui:#bda3ff;
     --violet-ui-pressed:#a88fff;
     --txt:#f5f7ff; --txt-dim:#e6e6ff; --accent:#c9b7ff;
     --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
@@ -78,7 +78,7 @@
     box-shadow:0 0 0 3px rgba(201,183,255,.25), var(--shadow);
   }
 
-  /* ====== SELECT CUSTOM (épaisseur) ====== */
+  /* ====== SELECT CUSTOM ====== */
   .native-select{
     position:absolute !important;
     opacity:0 !important;
@@ -97,7 +97,6 @@
     min-height:44px;
   }
   .cselect-toggle:hover{ background: var(--violet-ui-pressed); }
-  .cselect-toggle:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35); }
   .cselect-label{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1}
   .cselect-caret{
     width:10px; height:10px; flex:0 0 auto; opacity:.9;
@@ -111,7 +110,6 @@
   }
   .cselect[aria-expanded="true"] .cselect-caret{ transform: rotate(180deg); }
 
-  /* Menu porté dans <body> */
   .cselect-menu{
     position:fixed; left:0; top:0; width:260px;
     z-index:99999;
@@ -145,10 +143,7 @@
   .option-item input[type="checkbox"]{
     width:18px;height:18px; accent-color:#8e6ae5;
   }
-  .option-item span{
-    color:#fff; /* écriture blanche */
-    font-weight:600;
-  }
+  .option-item span{ color:#fff; font-weight:600; }
 
   /* ===================== RESULT + BUTTONS ===================== */
   .result{
@@ -257,7 +252,146 @@
 
 <script src="../js/devis-core.js"></script>
 <script>
-/* ... tout le JS reste identique à la version précédente ... */
+/* === CONFIG === */
+const TVA = 0.20;
+const UPLIFT_PUBLIC = 2.0;
+
+/* === TARIFS INTERNE PAR MM DE HAUTEUR === */
+const TARIFS_PVC = {
+  10: 0.18,
+  19: 0.23,
+  30: 0.32
+};
+
+/* === ÉLÉMENTS DOM === */
+const elHauteur   = document.getElementById('hauteur');
+const elEpSelect  = document.getElementById('epaisseur');
+const elEpCustom  = document.querySelector('.cselect');
+const elQte       = document.getElementById('quantite');
+const elHT        = document.getElementById('prixHT');
+const elTTC       = document.getElementById('prixTTC');
+const cbLaquage   = document.getElementById('optLaquage');
+const cbFixation  = document.getElementById('optFixation');
+const cbRetro     = document.getElementById('optRetro');
+
+/* === INIT SELECT CUSTOM === */
+(function initCSelect(){
+  const menu = elEpCustom.querySelector('.cselect-menu');
+  const toggle = elEpCustom.querySelector('.cselect-toggle');
+  const label = elEpCustom.querySelector('.cselect-label');
+
+  const opts = [...elEpSelect.options].map(o => ({
+    value:o.value, label:o.textContent
+  })).filter(o=>o.value);
+
+  menu.innerHTML = opts.map(o =>
+    `<div class="cselect-option" role="option" data-value="${o.value}">${o.label}</div>`
+  ).join('');
+
+  toggle.addEventListener('click', ()=>{
+    const open = elEpCustom.getAttribute('aria-expanded') === 'true';
+    document.querySelectorAll('.cselect[aria-expanded="true"]').forEach(cs=>cs.setAttribute('aria-expanded','false'));
+    elEpCustom.setAttribute('aria-expanded', open?'false':'true');
+    positionMenu();
+  });
+
+  function positionMenu(){
+    const rect = toggle.getBoundingClientRect();
+    menu.style.left = rect.left + 'px';
+    menu.style.top  = (rect.bottom + 4) + 'px';
+    menu.style.width = rect.width + 'px';
+  }
+  window.addEventListener('resize', ()=>{ if(elEpCustom.getAttribute('aria-expanded')==='true') positionMenu(); });
+  window.addEventListener('scroll', ()=>{ if(elEpCustom.getAttribute('aria-expanded')==='true') positionMenu(); });
+
+  menu.addEventListener('click', e=>{
+    const opt = e.target.closest('.cselect-option');
+    if(!opt) return;
+    const value = opt.dataset.value;
+    const text  = opt.textContent;
+    label.textContent = text;
+    elEpSelect.value = value;
+    elEpCustom.setAttribute('aria-expanded','false');
+    compute();
+  });
+
+  document.addEventListener('click', e=>{
+    if(!elEpCustom.contains(e.target)) elEpCustom.setAttribute('aria-expanded','false');
+  });
+})();
+
+/* === CALCUL === */
+function compute(){
+  const H = parseFloat(elHauteur.value||0);
+  const ep = parseFloat(elEpSelect.value||0);
+  const qte = Math.max(1, parseInt(elQte.value||1));
+  if(!H || !ep) {
+    elHT.textContent = "0,00";
+    elTTC.textContent = "0,00";
+    return;
+  }
+
+  if(ep < 19){ cbRetro.checked = false; cbRetro.disabled = true; }
+  else cbRetro.disabled = false;
+
+  let base = (TARIFS_PVC[ep] || 0) * H;
+  if(cbLaquage.checked) base += 20;
+  if(cbFixation.checked) base += 15;
+  if(cbRetro.checked) base += 25;
+
+  const pu_public = base * UPLIFT_PUBLIC;
+  const totalHT = pu_public * qte;
+  const totalTTC = totalHT * (1+TVA);
+
+  elHT.textContent  = totalHT.toFixed(2).replace('.', ',');
+  elTTC.textContent = totalTTC.toFixed(2).replace('.', ',');
+}
+
+/* === EVENTS === */
+[elHauteur, elQte].forEach(el => el.addEventListener('input', compute));
+[cbLaquage, cbFixation, cbRetro].forEach(el => el.addEventListener('change', compute));
+
+/* === RESET === */
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  elHauteur.value=''; elEpSelect.value=''; elQte.value=1;
+  document.querySelector('.cselect-label').textContent='— Sélectionnez —';
+  [cbLaquage,cbFixation,cbRetro].forEach(cb=>cb.checked=false);
+  compute();
+});
+
+/* === AJOUT AU DEVIS === */
+document.getElementById('btnAddDevis').addEventListener('click', ()=>{
+  if(!window.Devis){ alert('Moteur devis indisponible'); return; }
+  const ep = elEpSelect.value;
+  const H = elHauteur.value;
+  const qte = parseInt(elQte.value||1);
+  if(!ep || !H){ alert('Merci de renseigner la hauteur et l’épaisseur'); return; }
+
+  const totalHT = parseFloat(elHT.textContent.replace(',','.'))||0;
+  const puHT = totalHT / qte;
+  const opts = [];
+  if(cbLaquage.checked) opts.push("Laquage");
+  if(cbFixation.checked) opts.push("Fixations");
+  if(cbRetro.checked) opts.push("Rétroéclairage");
+
+  const designation = [
+    "Lettres PVC",
+    `Hauteur ${H} mm`,
+    `Épaisseur ${ep} mm`,
+    opts.length ? `Options: ${opts.join(', ')}` : null
+  ].filter(Boolean).join(' — ');
+
+  Devis.addLine({
+    type: "Lettres PVC",
+    designation,
+    quantite: qte,
+    pu_public_ht: parseFloat(puHT.toFixed(2))
+  });
+
+  alert(`✅ Ligne ajoutée au devis : ${designation}`);
+});
+
+compute();
 </script>
 
 </body>
