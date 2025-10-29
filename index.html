@@ -165,6 +165,13 @@
     .btn-danger{
       background: transparent; color:#ffe3e3; border:1px solid rgba(255, 107, 107, .45);
     }
+    /* ===== Style du bouton désactivé ===== */
+    .btn[disabled]{
+      opacity:.45;
+      cursor:not-allowed;
+      box-shadow:none;
+      pointer-events:none;
+    }
 
     footer{
       color:#f3ecff; font-size:12px; text-align:center; padding:24px 10px; opacity:.9;
@@ -281,7 +288,14 @@
       </div>
 
       <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
-        <button id="btnPdf" class="btn">📄 Exporter le devis en PDF</button>
+        <!-- Bouton PDF désactivé par défaut + info-bulle -->
+        <button
+          id="btnPdf"
+          class="btn"
+          disabled
+          title="Renseignez Entreprise, Nom & prénom et Nom du chantier pour activer l’export PDF"
+        >📄 Exporter le devis en PDF</button>
+
         <button id="btnClear" class="btn btn-danger">🗑 Vider le devis</button>
       </div>
     </section>
@@ -319,24 +333,42 @@
     // DOM
     const elRemise = document.getElementById('remiseInput');
     const body = document.getElementById('bodyDevis');
-    const elHT = document.getElementById('totHT');
-    const elTVA = document.getElementById('totTVA');
-    const elTTC = document.getElementById('totTTC');
+    const elHT   = document.getElementById('totHT');
+    const elTVA  = document.getElementById('totTVA');
+    const elTTC  = document.getElementById('totTTC');
 
-    const elSociete = document.getElementById('societe');
-    const elContact = document.getElementById('contact');
+    const elSociete  = document.getElementById('societe');
+    const elContact  = document.getElementById('contact');
     const elChantier = document.getElementById('chantier');
+
+    const btnPdf   = document.getElementById('btnPdf');   // <-- réf du bouton PDF
     const btnClear = document.getElementById('btnClear');
+
+    // Validation activation export PDF
+    function validateExportEnabled(){
+      const filled = v => (v || '').trim().length > 0;
+      const ok =
+        filled(elSociete.value) &&
+        filled(elContact.value) &&
+        filled(elChantier.value);
+      btnPdf.disabled = !ok;
+      btnPdf.title = ok ? "" : "Renseignez Entreprise, Nom & prénom et Nom du chantier pour activer l’export PDF";
+    }
 
     // Prefill client
     (function hydrateClient(){
       const c = getClient();
-      if(c.societe) elSociete.value = c.societe;
-      if(c.contact) elContact.value = c.contact;
+      if(c.societe)  elSociete.value  = c.societe;
+      if(c.contact)  elContact.value  = c.contact;
       if(c.chantier) elChantier.value = c.chantier;
+      validateExportEnabled(); // <-- vérifie l'état au chargement
     })();
+
     [ ['societe', elSociete], ['contact', elContact], ['chantier', elChantier] ]
-      .forEach(([k,el]) => el.addEventListener('input', () => updateClientField(k, el.value)));
+      .forEach(([k,el]) => el.addEventListener('input', () => {
+        updateClientField(k, el.value);
+        validateExportEnabled(); // <-- revalide à chaque saisie
+      }));
 
     function render(){
       const d = Devis.computeTotals();
@@ -347,11 +379,11 @@
         body.innerHTML = '<tr><td colspan="5" style="padding:12px;color:#f0edff">Aucune ligne dans le devis.</td></tr>';
       } else {
         body.innerHTML = d.lignes.map(l => `
-          <tr data-id="${l.id}">
-            <td>${l.designation || "-"}</td>
-            <td class="center">${l.quantite}</td>
-            <td class="right">${fmt(l.pu_net_ht)}</td>
-            <td class="right">${fmt(l.total_ligne_ht)}</td>
+          <tr data-id="\${l.id}">
+            <td>\${l.designation || "-"}</td>
+            <td class="center">\${l.quantite}</td>
+            <td class="right">\${fmt(l.pu_net_ht)}</td>
+            <td class="right">\${fmt(l.total_ligne_ht)}</td>
             <td class="center">
               <button class="btn btn-ghost btn-qty" style="margin-right:6px;">📝 Qté</button>
               <button class="btn btn-danger btn-del">Suppr.</button>
@@ -394,6 +426,7 @@
       if(confirm("Vider entièrement le devis ?")){
         Devis.clearAll(true);
         render();
+        validateExportEnabled(); // <-- au cas où tu vides les champs plus tard
       }
     });
 
@@ -446,8 +479,8 @@
         doc.text("Client", 40, yClient);
         doc.setFont("Helvetica", "normal");
         yClient += 18;
-        if (client.societe) doc.text("Entreprise : " + client.societe, 40, yClient), yClient += 16;
-        if (client.contact) doc.text("Contact : " + client.contact, 40, yClient), yClient += 16;
+        if (client.societe)  doc.text("Entreprise : " + client.societe, 40, yClient), yClient += 16;
+        if (client.contact)  doc.text("Contact : " + client.contact, 40, yClient), yClient += 16;
         if (client.chantier) doc.text("Nom du chantier : " + client.chantier, 40, yClient), yClient += 16;
         if (d.remise_pct > 0) doc.text("Remise appliquée : " + d.remise_pct + " %", 40, yClient), yClient += 16;
 
