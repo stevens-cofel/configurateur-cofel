@@ -403,17 +403,15 @@ function buildVariantUI(){
   elVarHelp.textContent = values.length ? `Filtre sur « ${key} ».` : '';
   buildCustomFromNative(elVar);
 }
+/* === MODIFIÉ : au lieu d'afficher toutes les plages, on affiche juste "Hauteur maximale X mm" === */
 function buildRangesHelp(){
   if(!MAP?.hmaxKey){ elRanges.innerHTML=''; return; }
-  const kmin=MAP.hminKey, kmax=MAP.hmaxKey;
-  const seen=new Set(), pills=[];
-  for(const r of ROWS){
-    const a=numFR(kmin? r[kmin] : 0), b=numFR(r[kmax]); if(!Number.isFinite(b)) continue;
-    const txt=(Number.isFinite(a)&&a>0)?`${a}–${b}`:`≤ ${b}`;
-    if(!seen.has(txt)){ seen.add(txt); pills.push(txt); }
-  }
-  pills.sort((A,B)=> Number(A.replace(/[^\d]/g,'')) - Number(B.replace(/[^\d]/g,'')));
-  elRanges.innerHTML = pills.map(p=>`<span class="pill">${p}</span>`).join('');
+  const kmax = MAP.hmaxKey;
+  const rows = filterRowsByVariant(ROWS); // respecte le filtre d’éclairage
+  const maxVals = rows.map(r => numFR(r[kmax])).filter(Number.isFinite);
+  if(!maxVals.length){ elRanges.innerHTML=''; return; }
+  const maxH = Math.max(...maxVals);
+  elRanges.innerHTML = `Hauteur maximale ${Math.round(maxH)} mm`;
 }
 
 /* ======================= RULE ======================= */
@@ -477,13 +475,14 @@ function bind(){
     try{ await loadFamily(CURRENT); }catch(e){ console.error(e); alert("Erreur de chargement des données."); }
   });
   elQ.addEventListener('input', compute);
-  elH.addEventListener('input', compute);
-  elVar.addEventListener('change', ()=>{ updateDibondRule(); compute(); });
+  elH.addEventListener('input', ()=>{ buildRangesHelp(); compute(); });
+  elVar.addEventListener('change', ()=>{ buildRangesHelp(); updateDibondRule(); compute(); });
   $("btnReset").addEventListener('click', ()=>{
     elFam.value=""; buildCustomFromNative(elFam);
     CURRENT=null; ROWS=[]; MAP=null;
     elVar.innerHTML='<option value="">— (aucun filtre) —</option>'; buildCustomFromNative(elVar);
     elQ.value=1; elH.value='';
+    elRanges.innerHTML = '';
     compute();
   });
 }
