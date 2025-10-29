@@ -11,11 +11,9 @@
       --cofel:#5a2d82;
       --cofel-2:#7838a7;
       --glass: rgba(255,255,255,.08);
-      --glass-hr: rgba(255,255,255,.14);
       --txt:#f5f7ff;
       --txt-dim:#e6e6ff;
       --accent:#c9b7ff;
-      --radius:18px;
       --blur:18px;
       --shadow: 0 10px 30px rgba(0,0,0,.35);
     }
@@ -24,279 +22,123 @@
     body{
       margin:0;
       color:var(--txt);
-      font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
-
-      /* ===== Fond violet (comme l’ancienne page) ===== */
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif;
       background:
         radial-gradient(800px 500px at 20% -10%, rgba(255,255,255,.10), transparent 60%),
         radial-gradient(800px 500px at 110% 10%, rgba(255,255,255,.08), transparent 60%),
         linear-gradient(135deg, var(--cofel), var(--cofel-2));
-      position:relative;
-      overflow-x:hidden;
     }
 
-    /* ===================== HEADER / HERO ===================== */
-    .hero{
-      position:relative; z-index:1;
-      padding:40px 20px 24px;
-    }
-    .hero-inner{
-      max-width:1200px; margin:0 auto;
-      display:flex; align-items:center; justify-content:space-between; gap:16px;
-    }
-    .brand{
-      display:flex; align-items:center; gap:14px;
-      backdrop-filter: blur(var(--blur));
-      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+    /* ===================== HEADER ===================== */
+    .hero{padding:40px 20px 24px;}
+    .hero-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+    .brand{display:flex;align-items:center;gap:14px;
+      backdrop-filter:blur(var(--blur));
+      background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));
       border:1px solid rgba(255,255,255,.18);
-      padding:10px 14px; border-radius:14px;
-      box-shadow: var(--shadow);
-    }
-    .brand img{height:42px; width:auto; object-fit:contain; border-radius:10px}
-    .brand h1{
-      font-size: clamp(18px, 2.6vw, 22px);
-      margin:0; letter-spacing:.2px; font-weight:700;
-    }
-    .hero-tagline{
-      max-width:1200px; margin:18px auto 0; padding:0 20px;
-      color:var(--txt-dim);
-    }
+      padding:10px 14px;border-radius:14px;box-shadow:var(--shadow);}
+    .brand img{height:42px;width:auto;border-radius:10px}
+    .brand h1{font-size:clamp(18px,2.6vw,22px);margin:0;letter-spacing:.2px;font-weight:700;}
+    .hero-tagline{max-width:1200px;margin:18px auto 0;padding:0 20px;color:var(--txt-dim);}
 
-    /* ===================== APPS GRID ===================== */
-    .wrap{max-width:1200px; margin:26px auto; padding:0 20px 40px; position:relative; z-index:1;}
-    .apps{
-      display:grid; gap:16px;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    }
-    .app{
-      position:relative;
-      text-decoration:none; color:var(--txt);
-      background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
-      border:1px solid rgba(255,255,255,.2);
-      border-radius:20px;
-      padding:18px 16px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(var(--blur));
-      transform: translateY(0); transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
-    }
-    .app:hover{ transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0,0,0,.45); }
-    .app:active{ transform: translateY(-1px); }
-    .app .title{ font-weight:800; margin:0 0 6px; letter-spacing:.2px; }
-    .app .hint{ color:var(--txt-dim); margin:0; font-size:13px; }
+    /* ===================== CONTENT ===================== */
+    .wrap{max-width:1200px;margin:26px auto;padding:0 20px 40px;}
+    .apps{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+    .app{position:relative;text-decoration:none;color:var(--txt);
+      background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.08));
+      border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:18px 16px;
+      box-shadow:var(--shadow);backdrop-filter:blur(var(--blur));
+      transition:.18s;}
+    .app:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,.45);}
+    .app .title{font-weight:800;margin:0 0 6px;}
+    .app .hint{color:var(--txt-dim);font-size:13px;margin:0;}
 
-    .app::after{
-      content:""; position:absolute; right:10px; top:10px; width:46px; height:46px; border-radius:12px;
-      background: radial-gradient(closest-side, rgba(255,255,255,.26), transparent 70%);
-      filter: blur(6px); opacity:.65;
-    }
-
-    /* ===================== PANEL (devis + client) ===================== */
+    /* ===================== PANEL ===================== */
     .panel{
       margin-top:28px;
-      background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+      background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.06));
       border:1px solid rgba(255,255,255,.2);
-      border-radius:20px;
-      padding:18px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(var(--blur));
+      border-radius:20px;padding:18px;box-shadow:var(--shadow);
+      backdrop-filter:blur(var(--blur));
     }
-    .panel h2{
-      margin:0 0 12px;
-      font-size: clamp(18px, 2.4vw, 22px);
-      letter-spacing:.2px;
-    }
-
     .client-card{
       margin:12px 0 16px;
-      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+      background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));
       border:1px solid rgba(255,255,255,.18);
-      border-radius:16px;
-      padding:14px;
-      display:grid; gap:12px;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      border-radius:16px;padding:14px;
+      display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
     }
-    label{font-weight:700; font-size:12px; color:var(--accent);}
-    input[type="text"], input[type="number"]{
-      width:100%; margin-top:6px; padding:10px 12px;
-      background: rgba(255,255,255,.08);
+    label{font-weight:700;font-size:12px;color:var(--accent);}
+    input[type="text"],input[type="number"]{
+      width:100%;margin-top:6px;padding:10px 12px;
+      background:rgba(255,255,255,.08);
       color:var(--txt);
       border:1px solid rgba(255,255,255,.18);
       border-radius:12px;
-      outline:none;
-      transition: border-color .18s ease, background .18s ease;
     }
-    input[type="text"]::placeholder, input[type="number"]::placeholder{ color: #f0edff; opacity:.75; }
-    input[type="text"]:focus, input[type="number"]:focus{
-      border-color: rgba(255,255,255,.34);
-      background: rgba(255,255,255,.12);
+    input[type="text"]:focus,input[type="number"]:focus{
+      border-color:rgba(255,255,255,.34);
+      background:rgba(255,255,255,.12);
     }
 
-    .table-wrap{overflow:auto; border-radius:14px; border:1px solid rgba(255,255,255,.16);}
-    table{width:100%; border-collapse:collapse; min-width:720px;}
-    thead tr{ background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); }
-    th, td{ padding:10px 12px; text-align:left; }
-    th{ font-size:12px; color:var(--accent); letter-spacing:.3px; }
-    tbody tr + tr td{ border-top:1px solid rgba(255,255,255,.12); }
-    td.right{ text-align:right; }
-    td.center{ text-align:center; }
+    .btn{appearance:none;border:none;cursor:pointer;font-weight:700;
+      color:#0b0b0b;background:#fff;border-radius:12px;padding:10px 14px;
+      box-shadow:0 10px 24px rgba(0,0,0,.25);transition:.16s;}
+    .btn:active{transform:translateY(1px);}
+    .btn-danger{background:transparent;color:#ffe3e3;border:1px solid rgba(255,107,107,.45);}
+    .btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none;pointer-events:none;}
 
-    .totaux{ margin-top:16px; display:flex; justify-content:flex-end; }
-    .totaux-box{
-      min-width:320px; border-radius:16px; padding:12px 14px;
-      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-      border:1px solid rgba(255,255,255,.18);
-    }
-    .row{ display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,.16); }
-    .row:last-child{ border-bottom:none; padding-bottom:0; }
-    .grand{ font-weight:800; font-size:18px; }
-
-    .subnote{ color:var(--txt-dim); font-size:12px; margin-top:6px; }
-
-    .btn{
-      appearance:none; border:none; cursor:pointer; font-weight:700;
-      color:#0b0b0b; background:#fff; border-radius:12px; padding:10px 14px;
-      box-shadow: 0 10px 24px rgba(0,0,0,.25);
-      transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
-    }
-    .btn:active{ transform: translateY(1px); box-shadow: 0 6px 16px rgba(0,0,0,.28); }
-    .btn-ghost{
-      background: transparent; color:var(--txt); border:1px solid rgba(255,255,255,.24);
-    }
-    .btn-danger{
-      background: transparent; color:#ffe3e3; border:1px solid rgba(255, 107, 107, .45);
-    }
-    /* ===== Style du bouton désactivé ===== */
-    .btn[disabled]{
-      opacity:.45;
-      cursor:not-allowed;
-      box-shadow:none;
-      pointer-events:none;
+    .note-info{
+      color:var(--txt-dim);
+      font-size:13px;
+      align-self:center;
     }
 
-    footer{
-      color:#f3ecff; font-size:12px; text-align:center; padding:24px 10px; opacity:.9;
-    }
-
-    @media (max-width:720px){
-      .brand h1{display:none;}
-    }
+    footer{color:#f3ecff;font-size:12px;text-align:center;padding:24px 10px;opacity:.9;}
   </style>
 </head>
 <body>
 
-  <!-- ===================== HERO ===================== -->
   <div class="hero">
     <div class="hero-inner">
       <div class="brand">
         <img src="./assets/logo cofel.jpg" alt="Cofel" />
         <h1>Configurateurs Cofel</h1>
       </div>
-      <div class="brand" style="gap:10px;">
-        <div style="font-size:12px;color:var(--txt-dim)">Rapide • Clair • PDF prêt à envoyer</div>
-      </div>
+      <div class="brand"><div style="font-size:12px;color:var(--txt-dim)">Rapide • Clair • PDF prêt à envoyer</div></div>
     </div>
-    <div class="hero-tagline">Choisissez un configurateur puis composez votre devis en quelques clics. L’aperçu et l’export PDF sont mis à jour automatiquement.</div>
+    <div class="hero-tagline">Choisissez un configurateur puis composez votre devis en quelques clics.</div>
   </div>
 
-  <!-- ===================== APPS GRID ===================== -->
   <main class="wrap">
-    <section class="apps" aria-label="Liste des configurateurs">
+    <section class="apps">
       <a class="app" href="./configurateurs/configurateur-tole-tablette.html">
-        <p class="title">Tôle Tablette</p>
-        <p class="hint">Ajourage, PMMA, châssis…</p>
-      </a>
+        <p class="title">Tôle Tablette</p><p class="hint">Ajourage, PMMA, châssis…</p></a>
       <a class="app" href="./configurateurs/configurateur-rampe-lumineuse.html">
-        <p class="title">Rampe Lumineuse (PLL)</p>
-        <p class="hint">LED + laquage inclus</p>
-      </a>
-      <a class="app" href="./configurateurs/configurateur-enseigne-drapeau.html">
-        <p class="title">Enseigne Drapeau</p>
-        <p class="hint">Rond / Carré, potence</p>
-      </a>
-      <a class="app" href="./configurateurs/configurateur-totems.html">
-        <p class="title">Totems</p>
-        <p class="hint">Hauteurs, options d’installation</p>
-      </a>
-      <a class="app" href="./configurateurs/configurateur-lettres PVC.html">
-        <p class="title">Lettres PVC</p>
-        <p class="hint">Hauteur, chant, finitions</p>
-      </a>
-      <a class="app" href="./configurateurs/configurateur-lettre-alu-alupvc.html">
-        <p class="title">Lettres Alu / Alu-PVC</p>
-        <p class="hint">Finitions et options</p>
-      </a>
-      <a class="app" href="./configurateurs/configurateur-lettre-boitier.html">
-        <p class="title">Lettres Boîtiers</p>
-        <p class="hint">Face PMMA ou Dibond</p>
-      </a>
-      <a class="app" href="./configurateurs/configurateur-tolerie-dibond.html">
-        <p class="title">Tôlerie Alu / Dibond</p>
-        <p class="hint">Au m², laqué / prélaqué</p>
-      </a>
+        <p class="title">Rampe Lumineuse (PLL)</p><p class="hint">LED + laquage inclus</p></a>
     </section>
 
-    <!-- ===================== RÉCAP + CLIENT ===================== -->
-    <section class="panel" aria-label="Récapitulatif du devis">
+    <section class="panel">
       <h2>🧾 Récapitulatif du devis</h2>
 
-      <!-- Client -->
       <div class="client-card">
-        <div>
-          <label for="societe">Entreprise</label>
-          <input type="text" id="societe" placeholder="Nom de l’entreprise">
-        </div>
-        <div>
-          <label for="contact">Nom & prénom</label>
-          <input type="text" id="contact" placeholder="Nom Prénom">
-        </div>
-        <div>
-          <label for="chantier">Nom du chantier</label>
-          <input type="text" id="chantier" placeholder="Nom du chantier">
-        </div>
-        <div>
-          <label for="remiseInput">Remise client (%)</label>
-          <input type="number" id="remiseInput" value="0" min="0" max="90" placeholder="0 à 90">
-        </div>
+        <div><label>Entreprise</label><input type="text" id="societe" placeholder="Nom de l’entreprise"></div>
+        <div><label>Nom & prénom</label><input type="text" id="contact" placeholder="Nom Prénom"></div>
+        <div><label>Nom du chantier</label><input type="text" id="chantier" placeholder="Nom du chantier"></div>
+        <div><label>Remise client (%)</label><input type="number" id="remiseInput" value="0" min="0" max="90"></div>
       </div>
 
-      <!-- Tableau -->
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>Désignation</th>
-              <th>Qté</th>
-              <th class="right">PU HT (net)</th>
-              <th class="right">Total HT</th>
-              <th class="center">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="bodyDevis">
-            <tr><td colspan="5" style="padding:12px;color:var(--txt-dim)">Aucune ligne dans le devis.</td></tr>
-          </tbody>
+          <thead><tr><th>Désignation</th><th>Qté</th><th>PU HT</th><th>Total HT</th><th>Actions</th></tr></thead>
+          <tbody id="bodyDevis"><tr><td colspan="5" style="padding:12px;color:var(--txt-dim)">Aucune ligne dans le devis.</td></tr></tbody>
         </table>
       </div>
 
-      <!-- Totaux -->
-      <div class="totaux">
-        <div class="totaux-box">
-          <div class="row"><div>Total HT</div><div id="totHT">0,00 €</div></div>
-          <div class="row"><div>TVA 20 %</div><div id="totTVA">0,00 €</div></div>
-          <div class="row grand"><div>Total TTC</div><div id="totTTC">0,00 €</div></div>
-          <div class="subnote">Remise commerciale incluse dans les montants affichés.</div>
-        </div>
-      </div>
-
-      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
-        <!-- Bouton PDF désactivé par défaut + info-bulle -->
-        <button
-          id="btnPdf"
-          class="btn"
-          disabled
-          title="Renseignez Entreprise, Nom & prénom et Nom du chantier pour activer l’export PDF"
-        >📄 Exporter le devis en PDF</button>
-
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button id="btnPdf" class="btn" disabled>📄 Exporter le devis en PDF</button>
         <button id="btnClear" class="btn btn-danger">🗑 Vider le devis</button>
+        <div class="note-info">💡 Veuillez renseigner l’entreprise, le nom du contact et le chantier pour activer l’export PDF.</div>
       </div>
     </section>
   </main>
@@ -305,218 +147,74 @@
     © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
   </footer>
 
-  <!-- Core devis -->
   <script src="./js/devis-core.js"></script>
-
-  <!-- jsPDF pour export PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
   <script>
   (function(){
     if(!window.Devis) return;
-
-    // Helpers
     const fmt = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
     const STORAGE_KEY = "devisCourant_v1";
+    const readStore = ()=>JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");
+    const writeStore = o=>localStorage.setItem(STORAGE_KEY,JSON.stringify(o));
+    const updateClientField=(k,v)=>{const s=readStore();if(!s.client)s.client={};s.client[k]=v;writeStore(s);};
+    const getClient=()=>readStore().client||{};
+    const elSociete=document.getElementById('societe');
+    const elContact=document.getElementById('contact');
+    const elChantier=document.getElementById('chantier');
+    const elRemise=document.getElementById('remiseInput');
+    const body=document.getElementById('bodyDevis');
+    const btnPdf=document.getElementById('btnPdf');
+    const btnClear=document.getElementById('btnClear');
+    const elHT=document.getElementById('totHT');
+    const elTVA=document.getElementById('totTVA');
+    const elTTC=document.getElementById('totTTC');
 
-    function readStore(){
-      try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }catch{ return {}; }
-    }
-    function writeStore(obj){ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }
-    function updateClientField(key, value){
-      const state = readStore(); if(!state.client) state.client = {};
-      state.client[key] = value; writeStore(state);
-    }
-    function getClient(){ const st = readStore(); return st.client || {}; }
-
-    // DOM
-    const elRemise = document.getElementById('remiseInput');
-    const body = document.getElementById('bodyDevis');
-    const elHT   = document.getElementById('totHT');
-    const elTVA  = document.getElementById('totTVA');
-    const elTTC  = document.getElementById('totTTC');
-
-    const elSociete  = document.getElementById('societe');
-    const elContact  = document.getElementById('contact');
-    const elChantier = document.getElementById('chantier');
-
-    const btnPdf   = document.getElementById('btnPdf');   // <-- réf du bouton PDF
-    const btnClear = document.getElementById('btnClear');
-
-    // Validation activation export PDF
     function validateExportEnabled(){
-      const filled = v => (v || '').trim().length > 0;
-      const ok =
-        filled(elSociete.value) &&
-        filled(elContact.value) &&
-        filled(elChantier.value);
-      btnPdf.disabled = !ok;
-      btnPdf.title = ok ? "" : "Renseignez Entreprise, Nom & prénom et Nom du chantier pour activer l’export PDF";
+      const ok = [elSociete,elContact,elChantier].every(e=>e.value.trim().length>0);
+      btnPdf.disabled=!ok;
     }
 
-    // Prefill client
-    (function hydrateClient(){
-      const c = getClient();
-      if(c.societe)  elSociete.value  = c.societe;
-      if(c.contact)  elContact.value  = c.contact;
-      if(c.chantier) elChantier.value = c.chantier;
-      validateExportEnabled(); // <-- vérifie l'état au chargement
+    (function(){
+      const c=getClient();
+      if(c.societe)elSociete.value=c.societe;
+      if(c.contact)elContact.value=c.contact;
+      if(c.chantier)elChantier.value=c.chantier;
+      validateExportEnabled();
     })();
 
-    [ ['societe', elSociete], ['contact', elContact], ['chantier', elChantier] ]
-      .forEach(([k,el]) => el.addEventListener('input', () => {
-        updateClientField(k, el.value);
-        validateExportEnabled(); // <-- revalide à chaque saisie
-      }));
+    [['societe',elSociete],['contact',elContact],['chantier',elChantier]].forEach(([k,e])=>{
+      e.addEventListener('input',()=>{updateClientField(k,e.value);validateExportEnabled();});
+    });
 
     function render(){
-      const d = Devis.computeTotals();
-      const storedRemise = Number(d.remise_pct||0);
-      if(Number(elRemise.value||0) !== storedRemise) elRemise.value = storedRemise;
-
+      const d=Devis.computeTotals();
       if(!d.lignes.length){
-        body.innerHTML = '<tr><td colspan="5" style="padding:12px;color:#f0edff">Aucune ligne dans le devis.</td></tr>';
+        body.innerHTML='<tr><td colspan="5" style="padding:12px;color:#f0edff">Aucune ligne dans le devis.</td></tr>';
       } else {
-        body.innerHTML = d.lignes.map(l => `
-          <tr data-id="\${l.id}">
-            <td>\${l.designation || "-"}</td>
-            <td class="center">\${l.quantite}</td>
-            <td class="right">\${fmt(l.pu_net_ht)}</td>
-            <td class="right">\${fmt(l.total_ligne_ht)}</td>
-            <td class="center">
-              <button class="btn btn-ghost btn-qty" style="margin-right:6px;">📝 Qté</button>
-              <button class="btn btn-danger btn-del">Suppr.</button>
-            </td>
-          </tr>
-        `).join("");
+        body.innerHTML=d.lignes.map(l=>`
+          <tr><td>${l.designation||"-"}</td>
+          <td>${l.quantite}</td>
+          <td>${fmt(l.pu_net_ht)}</td>
+          <td>${fmt(l.total_ligne_ht)}</td>
+          <td><button class="btn btn-danger btn-del">Suppr.</button></td></tr>`).join('');
       }
-
-      elHT.textContent  = fmt(d.total_ht);
-      elTVA.textContent = fmt(d.tva);
-      elTTC.textContent = fmt(d.total_ttc);
+      elHT.textContent=fmt(d.total_ht);elTVA.textContent=fmt(d.tva);elTTC.textContent=fmt(d.total_ttc);
     }
 
-    // Remise
-    elRemise.addEventListener('input', ()=>{
-      const v = Math.max(0, Math.min(90, Number(elRemise.value||0)));
-      Devis.setRemise(v); elRemise.value = v; render();
+    btnClear.addEventListener('click',()=>{if(confirm("Vider le devis ?")){Devis.clearAll(true);render();validateExportEnabled();}});
+    btnPdf.addEventListener('click',async()=>{
+      const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:"pt",format:"a4"});
+      const d=Devis.computeTotals();const client=getClient();
+      doc.text("DEVIS COFEL",40,50);
+      doc.text("Entreprise : "+client.societe,40,70);
+      doc.text("Contact : "+client.contact,40,85);
+      doc.text("Chantier : "+client.chantier,40,100);
+      doc.text("Total TTC : "+(Number(d.total_ttc)||0).toFixed(2)+" €",40,120);
+      doc.save("Devis-Cofel.pdf");
     });
 
-    // Actions lignes
-    body.addEventListener('click',(e)=>{
-      const tr = e.target.closest('tr[data-id]');
-      if(!tr) return;
-      const id = tr.getAttribute('data-id');
-
-      if(e.target.classList.contains('btn-del')){
-        if(confirm("Supprimer cette ligne du devis ?")){
-          Devis.removeLine(id); render();
-        }
-      }
-      if(e.target.classList.contains('btn-qty')){
-        const currentQty = Number(tr.children[1].textContent||1);
-        const q = prompt("Nouvelle quantité :", currentQty);
-        if(q !== null){ Devis.updateQty(id, q); render(); }
-      }
-    });
-
-    // Vider le devis
-    btnClear.addEventListener('click', ()=>{
-      if(confirm("Vider entièrement le devis ?")){
-        Devis.clearAll(true);
-        render();
-        validateExportEnabled(); // <-- au cas où tu vides les champs plus tard
-      }
-    });
-
-    // Util: charger image en DataURL (logo PDF)
-    function loadImageDataURL(src){
-      return new Promise((resolve,reject)=>{
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const targetW = 180;
-          const ratio = img.height / img.width;
-          canvas.width = targetW;
-          canvas.height = Math.round(targetW * ratio);
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          resolve(canvas.toDataURL('image/jpeg', 0.95));
-        };
-        img.onerror = reject;
-        img.src = src;
-      });
-    }
-
-    // Export PDF (logo + infos client, aucune mention de politique tarifaire)
-    document.getElementById("btnPdf").addEventListener("click", async () => {
-      try{
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ unit: "pt", format: "a4" });
-
-        const d = Devis.computeTotals();
-        const client = getClient();
-
-        // Logo
-        try{
-          const logoData = await loadImageDataURL("./assets/logo cofel.jpg");
-          doc.addImage(logoData, "JPEG", 40, 40, 180, 180 * 0.28);
-        }catch(e){ /* pas de logo : on continue */ }
-
-        // En-tête
-        doc.setFont("Helvetica", "bold"); doc.setFontSize(18);
-        doc.text("DEVIS", 250, 55);
-        doc.setFont("Helvetica", "normal"); doc.setFontSize(11);
-        doc.text("COFEL72 — ZA du Perquoi, 72560 Changé", 250, 75);
-        doc.text("SIRET 927 659 458 00024 — TVA FR80927659458", 250, 90);
-        doc.text("Date : " + new Date().toLocaleDateString("fr-FR"), 250, 110);
-
-        // Client
-        let yClient = 140;
-        doc.setFont("Helvetica", "bold");
-        doc.text("Client", 40, yClient);
-        doc.setFont("Helvetica", "normal");
-        yClient += 18;
-        if (client.societe)  doc.text("Entreprise : " + client.societe, 40, yClient), yClient += 16;
-        if (client.contact)  doc.text("Contact : " + client.contact, 40, yClient), yClient += 16;
-        if (client.chantier) doc.text("Nom du chantier : " + client.chantier, 40, yClient), yClient += 16;
-        if (d.remise_pct > 0) doc.text("Remise appliquée : " + d.remise_pct + " %", 40, yClient), yClient += 16;
-
-        // Tableau
-        const rows = d.lignes.map(l => [
-          String(l.designation||"-"),
-          String(l.quantite),
-          (Number(l.pu_net_ht)||0).toFixed(2) + " €",
-          (Number(l.total_ligne_ht)||0).toFixed(2) + " €"
-        ]);
-        const startY = Math.max(yClient + 12, 200);
-        doc.autoTable({
-          startY,
-          head: [["Désignation", "Qté", "PU HT", "Total HT"]],
-          body: rows,
-          styles: { font: "helvetica", fontSize: 10 }
-        });
-
-        // Totaux
-        let y = doc.lastAutoTable ? doc.lastAutoTable.finalY + 25 : startY + 25;
-        doc.setFont("Helvetica", "bold");
-        doc.text("Total HT : " + (Number(d.total_ht)||0).toFixed(2) + " €", 40, y);
-        doc.text("TVA 20% : " + (Number(d.tva)||0).toFixed(2) + " €", 40, y + 18);
-        doc.text("Total TTC : " + (Number(d.total_ttc)||0).toFixed(2) + " €", 40, y + 36);
-
-        doc.setFont("Helvetica", "normal"); doc.setFontSize(9);
-        doc.text("Conditions : Offre valable 30 jours. Délais et transport à confirmer. Paiement selon conditions Cofel.", 40, y + 64);
-
-        doc.save("Devis-Cofel.pdf");
-      }catch(err){
-        alert("Erreur pendant la génération du PDF : " + err.message);
-        console.error(err);
-      }
-    });
-
-    // Initial render
     render();
   })();
   </script>
