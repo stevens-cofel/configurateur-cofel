@@ -120,6 +120,9 @@
       background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
       border:1px solid rgba(255,255,255,.18); border-radius:12px; padding:8px 12px; box-shadow: var(--shadow); backdrop-filter: blur(var(--blur)); }
     .logout-btn:hover{ transform: translateY(-1px); box-shadow: 0 14px 34px rgba(0,0,0,.42); }
+
+    .toast{ position:fixed; right:16px; bottom:16px; background:#fff; color:#222; padding:10px 12px; border-radius:10px; box-shadow:0 10px 24px rgba(0,0,0,.35); display:none; z-index:99; }
+    .toast.show{ display:block; }
   </style>
 </head>
 <body>
@@ -210,6 +213,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
 
+  <div id="toast" class="toast"></div>
+
   <script>
   (function(){
     if(!window.Devis){ console.error("Devis-core non chargé. Vérifiez ./js/devis-core.js"); return; }
@@ -220,6 +225,14 @@
     // Helpers
     const fmt = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
     const STORAGE_KEY = "devisCourant_v1";
+    const toast = document.getElementById('toast');
+    function showToast(msg, ok=true){
+      toast.textContent = msg;
+      toast.style.background = ok ? "#d7ffd7" : "#ffe3e3";
+      toast.style.color = "#222";
+      toast.classList.add('show');
+      setTimeout(()=> toast.classList.remove('show'), 3000);
+    }
 
     function readStore(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }catch{ return {}; } }
     function writeStore(obj){ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }
@@ -326,16 +339,14 @@
 
     async function sendEmailWithPayload({client, devis, pdfDataUrl}){
       try{
-        // Construction d’un sujet lisible
         const dateStr = new Date().toLocaleDateString("fr-FR");
-        const subject = `Devis Cofel — ${client?.societe||"Sans société"} — ${client?.chantier||"Sans chantier"} — ${fmt(devis.total_ttc)} — ${dateStr}`;
+        const subject = `Devis Cofel — ${client?.societe||"Sans société"} — ${client?.chantier||"Sans chantier"} — ${((Number(devis.total_ttc)||0).toFixed(2)).replace('.',',')} € — ${dateStr}`;
 
-        // On évite d’envoyer un PDF trop lourd à Apps Script
+        // Limitation taille jointe (sécurité)
         let attachBase64 = null;
         if (pdfDataUrl){
           const base64 = pdfDataUrl.split(",")[1] || "";
-          // ~7 MB max raisonnable pour GAS ; on limite à ~4 MB pour marge
-          if (base64.length < 4_000_000 * 1.37) { // base64 ~ 1.37x
+          if (base64.length < 4_000_000 * 1.37) {
             attachBase64 = base64;
           }
         }
@@ -352,22 +363,33 @@
               designation: l.designation, quantite: l.quantite, pu_net_ht: l.pu_net_ht, total_ligne_ht: l.total_ligne_ht, type: l.type||""
             }))
           },
-          meta: {
-            page: location.href,
-            userAgent: navigator.userAgent,
-            date: new Date().toISOString()
-          },
+          meta: { page: location.href, userAgent: navigator.userAgent, date: new Date().toISOString() },
           pdf: attachBase64 ? { filename: "Devis-Cofel.pdf", base64: attachBase64 } : null
         };
 
-        await fetch(MAIL_WEBHOOK, {
+        const resp = await fetch(MAIL_WEBHOOK, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body)
         });
-        // Pas d'alert bloquante : on envoie en arrière-plan
+
+        const text = await resp.text().catch(()=>"(no text)");
+        console.log("[MAIL] status", resp.status, "body:", text);
+
+        if (!resp.ok) {
+          showToast(`❌ Mail non envoyé (HTTP ${resp.status})`, false);
+        } else {
+          // Beaucoup de webapps Apps Script renvoient un JSON/texte "ok"
+          if (/ok/i.test(text)) {
+            showToast("✅ Email envoyé");
+          } else {
+            // on considère quand même OK si 2xx
+            showToast("✅ Email envoyé (réponse reçue)", true);
+          }
+        }
       }catch(err){
-        console.warn("Envoi email échoué (non bloquant)", err);
+        console.warn("Envoi email échoué:", err);
+        showToast("❌ Erreur envoi email (voir console)", false);
       }
     }
 
@@ -416,19 +438,13 @@
         const afterTableY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 16 : (margin + 200); drawTotalsBox(afterTableY);
         const pageCount=doc.internal.getNumberOfPages(); for(let i=1;i<=pageCount;i++){ doc.setPage(i); drawFooter(i,pageCount); }
 
-        // ---- Envoi email (non bloquant) ----
+        // ---- Envoi email (attend la réponse et affiche un toast) ----
         try{
-          // datauristring -> base64 (peut être volumineux)
           const dataUrl = doc.output("datauristring"); // "data:application/pdf;base64,...."
-          await sendEmailWithPayload({
-            client,
-            devis: d,
-            pdfDataUrl: dataUrl
-          });
+          await sendEmailWithPayload({ client, devis: d, pdfDataUrl: dataUrl });
         }catch(e){
           console.warn("Préparation email échouée", e);
-          // On tente quand même un envoi sans PDF
-          sendEmailWithPayload({ client, devis: d, pdfDataUrl: null });
+          await sendEmailWithPayload({ client, devis: d, pdfDataUrl: null });
         }
 
         // Téléchargement PDF utilisateur
