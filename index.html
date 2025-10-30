@@ -238,7 +238,7 @@
           <div class="row"><div>Total HT</div><div id="totHT">0,00 €</div></div>
           <div class="row"><div>TVA 20 %</div><div id="totTVA">0,00 €</div></div>
           <div class="row grand"><div>Total TTC</div><div id="totTTC">0,00 €</div></div>
-          <div class="subnote">Remise commerciale incluse dans les montants affichés.</div>
+          <div class="subnote">La remise ne s’applique pas au transport.</div>
         </div>
 
         <!-- Tuile transport (page dédiée) -->
@@ -298,6 +298,7 @@
     // Helpers
     const fmt = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
     const STORAGE_KEY = "devisCourant_v1";
+    const TVA_RATE = 0.20;
 
     function readStore(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }catch{ return {}; } }
     function writeStore(obj){ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }
@@ -306,6 +307,25 @@
       state.client[key] = value; writeStore(state);
     }
     function getClient(){ const st = readStore(); return st.client || {}; }
+
+    // 👉 Totaux avec remise EXCLUANT les lignes de type "transport"
+    function totalsExcludingTransportDiscount(d){
+      const lignes = d?.lignes || [];
+      const remise = Math.max(0, Math.min(90, Number(d?.remise_pct || 0)));
+      let sumTransport = 0, sumNon = 0;
+      for (const l of lignes){
+        const q  = Number(l.quantite)||0;
+        const pu = Number(l.pu_net_ht)||0;
+        const total = q * pu;
+        if ((l.type || "").toLowerCase() === "transport") sumTransport += total;
+        else sumNon += total;
+      }
+      const nonAfterRemise = sumNon * (1 - remise/100);
+      const total_ht  = +(nonAfterRemise + sumTransport).toFixed(2);
+      const tva       = +(total_ht * TVA_RATE).toFixed(2);
+      const total_ttc = +(total_ht + tva).toFixed(2);
+      return { total_ht, tva, total_ttc };
+    }
 
     // DOM refs
     const elRemise   = document.getElementById('remiseInput');
@@ -364,9 +384,12 @@
           </tr>
         `).join("");
       }
-      elHT.textContent  = fmt(d.total_ht);
-      elTVA.textContent = fmt(d.tva);
-      elTTC.textContent = fmt(d.total_ttc);
+
+      // 👉 Totaux corrigés (remise hors transport)
+      const t = totalsExcludingTransportDiscount(d);
+      elHT.textContent  = fmt(t.total_ht);
+      elTVA.textContent = fmt(t.tva);
+      elTTC.textContent = fmt(t.total_ttc);
     }
 
     // Remise
@@ -457,15 +480,16 @@
     // Envoi e-mail (sans pièce jointe) — en text/plain pour éviter le préflight
     async function sendEmail({client, devis}){
       try{
-        const subject = `Devis Cofel — ${client?.societe||"Sans société"} — ${client?.chantier||"Sans chantier"} — ${((Number(devis.total_ttc)||0).toFixed(2)).replace('.',',')} € — ${new Date().toLocaleDateString("fr-FR")}`;
+        const t = totalsExcludingTransportDiscount(devis); // 👉 totaux corrigés
+        const subject = `Devis Cofel — ${client?.societe||"Sans société"} — ${client?.chantier||"Sans chantier"} — ${((Number(t.total_ttc)||0).toFixed(2)).replace('.',',')} € — ${new Date().toLocaleDateString("fr-FR")}`;
         const body = {
           subject,
           client,
           devis: {
             remise_pct: devis.remise_pct,
-            total_ht: devis.total_ht,
-            tva: devis.tva,
-            total_ttc: devis.total_ttc,
+            total_ht: t.total_ht,
+            tva: t.tva,
+            total_ttc: t.total_ttc,
             lignes: (devis.lignes||[]).map(l=>({
               designation: l.designation, quantite: l.quantite, pu_net_ht: l.pu_net_ht, total_ligne_ht: l.total_ligne_ht, type: l.type||""
             }))
@@ -509,6 +533,7 @@
         const BG_SOFT       = [245, 242, 252];
 
         const d = Devis.computeTotals();
+        const t = totalsExcludingTransportDiscount(d); // 👉 totaux corrigés pour PDF
         const client = getClient();
 
         const doc = new jsPDF({ unit:"pt", format:"a4", compress:true });
@@ -594,7 +619,7 @@
           return yStart + cardH + 18;
         };
 
-        // Pavé totaux
+        // Pavé totaux (avec remise hors transport)
         const drawTotalsBox = (yStart) => {
           const boxW = 220, boxH = 102;
           const x = pageWidth - margin - boxW;
@@ -612,9 +637,9 @@
             doc.text(label, x + 12, yy);
             doc.text(value, x + boxW - 12, yy, { align:"right" });
           };
-          row("Total HT",  formatEuros(d.total_ht),   y + 40);
-          row("TVA 20 %",  formatEuros(d.tva),        y + 58);
-          row("Total TTC", formatEuros(d.total_ttc),  y + 82, true);
+          row("Total HT",  formatEuros(t.total_ht),  y + 40);
+          row("TVA 20 %",  formatEuros(t.tva),       y + 58);
+          row("Total TTC", formatEuros(t.total_ttc), y + 82, true);
 
           return y + boxH;
         };
