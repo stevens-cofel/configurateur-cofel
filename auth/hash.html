@@ -1,0 +1,32 @@
+<!-- /auth/hash.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Générer SHA-256</title>
+  <style>
+    body{font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; padding:24px}
+    input{padding:10px; width:min(520px,90vw)}
+    code{display:block; margin-top:10px; padding:10px; background:#f3f3f3; border-radius:8px; word-break:break-all}
+  </style>
+</head>
+<body>
+  <h1>Empreinte SHA-256</h1>
+  <p>Entrez votre mot de passe :</p>
+  <input id="pw" type="password" placeholder="Mot de passe">
+  <button id="go">Générer</button>
+  <code id="out"></code>
+  <script>
+    async function sha256hex(str){
+      const buf = new TextEncoder().encode(str);
+      const digest = await crypto.subtle.digest("SHA-256", buf);
+      return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,"0")).join("");
+    }
+    document.getElementById("go").onclick = async ()=>{
+      const val = document.getElementById("pw").value || "";
+      document.getElementById("out").textContent = val ? (await sha256hex(val)) : "";
+    };
+  </script>
+</body>
+</html>
