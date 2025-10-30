@@ -47,12 +47,14 @@
     }
     .err{ color:#ffe3e3; min-height:20px; margin-top:12px }
     .sub{font-size:12px; opacity:.85; margin-top:8px}
+    a{color:#fff}
   </style>
 </head>
 <body>
   <main class="card">
     <div class="brand">
-      <img src="/assets/logo cofel.jpg" alt="Cofel">
+      <!-- ⚠️ chemin relatif pour un site GitHub Pages de projet -->
+      <img src="../assets/logo cofel.jpg" alt="Cofel">
       <h1>Connexion requise</h1>
     </div>
     <p>Entrez le mot de passe pour accéder aux configurateurs.</p>
@@ -67,7 +69,7 @@
       <div id="err" class="err"></div>
       <p class="sub">
         Besoin de réinitialiser le mot de passe ? Générez une nouvelle empreinte dans
-        <a href="/auth/hash.html" style="color:#fff; text-decoration:underline;">/auth/hash.html</a> puis mettez à jour <code>/auth/config.js</code>.
+        <a href="./hash.html" style="text-decoration:underline;">/auth/hash.html</a> puis mettez à jour <code>/auth/config.js</code>.
       </p>
     </form>
   </main>
@@ -81,7 +83,8 @@
     const remember = document.getElementById("remember");
     const err = document.getElementById("err");
     const url = new URL(location.href);
-    const returnTo = url.searchParams.get("return") || "/";
+    // ⚠️ Sur un site de projet, revenir à ../index.html par défaut
+    const returnTo = url.searchParams.get("return") || "../index.html";
 
     async function sha256hex(str){
       const buf = new TextEncoder().encode(str);
@@ -114,7 +117,7 @@
           const next = decodeURIComponent(returnTo);
           location.replace(next);
         } catch {
-          location.replace("/");
+          location.replace("../index.html");
         }
       }catch(ex){
         err.textContent = "Erreur inattendue. Réessayez.";
