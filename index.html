@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Accès Cofel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg,#5a2d82,#7838a7);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .box {
+    background: rgba(255,255,255,.1);
+    padding: 30px 40px;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(0,0,0,.3);
+    text-align: center;
+    max-width: 320px;
+  }
+  h2 { margin-top: 0; }
+  input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    text-align: center;
+  }
+  button {
+    margin-top: 12px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: white;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  button:hover { opacity: .85; }
+  #msg { color: #ffb3b3; min-height: 20px; margin-top: 8px; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h2>🔒 Accès réservé Cofel</h2>
+    <p>Veuillez entrer le mot de passe pour accéder au configurateur.</p>
+    <input type="password" id="pwd" placeholder="Mot de passe">
+    <button onclick="check()">Entrer</button>
+    <p id="msg"></p>
+  </div>
+
+<script>
+const PASSWORD = "cofel2025"; // 🔑 Ton mot de passe ici
+
+function check(){
+  const val = document.getElementById("pwd").value.trim();
+  if(val === PASSWORD){
+    sessionStorage.setItem("access_granted","true");
+    window.location.href = "home.html";
+  }else{
+    document.getElementById("msg").textContent = "Mot de passe incorrect.";
+  }
+}
+</script>
+</body>
+</html>
