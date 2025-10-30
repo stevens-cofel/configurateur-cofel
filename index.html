@@ -68,11 +68,6 @@
     .app:hover{ transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0,0,0,.45); }
     .app .title{ font-weight:800; margin:0 0 6px; letter-spacing:.2px; }
     .app .hint{ color:var(--txt-dim); margin:0; font-size:13px; }
-    .app::after{
-      content:""; position:absolute; right:10px; top:10px; width:46px; height:46px; border-radius:12px;
-      background: radial-gradient(closest-side, rgba(255,255,255,.26), transparent 70%);
-      filter: blur(6px); opacity:.65;
-    }
 
     /* ===================== PANEL (devis + client) ===================== */
     .panel{
@@ -101,7 +96,7 @@
       transition: border-color .18s ease, background .18s ease;
     }
     input[type="text"]::placeholder, input[type="number"]::placeholder{ color: #f0edff; opacity:.75; }
-    input[type="text"]:focus, input[type="number"]*:focus{ border-color: rgba(255,255,255,.34); background: rgba(255,255,255,.12); }
+    input[type="text"]:focus, input[type="number"]:focus{ border-color: rgba(255,255,255,.34); background: rgba(255,255,255,.12); }
 
     .table-wrap{overflow:auto; border-radius:14px; border:1px solid rgba(255,255,255,.16);}
     table{width:100%; border-collapse:collapse; min-width:720px;}
@@ -202,7 +197,6 @@
     <section class="panel" aria-label="Récapitulatif du devis">
       <h2>🧾 Récapitulatif du devis</h2>
 
-      <!-- Client -->
       <div class="client-card">
         <div>
           <label for="societe">Entreprise</label>
@@ -222,7 +216,6 @@
         </div>
       </div>
 
-      <!-- Tableau -->
       <div class="table-wrap">
         <table>
           <thead>
@@ -240,7 +233,6 @@
         </table>
       </div>
 
-      <!-- Totaux + tuile Transport -->
       <div class="totaux">
         <div class="totaux-box">
           <div class="row"><div>Total HT</div><div id="totHT">0,00 €</div></div>
@@ -272,15 +264,17 @@
     © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
   </footer>
 
+  <!-- zone toast -->
+  <div id="toast" class="toast"></div>
+
   <!-- Core devis -->
   <script src="./js/devis-core.js"></script>
 
-  <!-- jsPDF pour export PDF -->
+  <!-- jsPDF + AutoTable -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
 
-  <div id="toast" class="toast"></div>
-
+  <!-- Script principal -->
   <script>
   (function(){
     if(!window.Devis){
@@ -289,10 +283,11 @@
     }
 
     // === Webhook e-mail (GAS) — SANS pièce jointe (robuste) ===
-    const MAIL_WEBHOOK = "https://script.google.com/macros/s/AKfycbwfOBZhRoL0WX9R1moMC4DIIiG2jUpNL0RwV7PRx4hME8j1_dyyEWbAdC8_l-srMzg/exec";
+    const MAIL_WEBHOOK = "https://script.google.com/macros/s/AKfycbxbt9CBjpiFTxPhJ08AqGtF7lqZFDMfOPN40M-1mZFwXN_0hUKhNO3-v-Pw3Ssqry0/exec";
 
     const toast = document.getElementById('toast');
     function showToast(msg, ok=true){
+      if(!toast) return alert(msg);
       toast.textContent = msg;
       toast.style.background = ok ? "#d7ffd7" : "#ffe3e3";
       toast.style.color = "#222";
@@ -345,13 +340,13 @@
 
     // Save-as-you-type + revalidate
     [ ['societe', elSociete], ['contact', elContact], ['chantier', elChantier] ]
-      .forEach(([k,el]) => el.addEventListener('input', () => { updateClientField(k, el.value); validateExportEnabled(); }));
+      .forEach(([k,el]) => el?.addEventListener('input', () => { updateClientField(k, el.value); validateExportEnabled(); }));
 
     // Rendu du tableau + totaux
     function render(){
       const d = Devis.computeTotals();
       const storedRemise = Number(d.remise_pct||0);
-      if(Number(elRemise.value||0) !== storedRemise) elRemise.value = storedRemise;
+      if(Number(elRemise?.value||0) !== storedRemise && elRemise) elRemise.value = storedRemise;
 
       if(!d.lignes.length){
         body.innerHTML = '<tr><td colspan="5" style="padding:12px;color:#f0edff">Aucune ligne dans le devis.</td></tr>';
@@ -440,7 +435,7 @@
     checkTransportInbox();
     window.addEventListener('storage', (ev)=>{ if(ev.key === 'cofel_transport_add' && ev.newValue){ checkTransportInbox(); } });
 
-    // Util: charger image en DataURL (logo PDF) — conserve le ratio pour éviter toute déformation
+    // Util: charger image en DataURL (logo PDF) — conserve le ratio
     function loadImageDataURL(src){
       return new Promise((resolve,reject)=>{
         const img = new Image(); img.crossOrigin = "anonymous";
@@ -459,7 +454,7 @@
       });
     }
 
-    // Envoi e-mail (sans pièce jointe)
+    // Envoi e-mail (sans pièce jointe) — en text/plain pour éviter le préflight
     async function sendEmail({client, devis}){
       try{
         const subject = `Devis Cofel — ${client?.societe||"Sans société"} — ${client?.chantier||"Sans chantier"} — ${((Number(devis.total_ttc)||0).toFixed(2)).replace('.',',')} € — ${new Date().toLocaleDateString("fr-FR")}`;
@@ -478,14 +473,24 @@
           meta: { page: location.href, userAgent: navigator.userAgent, date: new Date().toISOString() },
           pdf: null
         };
+
         const resp = await fetch(MAIL_WEBHOOK, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, // <- évite le préflight CORS
           body: JSON.stringify(body)
         });
         const text = await resp.text().catch(()=>"(no text)");
         console.log("[MAIL] status", resp.status, "body:", text);
-        showToast(resp.ok ? "✅ Email envoyé" : `❌ Mail non envoyé (HTTP ${resp.status})`, resp.ok);
+
+        if (!resp.ok) {
+          showToast(`❌ Mail non envoyé (HTTP ${resp.status})`, false);
+          return;
+        }
+        try {
+          const json = JSON.parse(text || "{}");
+          if (!json.ok) return showToast("❌ Mail non envoyé (réponse négative du webhook)", false);
+        } catch {}
+        showToast("✅ Email envoyé");
       }catch(err){
         console.warn("Envoi email échoué:", err);
         showToast("❌ Erreur envoi email (voir console)", false);
@@ -519,10 +524,8 @@
         const drawHeader = () => {
           const yTop = margin;
           if (logoData){
-            // largeur fixe 120px, hauteur auto (déjà calculée dans loadImageDataURL)
-            const img = new Image(); img.src = logoData;
             const w = 120;
-            const h = Math.round(w * 0.28); // fallback visuel si on ne peut pas lire la hauteur
+            const h = Math.round(w * 0.28); // approximation visuelle
             doc.addImage(logoData, "JPEG", margin, yTop, w, h);
           }
           doc.setFont("Helvetica", "bold"); doc.setFontSize(18);
