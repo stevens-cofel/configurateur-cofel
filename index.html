@@ -74,7 +74,7 @@
       transition: border-color .18s ease, background .18s ease;
     }
     input[type="text"]::placeholder, input[type="number"]::placeholder{ color:#f0edff; opacity:.75; }
-    input[type="text"]:focus, input[type="number"]:focus{ border-color: rgba(255,255,255,.34); background: rgba(255,255,255,.12); }
+    input[type="text"]:focus, input[type="number"]*:focus{ border-color: rgba(255,255,255,.34); background: rgba(255,255,255,.12); }
 
     .table-wrap{overflow:auto; border-radius:14px; border:1px solid rgba(255,255,255,.16);}
     table{width:100%; border-collapse:collapse; min-width:720px;}
@@ -173,7 +173,7 @@
       <div class="table-wrap">
         <table>
           <thead><tr><th>Désignation</th><th>Qté</th><th class="right">PU HT (net)</th><th class="right">Total HT</th><th class="center">Actions</th></tr></thead>
-          <tbody id="bodyDevis"><tr><td colspan="5" style="padding:12px;color:var(--txt-dim)">Aucune ligne dans le devis.</td></tr></tbody>
+        <tbody id="bodyDevis"><tr><td colspan="5" style="padding:12px;color:var(--txt-dim)">Aucune ligne dans le devis.</td></tr></tbody>
         </table>
       </div>
 
@@ -219,8 +219,9 @@
   (function(){
     if(!window.Devis){ console.error("Devis-core non chargé. Vérifiez ./js/devis-core.js"); return; }
 
-    // === MAIL WEBHOOK (Google Apps Script) ===
+    // === WEBHOOK (Google Apps Script) ===
     const MAIL_WEBHOOK = "https://script.google.com/macros/s/AKfycbwfOBZhRoL0WX9R1moMC4DIIiG2jUpNL0RwV7PRx4hME8j1_dyyEWbAdC8_l-srMzg/exec";
+    const SEND_PDF_ATTACHMENT = false; // ✅ on désactive l’envoi de la PJ pour fiabilité
 
     // Helpers
     const fmt = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
@@ -327,7 +328,7 @@
     checkTransportInbox();
     window.addEventListener('storage', (ev)=>{ if(ev.key === 'cofel_transport_add' && ev.newValue){ checkTransportInbox(); } });
 
-    // === EXPORT PDF + ENVOI EMAIL ===
+    // === EXPORT PDF + ENVOI EMAIL (sans PJ) ===
     function loadImageDataURL(src){
       return new Promise((resolve,reject)=>{
         const img = new Image(); img.crossOrigin="anonymous";
@@ -337,19 +338,10 @@
       });
     }
 
-    async function sendEmailWithPayload({client, devis, pdfDataUrl}){
+    async function sendEmail({client, devis, maybePdfDataUrl}){
       try{
         const dateStr = new Date().toLocaleDateString("fr-FR");
         const subject = `Devis Cofel — ${client?.societe||"Sans société"} — ${client?.chantier||"Sans chantier"} — ${((Number(devis.total_ttc)||0).toFixed(2)).replace('.',',')} € — ${dateStr}`;
-
-        // Limitation taille jointe (sécurité)
-        let attachBase64 = null;
-        if (pdfDataUrl){
-          const base64 = pdfDataUrl.split(",")[1] || "";
-          if (base64.length < 4_000_000 * 1.37) {
-            attachBase64 = base64;
-          }
-        }
 
         const body = {
           subject,
@@ -364,8 +356,17 @@
             }))
           },
           meta: { page: location.href, userAgent: navigator.userAgent, date: new Date().toISOString() },
-          pdf: attachBase64 ? { filename: "Devis-Cofel.pdf", base64: attachBase64 } : null
+          pdf: null
         };
+
+        // Si un jour tu veux remettre la PJ : passe SEND_PDF_ATTACHMENT à true.
+        if (SEND_PDF_ATTACHMENT && maybePdfDataUrl) {
+          const base64 = (maybePdfDataUrl.split(",")[1] || "");
+          // garde-fou ~4 MB
+          if (base64.length < 4_000_000 * 1.37) {
+            body.pdf = { filename: "Devis-Cofel.pdf", base64 };
+          }
+        }
 
         const resp = await fetch(MAIL_WEBHOOK, {
           method: "POST",
@@ -375,18 +376,8 @@
 
         const text = await resp.text().catch(()=>"(no text)");
         console.log("[MAIL] status", resp.status, "body:", text);
-
-        if (!resp.ok) {
-          showToast(`❌ Mail non envoyé (HTTP ${resp.status})`, false);
-        } else {
-          // Beaucoup de webapps Apps Script renvoient un JSON/texte "ok"
-          if (/ok/i.test(text)) {
-            showToast("✅ Email envoyé");
-          } else {
-            // on considère quand même OK si 2xx
-            showToast("✅ Email envoyé (réponse reçue)", true);
-          }
-        }
+        if (!resp.ok) showToast(`❌ Mail non envoyé (HTTP ${resp.status})`, false);
+        else showToast(/ok/i.test(text) ? "✅ Email envoyé" : "✅ Email envoyé (réponse reçue)", true);
       }catch(err){
         console.warn("Envoi email échoué:", err);
         showToast("❌ Erreur envoi email (voir console)", false);
@@ -438,13 +429,13 @@
         const afterTableY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 16 : (margin + 200); drawTotalsBox(afterTableY);
         const pageCount=doc.internal.getNumberOfPages(); for(let i=1;i<=pageCount;i++){ doc.setPage(i); drawFooter(i,pageCount); }
 
-        // ---- Envoi email (attend la réponse et affiche un toast) ----
+        // ---- Envoi email (métadonnées uniquement) ----
         try{
-          const dataUrl = doc.output("datauristring"); // "data:application/pdf;base64,...."
-          await sendEmailWithPayload({ client, devis: d, pdfDataUrl: dataUrl });
+          const dataUrl = doc.output("datauristring"); // dispo si un jour on réactive la PJ
+          await sendEmail({ client, devis: d, maybePdfDataUrl: SEND_PDF_ATTACHMENT ? dataUrl : null });
         }catch(e){
           console.warn("Préparation email échouée", e);
-          await sendEmailWithPayload({ client, devis: d, pdfDataUrl: null });
+          await sendEmail({ client, devis: d, maybePdfDataUrl: null });
         }
 
         // Téléchargement PDF utilisateur
