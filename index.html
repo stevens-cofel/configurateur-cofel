@@ -103,7 +103,6 @@
     .btn-danger{ background: transparent; color:#ffe3e3; border:1px solid rgba(255, 107, 107, .45); }
     .btn[disabled]{ opacity:.45; cursor:not-allowed; box-shadow:none; pointer-events:none; }
 
-    /* Mini-carte « app » à l’intérieur du panneau */
     .app-inline{
       display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:14px; text-decoration:none; color:var(--txt);
       background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
@@ -113,8 +112,10 @@
     .app-inline:hover{ transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0,0,0,.42); }
     .app-inline .title{ margin:0; font-weight:800; }
     .app-inline .hint{ margin:0; color:var(--txt-dim); font-size:12px; }
+
     footer{ color:#f3ecff; font-size:12px; text-align:center; padding:24px 10px; opacity:.9; }
     @media (max-width:720px){ .brand h1{display:none;} }
+
     .logout-btn{ appearance:none; border:none; cursor:pointer; font-weight:700; color:var(--txt);
       background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
       border:1px solid rgba(255,255,255,.18); border-radius:12px; padding:8px 12px; box-shadow: var(--shadow); backdrop-filter: blur(var(--blur)); }
@@ -213,6 +214,9 @@
   (function(){
     if(!window.Devis){ console.error("Devis-core non chargé. Vérifiez ./js/devis-core.js"); return; }
 
+    // === MAIL WEBHOOK (Google Apps Script) ===
+    const MAIL_WEBHOOK = "https://script.google.com/macros/s/AKfycbwfOBZhRoL0WX9R1moMC4DIIiG2jUpNL0RwV7PRx4hME8j1_dyyEWbAdC8_l-srMzg/exec";
+
     // Helpers
     const fmt = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
     const STORAGE_KEY = "devisCourant_v1";
@@ -277,7 +281,6 @@
 
     // ==== INTEGRATION TRANSPORT ====
     function addTransportLine(payload){
-      // payload: {id, designation, quantite, pu_net_ht, type, ts}
       const st = readStore();
       if(!st.lignes) st.lignes = [];
       const exists = st.lignes.some(l => l.id === payload.id);
@@ -308,11 +311,10 @@
       localStorage.removeItem('cofel_transport_add');
     }
 
-    // Au chargement + quand transport.html écrit (évènement storage si autre onglet)
     checkTransportInbox();
     window.addEventListener('storage', (ev)=>{ if(ev.key === 'cofel_transport_add' && ev.newValue){ checkTransportInbox(); } });
 
-    // === EXPORT PDF (inchangé) ===
+    // === EXPORT PDF + ENVOI EMAIL ===
     function loadImageDataURL(src){
       return new Promise((resolve,reject)=>{
         const img = new Image(); img.crossOrigin="anonymous";
@@ -320,6 +322,53 @@
           const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,canvas.width,canvas.height); resolve(canvas.toDataURL('image/jpeg',0.95)); };
         img.onerror = reject; img.src = src;
       });
+    }
+
+    async function sendEmailWithPayload({client, devis, pdfDataUrl}){
+      try{
+        // Construction d’un sujet lisible
+        const dateStr = new Date().toLocaleDateString("fr-FR");
+        const subject = `Devis Cofel — ${client?.societe||"Sans société"} — ${client?.chantier||"Sans chantier"} — ${fmt(devis.total_ttc)} — ${dateStr}`;
+
+        // On évite d’envoyer un PDF trop lourd à Apps Script
+        let attachBase64 = null;
+        if (pdfDataUrl){
+          const base64 = pdfDataUrl.split(",")[1] || "";
+          // ~7 MB max raisonnable pour GAS ; on limite à ~4 MB pour marge
+          if (base64.length < 4_000_000 * 1.37) { // base64 ~ 1.37x
+            attachBase64 = base64;
+          }
+        }
+
+        const body = {
+          subject,
+          client,
+          devis: {
+            remise_pct: devis.remise_pct,
+            total_ht: devis.total_ht,
+            tva: devis.tva,
+            total_ttc: devis.total_ttc,
+            lignes: (devis.lignes||[]).map(l=>({
+              designation: l.designation, quantite: l.quantite, pu_net_ht: l.pu_net_ht, total_ligne_ht: l.total_ligne_ht, type: l.type||""
+            }))
+          },
+          meta: {
+            page: location.href,
+            userAgent: navigator.userAgent,
+            date: new Date().toISOString()
+          },
+          pdf: attachBase64 ? { filename: "Devis-Cofel.pdf", base64: attachBase64 } : null
+        };
+
+        await fetch(MAIL_WEBHOOK, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        // Pas d'alert bloquante : on envoie en arrière-plan
+      }catch(err){
+        console.warn("Envoi email échoué (non bloquant)", err);
+      }
     }
 
     document.getElementById("btnPdf").addEventListener("click", async () => {
@@ -366,8 +415,28 @@
           theme:"grid", margin:{ left: margin, right: margin }, didDrawPage: ()=> drawHeader() });
         const afterTableY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 16 : (margin + 200); drawTotalsBox(afterTableY);
         const pageCount=doc.internal.getNumberOfPages(); for(let i=1;i<=pageCount;i++){ doc.setPage(i); drawFooter(i,pageCount); }
+
+        // ---- Envoi email (non bloquant) ----
+        try{
+          // datauristring -> base64 (peut être volumineux)
+          const dataUrl = doc.output("datauristring"); // "data:application/pdf;base64,...."
+          await sendEmailWithPayload({
+            client,
+            devis: d,
+            pdfDataUrl: dataUrl
+          });
+        }catch(e){
+          console.warn("Préparation email échouée", e);
+          // On tente quand même un envoi sans PDF
+          sendEmailWithPayload({ client, devis: d, pdfDataUrl: null });
+        }
+
+        // Téléchargement PDF utilisateur
         doc.save("Devis-Cofel.pdf");
-      }catch(err){ alert("Erreur pendant la génération du PDF : " + err.message); console.error(err); }
+      }catch(err){
+        alert("Erreur pendant la génération du PDF : " + err.message);
+        console.error(err);
+      }
     });
 
     // Initial render
