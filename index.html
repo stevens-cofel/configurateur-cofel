@@ -10,33 +10,22 @@
 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
-    /* ===================== THEME (Apple-like) ===================== */
     :root{
-      --cofel:#5a2d82;
-      --cofel-2:#7838a7;
-      --glass: rgba(255,255,255,.08);
-      --glass-hr: rgba(255,255,255,.14);
-      --txt:#f5f7ff;
-      --txt-dim:#e6e6ff;
-      --accent:#c9b7ff;
-      --radius:18px;
-      --blur:18px;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --cofel:#5a2d82; --cofel-2:#7838a7;
+      --glass: rgba(255,255,255,.08); --glass-hr: rgba(255,255,255,.14);
+      --txt:#f5f7ff; --txt-dim:#e6e6ff; --accent:#c9b7ff;
+      --radius:18px; --blur:18px; --shadow: 0 10px 30px rgba(0,0,0,.35);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
-      color:var(--txt);
+      margin:0; color:var(--txt);
       font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
-
-      /* Fond violet */
       background:
         radial-gradient(800px 500px at 20% -10%, rgba(255,255,255,.10), transparent 60%),
         radial-gradient(800px 500px at 110% 10%, rgba(255,255,255,.08), transparent 60%),
         linear-gradient(135deg, var(--cofel), var(--cofel-2));
-      position:relative;
-      overflow-x:hidden;
+      position:relative; overflow-x:hidden;
     }
 
     /* ===================== HEADER / HERO ===================== */
@@ -50,15 +39,21 @@
       backdrop-filter: blur(var(--blur));
       background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
       border:1px solid rgba(255,255,255,.18);
-      padding:10px 14px; border-radius:14px;
-      box-shadow: var(--shadow);
+      padding:10px 14px; border-radius:14px; box-shadow: var(--shadow);
     }
     .brand img{height:42px; width:auto; object-fit:contain; border-radius:10px}
     .brand h1{ font-size: clamp(18px, 2.6vw, 22px); margin:0; letter-spacing:.2px; font-weight:700; }
     .hero-tagline{ max-width:1200px; margin:18px auto 0; padding:0 20px; color:var(--txt-dim); }
 
-    /* Actions à droite (tagline + bouton logout) */
     .hero-actions{ display:flex; align-items:center; gap:10px; }
+    .logout-btn{
+      appearance:none; border:none; cursor:pointer; font-weight:700; color:var(--txt);
+      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.18); border-radius:12px; padding:8px 12px;
+      box-shadow: var(--shadow); backdrop-filter: blur(var(--blur));
+      opacity:.95; transition: opacity .15s, transform .15s, box-shadow .15s;
+    }
+    .logout-btn:hover{ opacity:1; transform: translateY(-1px); box-shadow: 0 14px 34px rgba(0,0,0,.42); }
 
     /* ===================== APPS GRID ===================== */
     .wrap{max-width:1200px; margin:26px auto; padding:0 20px 40px; position:relative; z-index:1;}
@@ -68,10 +63,9 @@
       background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
       border:1px solid rgba(255,255,255,.2); border-radius:20px; padding:18px 16px;
       box-shadow: var(--shadow); backdrop-filter: blur(var(--blur));
-      transform: translateY(0); transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+      transform: translateY(0); transition: transform .18s, box-shadow .18s, background .18s, border-color .18s;
     }
     .app:hover{ transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0,0,0,.45); }
-    .app:active{ transform: translateY(-1px); }
     .app .title{ font-weight:800; margin:0 0 6px; letter-spacing:.2px; }
     .app .hint{ color:var(--txt-dim); margin:0; font-size:13px; }
     .app::after{
@@ -85,10 +79,8 @@
       margin-top:28px;
       background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
       border:1px solid rgba(255,255,255,.2);
-      border-radius:20px;
-      padding:18px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(var(--blur));
+      border-radius:20px; padding:18px;
+      box-shadow: var(--shadow); backdrop-filter: blur(var(--blur));
     }
     .panel h2{ margin:0 0 12px; font-size: clamp(18px, 2.4vw, 22px); letter-spacing:.2px; }
 
@@ -104,18 +96,12 @@
     label{font-weight:700; font-size:12px; color:var(--accent);}
     input[type="text"], input[type="number"]{
       width:100%; margin-top:6px; padding:10px 12px;
-      background: rgba(255,255,255,.08);
-      color:var(--txt);
-      border:1px solid rgba(255,255,255,.18);
-      border-radius:12px;
-      outline:none;
+      background: rgba(255,255,255,.08); color:var(--txt);
+      border:1px solid rgba(255,255,255,.18); border-radius:12px; outline:none;
       transition: border-color .18s ease, background .18s ease;
     }
     input[type="text"]::placeholder, input[type="number"]::placeholder{ color: #f0edff; opacity:.75; }
-    input[type="text"]:focus, input[type="number"]:focus{
-      border-color: rgba(255,255,255,.34);
-      background: rgba(255,255,255,.12);
-    }
+    input[type="text"]:focus, input[type="number"]*:focus{ border-color: rgba(255,255,255,.34); background: rgba(255,255,255,.12); }
 
     .table-wrap{overflow:auto; border-radius:14px; border:1px solid rgba(255,255,255,.16);}
     table{width:100%; border-collapse:collapse; min-width:720px;}
@@ -125,7 +111,7 @@
     tbody tr + tr td{ border-top:1px solid rgba(255,255,255,.12); }
     td.right{ text-align:right; } td.center{ text-align:center; }
 
-    .totaux{ margin-top:16px; display:flex; justify-content:flex-end; }
+    .totaux{ margin-top:16px; display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; }
     .totaux-box{
       min-width:320px; border-radius:16px; padding:12px 14px;
       background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
@@ -134,7 +120,6 @@
     .row{ display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,.16); }
     .row:last-child{ border-bottom:none; padding-bottom:0; }
     .grand{ font-weight:800; font-size:18px; }
-
     .subnote{ color:var(--txt-dim); font-size:12px; margin-top:6px; }
 
     .btn{
@@ -146,31 +131,23 @@
     .btn:active{ transform: translateY(1px); box-shadow: 0 6px 16px rgba(0,0,0,.28); }
     .btn-ghost{ background: transparent; color:var(--txt); border:1px solid rgba(255,255,255,.24); }
     .btn-danger{ background: transparent; color:#ffe3e3; border:1px solid rgba(255, 107, 107, .45); }
-
-    /* Désactivé */
     .btn[disabled]{ opacity:.45; cursor:not-allowed; box-shadow:none; pointer-events:none; }
 
-    /* Note d’info */
-    .note-info{ color:var(--txt-dim); font-size:13px; align-self:center; }
-    .hidden{ display:none; }
+    .app-inline{
+      display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:14px; text-decoration:none; color:var(--txt);
+      background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
+      border:1px solid rgba(255,255,255,.2); box-shadow: var(--shadow); backdrop-filter: blur(var(--blur));
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .app-inline:hover{ transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0,0,0,.42); }
+    .app-inline .title{ margin:0; font-weight:800; }
+    .app-inline .hint{ margin:0; color:var(--txt-dim); font-size:12px; }
 
     footer{ color:#f3ecff; font-size:12px; text-align:center; padding:24px 10px; opacity:.9; }
-
     @media (max-width:720px){ .brand h1{display:none;} }
 
-    /* === Bouton "Se déconnecter" discret, assorti au style "brand" === */
-    .logout-btn{
-      appearance:none; border:none; cursor:pointer; font-weight:700;
-      color:var(--txt);
-      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-      border:1px solid rgba(255,255,255,.18);
-      border-radius:12px; padding:8px 12px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(var(--blur));
-      opacity:.95; transition: opacity .15s ease, transform .15s ease, box-shadow .15s ease;
-    }
-    .logout-btn:hover{ opacity:1; transform: translateY(-1px); box-shadow: 0 14px 34px rgba(0,0,0,.42); }
-    .logout-btn:active{ transform: translateY(0); }
+    .toast{ position:fixed; right:16px; bottom:16px; background:#fff; color:#222; padding:10px 12px; border-radius:10px; box-shadow:0 10px 24px rgba(0,0,0,.35); display:none; z-index:99; }
+    .toast.show{ display:block; }
   </style>
 </head>
 <body>
@@ -182,18 +159,13 @@
         <img src="./assets/logo cofel.jpg" alt="Cofel" />
         <h1>Configurateurs Cofel</h1>
       </div>
-
-      <!-- Actions à droite : tagline + bouton logout discret -->
       <div class="hero-actions">
         <div class="brand" style="gap:10px;">
           <div style="font-size:12px;color:var(--txt-dim)">Rapide • Clair • PDF prêt à envoyer</div>
         </div>
-
-        <!-- 🚪 Bouton discret de déconnexion -->
         <button id="logoutBtn" class="logout-btn" title="Se déconnecter">🚪 Se déconnecter</button>
       </div>
     </div>
-
     <div class="hero-tagline">Choisissez un configurateur puis composez votre devis en quelques clics. L’aperçu et l’export PDF sont mis à jour automatiquement.</div>
   </div>
 
@@ -268,7 +240,7 @@
         </table>
       </div>
 
-      <!-- Totaux -->
+      <!-- Totaux + tuile Transport -->
       <div class="totaux">
         <div class="totaux-box">
           <div class="row"><div>Total HT</div><div id="totHT">0,00 €</div></div>
@@ -276,20 +248,21 @@
           <div class="row grand"><div>Total TTC</div><div id="totTTC">0,00 €</div></div>
           <div class="subnote">Remise commerciale incluse dans les montants affichés.</div>
         </div>
+
+        <!-- Tuile transport (page dédiée) -->
+        <a class="app-inline" href="./transport.html" title="Calculer le coût de transport">
+          <div style="font-size:22px">🚚</div>
+          <div>
+            <p class="title">Coût de transport</p>
+            <p class="hint">Messagerie / Affrètement • Ajouter au devis</p>
+          </div>
+        </a>
       </div>
 
       <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-        <!-- Bouton PDF désactivé par défaut tant que les infos client ne sont pas complètes -->
-        <button
-          id="btnPdf"
-          class="btn"
-          disabled
-          title="Renseignez Entreprise, Nom & prénom et Nom du chantier pour activer l’export PDF"
-        >📄 Exporter le devis en PDF</button>
-
+        <button id="btnPdf" class="btn" disabled
+          title="Renseignez Entreprise, Nom & prénom et Nom du chantier pour activer l’export PDF">📄 Exporter le devis en PDF</button>
         <button id="btnClear" class="btn btn-danger">🗑 Vider le devis</button>
-
-        <!-- Note explicative -->
         <div id="noteInfo" class="note-info">💡 Veuillez renseigner l’entreprise, le nom du contact et le chantier pour activer l’export PDF.</div>
       </div>
     </section>
@@ -306,6 +279,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
 
+  <div id="toast" class="toast"></div>
+
   <script>
   (function(){
     if(!window.Devis){
@@ -313,9 +288,17 @@
       return;
     }
 
-    /* === CONFIG WEBHOOK (Google Apps Script) — mets ici ton URL /exec === */
-    const WEBHOOK = "YOUR_APPS_SCRIPT_WEBHOOK_HERE";
-    const WEBHOOK = "https://script.google.com/macros/s/AKfycbwfOBZhRoL0WX9R1moMC4DIIiG2jUpNL0RwV7PRx4hME8j1_dyyEWbAdC8_l-srMzg/exec";
+    // === Webhook e-mail (GAS) — SANS pièce jointe (robuste) ===
+    const MAIL_WEBHOOK = "https://script.google.com/macros/s/AKfycbwfOBZhRoL0WX9R1moMC4DIIiG2jUpNL0RwV7PRx4hME8j1_dyyEWbAdC8_l-srMzg/exec";
+
+    const toast = document.getElementById('toast');
+    function showToast(msg, ok=true){
+      toast.textContent = msg;
+      toast.style.background = ok ? "#d7ffd7" : "#ffe3e3";
+      toast.style.color = "#222";
+      toast.classList.add('show');
+      setTimeout(()=> toast.classList.remove('show'), 3000);
+    }
 
     // Helpers
     const fmt = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
@@ -392,7 +375,7 @@
     }
 
     // Remise
-    elRemise.addEventListener('input', ()=>{
+    elRemise?.addEventListener('input', ()=>{
       const v = Math.max(0, Math.min(90, Number(elRemise.value||0)));
       Devis.setRemise(v); elRemise.value = v; render();
     });
@@ -424,16 +407,48 @@
       }
     });
 
-    // Util: charger image en DataURL (logo PDF) en respectant le ratio
+    // ===== Intégration TRANSPORT : réception depuis transport.html =====
+    function addTransportLine(payload){
+      const st = readStore();
+      if(!st.lignes) st.lignes = [];
+      const exists = st.lignes.some(l => l.id === payload.id);
+      if(!exists){
+        const q = Number(payload.quantite||1);
+        const pu = Number(payload.pu_net_ht||0);
+        st.lignes.push({
+          id: payload.id,
+          designation: payload.designation || "Transport",
+          quantite: q,
+          pu_net_ht: pu,
+          total_ligne_ht: +(q*pu).toFixed(2),
+          type: payload.type || "transport"
+        });
+        writeStore(st);
+        try{ Devis.reload && Devis.reload(); }catch{}
+        render();
+      }
+    }
+    function checkTransportInbox(){
+      const raw = localStorage.getItem('cofel_transport_add');
+      if(!raw) return;
+      try{
+        const payload = JSON.parse(raw);
+        if(payload && payload.id){ addTransportLine(payload); }
+      }catch(e){ console.warn("Transport payload invalide", e); }
+      localStorage.removeItem('cofel_transport_add');
+    }
+    checkTransportInbox();
+    window.addEventListener('storage', (ev)=>{ if(ev.key === 'cofel_transport_add' && ev.newValue){ checkTransportInbox(); } });
+
+    // Util: charger image en DataURL (logo PDF) — conserve le ratio pour éviter toute déformation
     function loadImageDataURL(src){
       return new Promise((resolve,reject)=>{
-        const img = new Image();
-        img.crossOrigin = "anonymous";
+        const img = new Image(); img.crossOrigin = "anonymous";
         img.onload = () => {
-          const targetW = 180;                 // largeur souhaitée dans le PDF
-          const ratio = img.height / img.width; // ratio d'origine
-          const canvas = document.createElement('canvas');
-          canvas.width = targetW;
+          const targetW = 120; // largeur PDF
+          const ratio   = img.height / img.width;
+          const canvas  = document.createElement('canvas');
+          canvas.width  = targetW;
           canvas.height = Math.round(targetW * ratio);
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -444,7 +459,40 @@
       });
     }
 
-    // ===================== EXPORT PDF (logo non déformé) + ENVOI MAIL =====================
+    // Envoi e-mail (sans pièce jointe)
+    async function sendEmail({client, devis}){
+      try{
+        const subject = `Devis Cofel — ${client?.societe||"Sans société"} — ${client?.chantier||"Sans chantier"} — ${((Number(devis.total_ttc)||0).toFixed(2)).replace('.',',')} € — ${new Date().toLocaleDateString("fr-FR")}`;
+        const body = {
+          subject,
+          client,
+          devis: {
+            remise_pct: devis.remise_pct,
+            total_ht: devis.total_ht,
+            tva: devis.tva,
+            total_ttc: devis.total_ttc,
+            lignes: (devis.lignes||[]).map(l=>({
+              designation: l.designation, quantite: l.quantite, pu_net_ht: l.pu_net_ht, total_ligne_ht: l.total_ligne_ht, type: l.type||""
+            }))
+          },
+          meta: { page: location.href, userAgent: navigator.userAgent, date: new Date().toISOString() },
+          pdf: null
+        };
+        const resp = await fetch(MAIL_WEBHOOK, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const text = await resp.text().catch(()=>"(no text)");
+        console.log("[MAIL] status", resp.status, "body:", text);
+        showToast(resp.ok ? "✅ Email envoyé" : `❌ Mail non envoyé (HTTP ${resp.status})`, resp.ok);
+      }catch(err){
+        console.warn("Envoi email échoué:", err);
+        showToast("❌ Erreur envoi email (voir console)", false);
+      }
+    }
+
+    // ===================== EXPORT PDF =====================
     document.getElementById("btnPdf").addEventListener("click", async () => {
       try{
         const { jsPDF } = window.jspdf;
@@ -463,23 +511,20 @@
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 40;
 
-        // Logo (respect du ratio via getImageProperties)
-        let logoData = null, logoW = 120, logoH = 0;
-        try {
-          logoData = await loadImageDataURL("./assets/logo cofel.jpg");
-          const props = doc.getImageProperties(logoData);
-          const ratio = props.height / props.width;
-          logoH = Math.round(logoW * ratio);
-        } catch(e){ /* pas de logo */ }
+        // Logo (ratio conservé)
+        let logoData = null;
+        try { logoData = await loadImageDataURL("./assets/logo cofel.jpg"); } catch(e){ /* pas de logo */ }
 
         // Header
         const drawHeader = () => {
           const yTop = margin;
-
           if (logoData){
-            doc.addImage(logoData, "JPEG", margin, yTop, logoW, logoH);
+            // largeur fixe 120px, hauteur auto (déjà calculée dans loadImageDataURL)
+            const img = new Image(); img.src = logoData;
+            const w = 120;
+            const h = Math.round(w * 0.28); // fallback visuel si on ne peut pas lire la hauteur
+            doc.addImage(logoData, "JPEG", margin, yTop, w, h);
           }
-
           doc.setFont("Helvetica", "bold"); doc.setFontSize(18);
           doc.setTextColor(...COLOR_PRIMARY);
           doc.text("DEVIS", pageWidth - margin, yTop + 6, { align:"right" });
@@ -493,11 +538,9 @@
           ];
           rightLines.forEach((t,i)=> doc.text(t, pageWidth - margin, yTop + 26 + i*14, { align:"right" }));
 
-          // Ligne sous le logo (toujours sous l'image si elle existe)
-          const lineY = yTop + (logoData ? (logoH + 14) : 54);
           doc.setDrawColor(...COLOR_PRIMARY);
           doc.setLineWidth(1);
-          doc.line(margin, lineY, pageWidth - margin, lineY);
+          doc.line(margin, yTop + 54, pageWidth - margin, yTop + 54);
         };
 
         const drawFooter = (pageNum, pageCount) => {
@@ -583,8 +626,7 @@
 
         // Première page
         drawHeader();
-        let currentY = (margin + (logoData ? (logoH + 14) : 54)) + 12; // démarre sous la ligne
-        currentY = drawClientCard(currentY);
+        let currentY = drawClientCard(margin + 66);
 
         // Tableau
         doc.autoTable({
@@ -614,39 +656,11 @@
           drawFooter(i, pageCount);
         }
 
-        // === 1) Télécharger localement
-        const filename = "Devis-Cofel.pdf";
-        doc.save(filename);
+        // 👉 Envoi e-mail (sans pièce jointe)
+        await sendEmail({ client, devis: d });
 
-        // === 2) Envoyer par mail via le webhook Apps Script
-        try{
-          if (WEBHOOK && WEBHOOK.startsWith("http")) {
-            const blob = doc.output("blob");
-            const ab = await blob.arrayBuffer();
-            const bytes = new Uint8Array(ab);
-            let binary = ""; for (let i=0; i<bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-            const pdfBase64 = btoa(binary);
-
-            const payload = {
-              pdfBase64,
-              filename,
-              client: { societe: elSociete.value, contact: elContact.value, chantier: elChantier.value },
-              meta:   { total_ht: d.total_ht, total_ttc: d.total_ttc, remise_pct: d.remise_pct || 0, date: new Date().toISOString() },
-              lines:  d.lignes || []
-            };
-
-            await fetch(WEBHOOK, {
-              method: "POST",
-              headers: { "Content-Type": "text/plain;charset=utf-8" },
-              body: JSON.stringify(payload)
-            });
-          } else {
-            console.warn("WEBHOOK non configuré.");
-          }
-        }catch(sendErr){
-          console.error("Erreur d'envoi e-mail:", sendErr);
-        }
-
+        // 👉 Téléchargement utilisateur
+        doc.save("Devis-Cofel.pdf");
       }catch(err){
         alert("Erreur pendant la génération du PDF : " + err.message);
         console.error(err);
@@ -655,29 +669,21 @@
 
     // Initial render
     render();
-  })();
-  </script>
 
-  <!-- 🚪 Script de déconnexion (supprime le jeton et renvoie vers la page de login) -->
-  <script type="module">
+    // 🚪 Déconnexion
     (async () => {
-      // On tente d'importer la config pour récupérer l'ID du site
-      let siteId = "cofel-configs"; // valeur par défaut utilisée dans /auth/config.js
+      let siteId = "cofel-configs"; // par défaut
       try {
         const mod = await import("./auth/config.js");
-        if (mod && mod.AUTH_SETTINGS && mod.AUTH_SETTINGS.siteId) {
-          siteId = mod.AUTH_SETTINGS.siteId;
-        }
-      } catch(e) { /* silencieux */ }
+        if (mod?.AUTH_SETTINGS?.siteId) siteId = mod.AUTH_SETTINGS.siteId;
+      } catch {}
       const TOKEN_KEY = `auth_token_${siteId}`;
-      const btn = document.getElementById("logoutBtn");
-      if (btn){
-        btn.addEventListener("click", ()=>{
-          try { localStorage.removeItem(TOKEN_KEY); } catch {}
-          location.href = "./auth/login.html";
-        });
-      }
+      document.getElementById("logoutBtn")?.addEventListener("click", ()=>{
+        try { localStorage.removeItem(TOKEN_KEY); } catch {}
+        location.href = "./auth/login.html";
+      });
     })();
+  })();
   </script>
 </body>
 </html>
