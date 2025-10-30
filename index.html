@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <script>
-if (sessionStorage.getItem("access_granted") !== "true") {
-  window.location.href = "index.html";
-}
-</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Configurateurs Cofel</title>
@@ -30,38 +25,55 @@ if (sessionStorage.getItem("access_granted") !== "true") {
       margin:0;
       color:var(--txt);
       font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
+
+      /* ===== Fond violet (comme l’ancienne page) ===== */
       background:
         radial-gradient(800px 500px at 20% -10%, rgba(255,255,255,.10), transparent 60%),
         radial-gradient(800px 500px at 110% 10%, rgba(255,255,255,.08), transparent 60%),
-        linear-gradient(135deg, var(--cofel), var(--cofel-2));
-      position:relative;
-      overflow-x:hidden;
+@@ -36,10 +34,7 @@
     }
 
     /* ===================== HEADER / HERO ===================== */
+    .hero{
+      position:relative; z-index:1;
+      padding:40px 20px 24px;
+    }
     .hero{ position:relative; z-index:1; padding:40px 20px 24px; }
     .hero-inner{
       max-width:1200px; margin:0 auto;
       display:flex; align-items:center; justify-content:space-between; gap:16px;
-    }
-    .brand{
-      display:flex; align-items:center; gap:14px;
-      backdrop-filter: blur(var(--blur));
-      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-      border:1px solid rgba(255,255,255,.18);
-      padding:10px 14px; border-radius:14px;
+@@ -53,37 +48,23 @@
       box-shadow: var(--shadow);
     }
     .brand img{height:42px; width:auto; object-fit:contain; border-radius:10px}
+    .brand h1{
+      font-size: clamp(18px, 2.6vw, 22px);
+      margin:0; letter-spacing:.2px; font-weight:700;
+    }
+    .hero-tagline{
+      max-width:1200px; margin:18px auto 0; padding:0 20px;
+      color:var(--txt-dim);
+    }
     .brand h1{ font-size: clamp(18px, 2.6vw, 22px); margin:0; letter-spacing:.2px; font-weight:700; }
     .hero-tagline{ max-width:1200px; margin:18px auto 0; padding:0 20px; color:var(--txt-dim); }
 
     /* ===================== APPS GRID ===================== */
     .wrap{max-width:1200px; margin:26px auto; padding:0 20px 40px; position:relative; z-index:1;}
+    .apps{
+      display:grid; gap:16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
     .apps{ display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     .app{
+      position:relative;
+      text-decoration:none; color:var(--txt);
       position:relative; text-decoration:none; color:var(--txt);
       background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:20px;
+      padding:18px 16px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(var(--blur));
       border:1px solid rgba(255,255,255,.2); border-radius:20px; padding:18px 16px;
       box-shadow: var(--shadow); backdrop-filter: blur(var(--blur));
       transform: translateY(0); transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
@@ -70,136 +82,464 @@ if (sessionStorage.getItem("access_granted") !== "true") {
     .app:active{ transform: translateY(-1px); }
     .app .title{ font-weight:800; margin:0 0 6px; letter-spacing:.2px; }
     .app .hint{ color:var(--txt-dim); margin:0; font-size:13px; }
+
     .app::after{
       content:""; position:absolute; right:10px; top:10px; width:46px; height:46px; border-radius:12px;
       background: radial-gradient(closest-side, rgba(255,255,255,.26), transparent 70%);
-      filter: blur(6px); opacity:.65;
-    }
-
-    /* ===================== PANEL (devis + client) ===================== */
-    .panel{
-      margin-top:28px;
-      background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
-      border:1px solid rgba(255,255,255,.2);
-      border-radius:20px;
-      padding:18px;
+@@ -100,11 +81,7 @@
       box-shadow: var(--shadow);
       backdrop-filter: blur(var(--blur));
+    }
+    .panel h2{
+      margin:0 0 12px;
+      font-size: clamp(18px, 2.4vw, 22px);
+      letter-spacing:.2px;
     }
     .panel h2{ margin:0 0 12px; font-size: clamp(18px, 2.4vw, 22px); letter-spacing:.2px; }
 
     .client-card{
       margin:12px 0 16px;
-      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-      border:1px solid rgba(255,255,255,.18);
-      border-radius:16px;
-      padding:14px;
-      display:grid; gap:12px;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    }
-    label{font-weight:700; font-size:12px; color:var(--accent);}
-    input[type="text"], input[type="number"]{
-      width:100%; margin-top:6px; padding:10px 12px;
-      background: rgba(255,255,255,.08);
-      color:var(--txt);
-      border:1px solid rgba(255,255,255,.18);
-      border-radius:12px;
-      outline:none;
+@@ -126,7 +103,7 @@
       transition: border-color .18s ease, background .18s ease;
     }
     input[type="text"]::placeholder, input[type="number"]::placeholder{ color: #f0edff; opacity:.75; }
+    input[type="text"]:focus, input[type="number"]::focus{
     input[type="text"]:focus, input[type="number"]:focus{
       border-color: rgba(255,255,255,.34);
       background: rgba(255,255,255,.12);
     }
-
-    .table-wrap{overflow:auto; border-radius:14px; border:1px solid rgba(255,255,255,.16);}
-    table{width:100%; border-collapse:collapse; min-width:720px;}
-    thead tr{ background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); }
+@@ -137,8 +114,7 @@
     th, td{ padding:10px 12px; text-align:left; }
     th{ font-size:12px; color:var(--accent); letter-spacing:.3px; }
     tbody tr + tr td{ border-top:1px solid rgba(255,255,255,.12); }
+    td.right{ text-align:right; }
+    td.center{ text-align:center; }
     td.right{ text-align:right; } td.center{ text-align:center; }
 
     .totaux{ margin-top:16px; display:flex; justify-content:flex-end; }
     .totaux-box{
-      min-width:320px; border-radius:16px; padding:12px 14px;
-      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-      border:1px solid rgba(255,255,255,.18);
-    }
-    .row{ display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,.16); }
-    .row:last-child{ border-bottom:none; padding-bottom:0; }
-    .grand{ font-weight:800; font-size:18px; }
-
-    .subnote{ color:var(--txt-dim); font-size:12px; margin-top:6px; }
-
-    .btn{
-      appearance:none; border:none; cursor:pointer; font-weight:700;
-      color:#0b0b0b; background:#fff; border-radius:12px; padding:10px 14px;
-      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+@@ -159,34 +135,19 @@
       transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
     }
     .btn:active{ transform: translateY(1px); box-shadow: 0 6px 16px rgba(0,0,0,.28); }
+    .btn-ghost{
+      background: transparent; color:var(--txt); border:1px solid rgba(255,255,255,.24);
+    }
+    .btn-danger{
+      background: transparent; color:#ffe3e3; border:1px solid rgba(255, 107, 107, .45);
+    }
+    /* ===== Style du bouton désactivé ===== */
+    .btn[disabled]{
+      opacity:.45;
+      cursor:not-allowed;
+      box-shadow:none;
+      pointer-events:none;
+    }
+    /* Note d'info à côté des boutons */
+    .note-info{
+      color:var(--txt-dim);
+      font-size:13px;
+      align-self:center;
+    }
     .btn-ghost{ background: transparent; color:var(--txt); border:1px solid rgba(255,255,255,.24); }
     .btn-danger{ background: transparent; color:#ffe3e3; border:1px solid rgba(255, 107, 107, .45); }
 
+    /* ===== Désactivé ===== */
     .btn[disabled]{ opacity:.45; cursor:not-allowed; box-shadow:none; pointer-events:none; }
 
+    /* Note d’info à côté des boutons */
     .note-info{ color:var(--txt-dim); font-size:13px; align-self:center; }
     .hidden{ display:none; }
 
+    footer{
+      color:#f3ecff; font-size:12px; text-align:center; padding:24px 10px; opacity:.9;
+    }
     footer{ color:#f3ecff; font-size:12px; text-align:center; padding:24px 10px; opacity:.9; }
 
+    @media (max-width:720px){
+      .brand h1{display:none;}
+    }
     @media (max-width:720px){ .brand h1{display:none;} }
   </style>
 </head>
 <body>
-  <!-- HERO -->
-  <div class="hero">
-    <div class="hero-inner">
-      <div class="brand">
-        <img src="./assets/logo cofel.jpg" alt="Cofel" />
-        <h1>Configurateurs Cofel</h1>
-      </div>
-      <div class="brand" style="gap:10px;">
-        <div style="font-size:12px;color:var(--txt-dim)">Rapide • Clair • PDF prêt à envoyer</div>
-      </div>
-    </div>
-    <div class="hero-tagline">Choisissez un configurateur puis composez votre devis en quelques clics.</div>
-  </div>
-
-  <!-- LISTE CONFIGURATEURS -->
+@@ -209,36 +170,28 @@
   <main class="wrap">
     <section class="apps" aria-label="Liste des configurateurs">
       <a class="app" href="./configurateurs/configurateur-tole-tablette.html">
+        <p class="title">Tôle Tablette</p>
+        <p class="hint">Ajourage, PMMA, châssis…</p>
         <p class="title">Tôle Tablette</p><p class="hint">Ajourage, PMMA, châssis…</p>
       </a>
       <a class="app" href="./configurateurs/configurateur-rampe-lumineuse.html">
+        <p class="title">Rampe Lumineuse (PLL)</p>
+        <p class="hint">LED + laquage inclus</p>
         <p class="title">Rampe Lumineuse (PLL)</p><p class="hint">LED + laquage inclus</p>
       </a>
       <a class="app" href="./configurateurs/configurateur-enseigne-drapeau.html">
+        <p class="title">Enseigne Drapeau</p>
+        <p class="hint">Rond / Carré, potence</p>
         <p class="title">Enseigne Drapeau</p><p class="hint">Rond / Carré, potence</p>
       </a>
       <a class="app" href="./configurateurs/configurateur-totems.html">
+        <p class="title">Totems</p>
+        <p class="hint">Hauteurs, options d’installation</p>
         <p class="title">Totems</p><p class="hint">Hauteurs, options d’installation</p>
       </a>
       <a class="app" href="./configurateurs/configurateur-lettres PVC.html">
+        <p class="title">Lettres PVC</p>
+        <p class="hint">Hauteur, chant, finitions</p>
         <p class="title">Lettres PVC</p><p class="hint">Hauteur, chant, finitions</p>
       </a>
       <a class="app" href="./configurateurs/configurateur-lettre-alu-alupvc.html">
+        <p class="title">Lettres Alu / Alu-PVC</p>
+        <p class="hint">Finitions et options</p>
         <p class="title">Lettres Alu / Alu-PVC</p><p class="hint">Finitions et options</p>
       </a>
       <a class="app" href="./configurateurs/configurateur-lettre-boitier.html">
+        <p class="title">Lettres Boîtiers</p>
+        <p class="hint">Face PMMA ou Dibond</p>
         <p class="title">Lettres Boîtiers</p><p class="hint">Face PMMA ou Dibond</p>
       </a>
       <a class="app" href="./configurateurs/configurateur-tolerie-dibond.html">
+        <p class="title">Tôlerie Alu / Dibond</p>
+        <p class="hint">Au m², laqué / prélaqué</p>
         <p class="title">Tôlerie Alu / Dibond</p><p class="hint">Au m², laqué / prélaqué</p>
       </a>
     </section>
-  </main>
 
-  <footer>
-    © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
-  </footer>
-</body>
-</html>
+@@ -305,7 +258,7 @@
+
+        <button id="btnClear" class="btn btn-danger">🗑 Vider le devis</button>
+
+        <!-- Petite note explicative qui s'auto-masque quand c'est OK -->
+        <!-- Note explicative auto-masquée -->
+        <div id="noteInfo" class="note-info">💡 Veuillez renseigner l’entreprise, le nom du contact et le chantier pour activer l’export PDF.</div>
+      </div>
+    </section>
+@@ -320,7 +273,7 @@
+
+  <!-- jsPDF pour export PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+  (function(){
+@@ -330,61 +283,50 @@
+    const fmt = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
+    const STORAGE_KEY = "devisCourant_v1";
+
+    function readStore(){
+      try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }catch{ return {}; }
+    }
+    function readStore(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }catch{ return {}; } }
+    function writeStore(obj){ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }
+    function updateClientField(key, value){
+      const state = readStore(); if(!state.client) state.client = {};
+      state.client[key] = value; writeStore(state);
+    }
+    function getClient(){ const st = readStore(); return st.client || {}; }
+
+    // DOM
+    const elRemise = document.getElementById('remiseInput');
+    const body = document.getElementById('bodyDevis');
+    const elHT = document.getElementById('totHT');
+    const elTVA = document.getElementById('totTVA');
+    const elTTC = document.getElementById('totTTC');
+
+    const elSociete = document.getElementById('societe');
+    const elContact = document.getElementById('contact');
+    // DOM refs
+    const elRemise   = document.getElementById('remiseInput');
+    const body       = document.getElementById('bodyDevis');
+    const elHT       = document.getElementById('totHT');
+    const elTVA      = document.getElementById('totTVA');
+    const elTTC      = document.getElementById('totTTC');
+    const elSociete  = document.getElementById('societe');
+    const elContact  = document.getElementById('contact');
+    const elChantier = document.getElementById('chantier');
+    const btnPdf   = document.getElementById('btnPdf');
+    const btnClear = document.getElementById('btnClear');
+    const noteInfo = document.getElementById('noteInfo');
+    const btnPdf     = document.getElementById('btnPdf');
+    const btnClear   = document.getElementById('btnClear');
+    const noteInfo   = document.getElementById('noteInfo');
+
+    // Validation activation export PDF
+    function validateExportEnabled(){
+      const filled = v => (v || '').trim().length > 0;
+      const ok =
+        filled(elSociete.value) &&
+        filled(elContact.value) &&
+        filled(elChantier.value);
+
+      const ok = filled(elSociete.value) && filled(elContact.value) && filled(elChantier.value);
+      btnPdf.disabled = !ok;
+      btnPdf.title = ok ? "" : "Renseignez Entreprise, Nom & prénom et Nom du chantier pour activer l’export PDF";
+      // Affiche/masque la note
+      if(noteInfo){
+        noteInfo.classList.toggle('hidden', ok);
+      }
+      if(noteInfo){ noteInfo.classList.toggle('hidden', ok); }
+    }
+
+    // Prefill client
+    (function hydrateClient(){
+      const c = getClient();
+      if(c.societe) elSociete.value = c.societe;
+      if(c.contact) elContact.value = c.contact;
+      if(c.societe)  elSociete.value  = c.societe;
+      if(c.contact)  elContact.value  = c.contact;
+      if(c.chantier) elChantier.value = c.chantier;
+      validateExportEnabled(); // ← vérifie l'état au chargement
+      validateExportEnabled();
+    })();
+
+    // Save-as-you-type + revalidate
+    [ ['societe', elSociete], ['contact', elContact], ['chantier', elChantier] ]
+      .forEach(([k,el]) => el.addEventListener('input', () => {
+        updateClientField(k, el.value);
+        validateExportEnabled(); // ← revalide à chaque saisie
+      }));
+      .forEach(([k,el]) => el.addEventListener('input', () => { updateClientField(k, el.value); validateExportEnabled(); }));
+
+    // Rendu du tableau + totaux
+    function render(){
+      const d = Devis.computeTotals();
+      const storedRemise = Number(d.remise_pct||0);
+@@ -406,7 +348,6 @@
+          </tr>
+        `).join("");
+      }
+
+      elHT.textContent  = fmt(d.total_ht);
+      elTVA.textContent = fmt(d.tva);
+      elTTC.textContent = fmt(d.total_ttc);
+@@ -441,12 +382,12 @@
+      if(confirm("Vider entièrement le devis ?")){
+        Devis.clearAll(true);
+        render();
+        validateExportEnabled(); // ← revalide
+        validateExportEnabled();
+      }
+    });
+
+    // Util: charger image en DataURL (logo PDF)
+    function loadImageDataURL(src){
+    async function loadImageDataURL(src){
+      return new Promise((resolve,reject)=>{
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+@@ -465,64 +406,168 @@
+      });
+    }
+
+    // Export PDF (logo + infos client, aucune mention de politique tarifaire)
+    // ===================== EXPORT PDF (mise en page soignée) =====================
+    document.getElementById("btnPdf").addEventListener("click", async () => {
+      try{
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+        // Palette
+        const COLOR_PRIMARY = [90, 45, 130];    // #5a2d82
+        const COLOR_TEXT    = [20, 20, 20];
+        const COLOR_MUTED   = [110, 110, 110];
+        const BG_SOFT       = [245, 242, 252];
+
+        const d = Devis.computeTotals();
+        const client = getClient();
+
+        const doc = new jsPDF({ unit:"pt", format:"a4", compress:true });
+        const pageWidth  = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 40;
+
+        // Logo
+        try{
+          const logoData = await loadImageDataURL("./assets/logo cofel.jpg");
+          doc.addImage(logoData, "JPEG", 40, 40, 180, 180 * 0.28);
+        }catch(e){ /* pas de logo : on continue */ }
+
+        // En-tête
+        doc.setFont("Helvetica", "bold"); doc.setFontSize(18);
+        doc.text("DEVIS", 250, 55);
+        doc.setFont("Helvetica", "normal"); doc.setFontSize(11);
+        doc.text("COFEL72 — ZA du Perquoi, 72560 Changé", 250, 75);
+        doc.text("SIRET 927 659 458 00024 — TVA FR80927659458", 250, 90);
+        doc.text("Date : " + new Date().toLocaleDateString("fr-FR"), 250, 110);
+
+        // Client
+        let yClient = 140;
+        doc.setFont("Helvetica", "bold");
+        doc.text("Client", 40, yClient);
+        doc.setFont("Helvetica", "normal");
+        yClient += 18;
+        if (client.societe) doc.text("Entreprise : " + client.societe, 40, yClient), yClient += 16;
+        if (client.contact) doc.text("Contact : " + client.contact, 40, yClient), yClient += 16;
+        if (client.chantier) doc.text("Nom du chantier : " + client.chantier, 40, yClient), yClient += 16;
+        if (d.remise_pct > 0) doc.text("Remise appliquée : " + d.remise_pct + " %", 40, yClient), yClient += 16;
+        let logoData = null;
+        try { logoData = await loadImageDataURL("./assets/logo cofel.jpg"); } catch(e){ /* pas de logo */ }
+
+        // Header
+        const drawHeader = () => {
+          const yTop = margin;
+          const logoW = 120;
+          if (logoData){
+            doc.addImage(logoData, "JPEG", margin, yTop, logoW, logoW*0.28);
+          }
+          doc.setFont("Helvetica", "bold"); doc.setFontSize(18);
+          doc.setTextColor(...COLOR_PRIMARY);
+          doc.text("DEVIS", pageWidth - margin, yTop + 6, { align:"right" });
+
+          doc.setFont("Helvetica", "normal"); doc.setFontSize(10);
+          doc.setTextColor(...COLOR_TEXT);
+          const rightLines = [
+            "COFEL72 — ZA du Perquoi, 72560 Changé",
+            "SIRET 927 659 458 00024 — TVA FR80927659458",
+            "Date : " + new Date().toLocaleDateString("fr-FR")
+          ];
+          rightLines.forEach((t,i)=> doc.text(t, pageWidth - margin, yTop + 26 + i*14, { align:"right" }));
+
+          doc.setDrawColor(...COLOR_PRIMARY);
+          doc.setLineWidth(1);
+          doc.line(margin, yTop + 54, pageWidth - margin, yTop + 54);
+        };
+
+        // Tableau
+        const rows = d.lignes.map(l => [
+        const drawFooter = (pageNum, pageCount) => {
+          const y = pageHeight - margin + 8;
+          doc.setFont("Helvetica","normal"); doc.setFontSize(9);
+          doc.setTextColor(...COLOR_MUTED);
+          doc.text("Conditions : Offre valable 30 jours. Délais et transport à confirmer. Paiement selon conditions Cofel.", margin, y);
+          doc.text(`Page ${pageNum} / ${pageCount}`, pageWidth - margin, y, { align:"right" });
+        };
+
+        const formatEuros = (n) => (Number(n)||0).toFixed(2).replace(".", ",") + " €";
+
+        // Carte client
+        const drawClientCard = (yStart) => {
+          const cardW = pageWidth - margin*2;
+          const cardH = 90;
+          doc.setFillColor(...BG_SOFT);
+          doc.setDrawColor(230,230,240);
+          doc.roundedRect(margin, yStart, cardW, cardH, 8, 8, "FD");
+
+          let y = yStart + 24;
+          doc.setFont("Helvetica","bold"); doc.setFontSize(12);
+          doc.setTextColor(...COLOR_PRIMARY);
+          doc.text("Client", margin + 14, y);
+
+          doc.setFont("Helvetica","normal"); doc.setFontSize(11);
+          doc.setTextColor(...COLOR_TEXT);
+          y += 18;
+
+          const lines = [];
+          if(client.societe)  lines.push(["Entreprise :", client.societe]);
+          if(client.contact)  lines.push(["Contact :",    client.contact]);
+          if(client.chantier) lines.push(["Chantier :",   client.chantier]);
+          if(d.remise_pct>0)  lines.push(["Remise :",     `${d.remise_pct} %`]);
+
+          const colGap = 260;
+          const leftX = margin + 14;
+          const rightX = leftX + colGap;
+
+          lines.forEach((row, idx)=>{
+            const isRight = (idx >= 3);
+            const x = isRight ? rightX : leftX;
+            const yy = y + (isRight ? (idx-3)*16 : idx*16);
+            doc.setTextColor(...COLOR_MUTED); doc.text(row[0], x, yy);
+            doc.setTextColor(...COLOR_TEXT);  doc.text(String(row[1]), x + 80, yy);
+          });
+
+          return yStart + cardH + 18;
+        };
+
+        // Pavé totaux
+        const drawTotalsBox = (yStart) => {
+          const boxW = 220, boxH = 102;
+          const x = pageWidth - margin - boxW;
+          const y = yStart;
+          doc.setFillColor(255,255,255);
+          doc.setDrawColor(...COLOR_PRIMARY);
+          doc.roundedRect(x, y, boxW, boxH, 8, 8, "S");
+
+          doc.setFont("Helvetica","bold"); doc.setFontSize(12);
+          doc.setTextColor(...COLOR_PRIMARY);
+          doc.text("Récapitulatif", x + 12, y + 18);
+
+          const row = (label, value, yy, bold=false) => {
+            doc.setFont("Helvetica", bold ? "bold":"normal"); doc.setFontSize(11); doc.setTextColor(...COLOR_TEXT);
+            doc.text(label, x + 12, yy);
+            doc.text(value, x + boxW - 12, yy, { align:"right" });
+          };
+          row("Total HT",  formatEuros(d.total_ht),   y + 40);
+          row("TVA 20 %",  formatEuros(d.tva),        y + 58);
+          row("Total TTC", formatEuros(d.total_ttc),  y + 82, true);
+
+          return y + boxH;
+        };
+
+        // Données tableau
+        const rows = (d.lignes||[]).map(l => ([
+          String(l.designation||"-"),
+          String(l.quantite),
+          (Number(l.pu_net_ht)||0).toFixed(2) + " €",
+          (Number(l.total_ligne_ht)||0).toFixed(2) + " €"
+        ]);
+        const startY = Math.max(yClient + 12, 200);
+          String(l.quantite||0),
+          (Number(l.pu_net_ht)||0).toFixed(2),
+          (Number(l.total_ligne_ht)||0).toFixed(2)
+        ]));
+
+        // Première page
+        drawHeader();
+        let currentY = drawClientCard(margin + 66);
+
+        // Tableau
+        doc.autoTable({
+          startY,
+          head: [["Désignation", "Qté", "PU HT", "Total HT"]],
+          startY: currentY,
+          head: [["Désignation","Qté","PU HT","Total HT"]],
+          body: rows,
+          styles: { font: "helvetica", fontSize: 10 }
+          styles: { font:"helvetica", fontSize:10, halign:"left", cellPadding:6 },
+          headStyles: { fillColor: COLOR_PRIMARY, textColor:[255,255,255], fontStyle:"bold" },
+          columnStyles: {
+            1: { halign:"center", cellWidth: 40 },
+            2: { halign:"right",  cellWidth: 70 },
+            3: { halign:"right",  cellWidth: 80 }
+          },
+          theme:"grid",
+          margin:{ left: margin, right: margin },
+          didDrawPage: () => {
+            drawHeader();
+          }
+        });
+
+        // Totaux
+        let y = doc.lastAutoTable ? doc.lastAutoTable.finalY + 25 : startY + 25;
+        doc.setFont("Helvetica", "bold");
+        doc.text("Total HT : " + (Number(d.total_ht)||0).toFixed(2) + " €", 40, y);
+        doc.text("TVA 20% : " + (Number(d.tva)||0).toFixed(2) + " €", 40, y + 18);
+        doc.text("Total TTC : " + (Number(d.total_ttc)||0).toFixed(2) + " €", 40, y + 36);
+        // Totaux sous le tableau (dernière page)
+        const afterTableY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 16 : (margin + 200);
+        drawTotalsBox(afterTableY);
+
+        doc.setFont("Helvetica", "normal"); doc.setFontSize(9);
+        doc.text("Conditions : Offre valable 30 jours. Délais et transport à confirmer. Paiement selon conditions Cofel.", 40, y + 64);
+        // Footer sur toutes les pages (pagination correcte)
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++){
+          doc.setPage(i);
+          drawFooter(i, pageCount);
+        }
+
+        doc.save("Devis-Cofel.pdf");
+      }catch(err){
