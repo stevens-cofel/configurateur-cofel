@@ -313,6 +313,9 @@
       return;
     }
 
+    /* === CONFIG WEBHOOK (Google Apps Script) — COLLE ICI TON URL /exec === */
+    const WEBHOOK = "YOUR_APPS_SCRIPT_WEBHOOK_HERE";
+
     // Helpers
     const fmt = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
     const STORAGE_KEY = "devisCourant_v1";
@@ -440,7 +443,7 @@
       });
     }
 
-    // ===================== EXPORT PDF (mise en page soignée) =====================
+    // ===================== EXPORT PDF (mise en page soignée) + ENVOI MAIL =====================
     document.getElementById("btnPdf").addEventListener("click", async () => {
       try{
         const { jsPDF } = window.jspdf;
@@ -506,7 +509,7 @@
           doc.setDrawColor(230,230,240);
           doc.roundedRect(margin, yStart, cardW, cardH, 8, 8, "FD");
 
-        let y = yStart + 24;
+          let y = yStart + 24;
           doc.setFont("Helvetica","bold"); doc.setFontSize(12);
           doc.setTextColor(...COLOR_PRIMARY);
           doc.text("Client", margin + 14, y);
@@ -603,7 +606,40 @@
           drawFooter(i, pageCount);
         }
 
-        doc.save("Devis-Cofel.pdf");
+        // === 1) Télécharger localement pour l'utilisateur
+        const filename = "Devis-Cofel.pdf";
+        doc.save(filename);
+
+        // === 2) Envoyer par mail via le webhook Apps Script
+        try{
+          if (WEBHOOK && WEBHOOK.startsWith("http")) {
+            const blob = doc.output("blob");
+            const ab = await blob.arrayBuffer();
+            const bytes = new Uint8Array(ab);
+            let binary = ""; for (let i=0; i<bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+            const pdfBase64 = btoa(binary);
+
+            const payload = {
+              pdfBase64,
+              filename,
+              client: { societe: elSociete.value, contact: elContact.value, chantier: elChantier.value },
+              meta:   { total_ht: d.total_ht, total_ttc: d.total_ttc, remise_pct: d.remise_pct || 0, date: new Date().toISOString() },
+              lines:  d.lignes || []
+            };
+
+            // text/plain pour éviter la pré-requête CORS (OPTIONS) sur GitHub Pages
+            await fetch(WEBHOOK, {
+              method: "POST",
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
+              body: JSON.stringify(payload)
+            });
+          } else {
+            console.warn("WEBHOOK non configuré.");
+          }
+        }catch(sendErr){
+          console.error("Erreur d'envoi e-mail:", sendErr);
+        }
+
       }catch(err){
         alert("Erreur pendant la génération du PDF : " + err.message);
         console.error(err);
