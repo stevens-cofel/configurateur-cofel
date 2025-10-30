@@ -172,20 +172,45 @@
     // === UTILITAIRES =======================================================
     const fmtEUR = n => (Number(n||0)).toFixed(2).replace('.', ',') + " €";
 
+    function stripBOM(s){ return s.replace(/^\uFEFF/, ""); }
+
+    // Parseur CSV robuste (BOM, séparateur virgule OU point-virgule, guillemets)
     async function loadCSV(url){
       const res = await fetch(url, { cache: "no-store" });
       if(!res.ok) throw new Error("Erreur chargement " + url + " : " + res.status);
-      const text = await res.text();
+      let text = await res.text();
+      text = stripBOM(text);
+
       const lines = text.split(/\r?\n/).filter(l => l.trim().length>0);
-      const headers = lines[0].split(",").map(h=>h.trim());
+      if(lines.length === 0) return { headers:[], rows:[] };
+
+      // Détecter séparateur: ; prioritaire si très présent
+      const sepGuess = (lines[0].match(/;/g)||[]).length > (lines[0].match(/,/g)||[]).length ? ";" : ",";
+      const split = (line) => {
+        // split simple + nettoyage guillets
+        return line.split(sepGuess).map(c => stripBOM(c).replace(/^"(.*)"$/,'$1').trim());
+      };
+
+      let headers = split(lines[0]).map(h => h.toLowerCase());
+      // normaliser noms attendus (retire BOM éventuel + espaces)
+      headers = headers.map(h => h.replace(/\s+/g,'').replace('département','departement'));
+
       const rows = lines.slice(1).map(line => {
-        const cols = line.split(",").map(c => c.trim());
+        const cols = split(line);
         const rec = {};
-        headers.forEach((h, i) => rec[h] = cols[i] ?? "";
-        return rec;
+        headers.forEach((h, i) => rec[h] = (cols[i] ?? "").trim());
+        // Mapper vers clés standardisées
+        return {
+          departement: rec["departement"] ?? rec["\ufeffdepartement"] ?? "",
+          poids_kg:    rec["poids_kg"] ?? rec["poids(kg)"] ?? rec["poids"] ?? "",
+          longueur_m:  rec["longueur_m"] ?? rec["longueurpalette(m)"] ?? rec["longueur"] ?? "",
+          prix_ht:     (rec["prix_ht"] ?? rec["prixht"] ?? rec["prix"]).replace(",", ".")
+        };
       });
+
       return { headers, rows };
     }
+
     const uniqueSorted = (arr, map=v=>v) => Array.from(new Set(arr.map(map))).filter(Boolean).sort((a,b)=>a<b?-1:a>b?1:0);
     const byDept = (rows, dept) => rows.filter(r => String(r.departement||"").trim() === String(dept).trim());
 
@@ -252,7 +277,7 @@
         return;
       }
       currentCtx.textContent = `${isMess ? "Messagerie" : "Affrètement"} • Dept ${state.departement} • ${isMess ? "Poids" : "Longueur"}: ${state.third}`;
-      const price = Number(String(match.prix_ht||"0").replace(",", "."));
+      const price = Number(String(match.prix_ht||"0"));
       priceValue.textContent = isFinite(price) ? fmtEUR(price) : "—";
     }
 
@@ -274,22 +299,14 @@
           loadCSV(CSV_MESSAGERIE_URL),
           loadCSV(CSV_AFFRETEMENT_URL)
         ]);
-        state.messagerie = {
-          headers: mess.headers,
-          rows: mess.rows.map(r=>({
-            departement: String(r.departement||"").trim(),
-            poids_kg:   String(r.poids_kg||"").trim(),
-            prix_ht:    String(r.prix_ht||"").trim()
-          }))
-        };
-        state.affretement = {
-          headers: affr.headers,
-          rows: affr.rows.map(r=>({
-            departement: String(r.departement||"").trim(),
-            longueur_m:  String(r.longueur_m||"").trim(),
-            prix_ht:     String(r.prix_ht||"").trim()
-          }))
-        };
+
+        // Filtrer les lignes pertinentes
+        const messRows = mess.rows.filter(r => r.departement && r.poids_kg && r.prix_ht);
+        const affrRows = affr.rows.filter(r => r.departement && r.longueur_m && r.prix_ht);
+
+        state.messagerie = { headers: mess.headers, rows: messRows };
+        state.affretement = { headers: affr.headers, rows: affrRows };
+
         renderDepartments();
       }catch(err){
         alert("Erreur de chargement des CSV. Vérifie les chemins en haut du fichier.\n" + err.message);
