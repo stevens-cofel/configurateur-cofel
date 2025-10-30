@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <script>
-if (sessionStorage.getItem("access_granted") !== "true") {
-  window.location.href = "index.html";
-}
-</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Configurateurs Cofel</title>
+
+  <!-- Contrôle d'accès : si pas authentifié, renvoyer vers index.html -->
+  <script>
+    if (localStorage.getItem("cofel_auth") !== "1") {
+      location.replace("index.html");
+    }
+  </script>
+
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
     /* ===================== THEME (Apple-like) ===================== */
@@ -55,6 +58,13 @@ if (sessionStorage.getItem("access_granted") !== "true") {
     .brand img{height:42px; width:auto; object-fit:contain; border-radius:10px}
     .brand h1{ font-size: clamp(18px, 2.6vw, 22px); margin:0; letter-spacing:.2px; font-weight:700; }
     .hero-tagline{ max-width:1200px; margin:18px auto 0; padding:0 20px; color:var(--txt-dim); }
+
+    /* logout link */
+    .hero-actions{ display:flex; align-items:center; gap:10px; }
+    .logout-link{
+      color:var(--txt-dim); text-decoration:underline; cursor:pointer; font-size:13px;
+      background:transparent; border:none;
+    }
 
     /* ===================== APPS GRID ===================== */
     .wrap{max-width:1200px; margin:26px auto; padding:0 20px 40px; position:relative; z-index:1;}
@@ -160,12 +170,18 @@ if (sessionStorage.getItem("access_granted") !== "true") {
   <!-- ===================== HERO ===================== -->
   <div class="hero">
     <div class="hero-inner">
-      <div class="brand">
+      <div class="brand" style="gap:12px;">
         <img src="./assets/logo cofel.jpg" alt="Cofel" />
         <h1>Configurateurs Cofel</h1>
       </div>
-      <div class="brand" style="gap:10px;">
-        <div style="font-size:12px;color:var(--txt-dim)">Rapide • Clair • PDF prêt à envoyer</div>
+
+      <div class="hero-actions">
+        <div class="brand" style="gap:10px;">
+          <div style="font-size:12px;color:var(--txt-dim)">Rapide • Clair • PDF prêt à envoyer</div>
+        </div>
+
+        <!-- Se déconnecter -->
+        <button id="logoutBtn" class="logout-link" title="Se déconnecter">Se déconnecter</button>
       </div>
     </div>
     <div class="hero-tagline">Choisissez un configurateur puis composez votre devis en quelques clics. L’aperçu et l’export PDF sont mis à jour automatiquement.</div>
@@ -308,6 +324,7 @@ if (sessionStorage.getItem("access_granted") !== "true") {
     const btnPdf     = document.getElementById('btnPdf');
     const btnClear   = document.getElementById('btnClear');
     const noteInfo   = document.getElementById('noteInfo');
+    const logoutBtn  = document.getElementById('logoutBtn');
 
     // Validation activation export PDF
     function validateExportEnabled(){
@@ -388,6 +405,14 @@ if (sessionStorage.getItem("access_granted") !== "true") {
         Devis.clearAll(true);
         render();
         validateExportEnabled();
+      }
+    });
+
+    // Logout handler
+    logoutBtn.addEventListener('click', ()=>{
+      if(confirm("Se déconnecter ?")) {
+        localStorage.removeItem('cofel_auth');
+        location.replace('index.html');
       }
     });
 
