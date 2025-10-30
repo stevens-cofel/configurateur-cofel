@@ -7,11 +7,7 @@
   <title>Connexion — Cofel</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
-    :root{
-      --cofel:#5a2d82; --cofel-2:#7838a7;
-      --txt:#f5f7ff; --glass: rgba(255,255,255,.08);
-      --radius:18px; --blur:18px; --shadow: 0 10px 30px rgba(0,0,0,.35);
-    }
+    :root{ --cofel:#5a2d82; --cofel-2:#7838a7; --txt:#f5f7ff; --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35); }
     *{box-sizing:border-box} html,body{height:100%}
     body{
       margin:0; color:var(--txt);
@@ -53,7 +49,7 @@
 <body>
   <main class="card">
     <div class="brand">
-      <!-- ⚠️ chemin relatif pour un site GitHub Pages de projet -->
+      <!-- chemin relatif (pas de "/assets/...") -->
       <img src="../assets/logo cofel.jpg" alt="Cofel">
       <h1>Connexion requise</h1>
     </div>
@@ -82,9 +78,17 @@
     const input = document.getElementById("pw");
     const remember = document.getElementById("remember");
     const err = document.getElementById("err");
+
+    // base du "project site" -> "/<repo-name>/"
+    function getProjectBase() {
+      const parts = location.pathname.split("/").filter(Boolean);
+      const project = parts.length ? parts[0] : "";
+      return `/${project}/`;
+    }
+
+    // retour par défaut: index du projet
     const url = new URL(location.href);
-    // ⚠️ Sur un site de projet, revenir à ../index.html par défaut
-    const returnTo = url.searchParams.get("return") || "../index.html";
+    const returnTo = url.searchParams.get("return") || (getProjectBase() + "index.html");
 
     async function sha256hex(str){
       const buf = new TextEncoder().encode(str);
@@ -113,19 +117,13 @@
         const token = makeToken(days);
         localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
         // Redirection
-        try {
-          const next = decodeURIComponent(returnTo);
-          location.replace(next);
-        } catch {
-          location.replace("../index.html");
-        }
+        location.replace(returnTo);
       }catch(ex){
         err.textContent = "Erreur inattendue. Réessayez.";
         console.error(ex);
       }
     });
 
-    // Focus direct
     input.focus();
   </script>
 </body>
