@@ -313,8 +313,8 @@
       return;
     }
 
-    /* === CONFIG WEBHOOK (Google Apps Script) — COLLE ICI TON URL /exec === */
-    const WEBHOOK = "https://script.google.com/macros/s/AKfycbwfOBZhRoL0WX9R1moMC4DIIiG2jUpNL0RwV7PRx4hME8j1_dyyEWbAdC8_l-srMzg/exec";
+    /* === CONFIG WEBHOOK (Google Apps Script) — mets ici ton URL /exec === */
+    const WEBHOOK = "YOUR_APPS_SCRIPT_WEBHOOK_HERE";
 
     // Helpers
     const fmt = n => (Number(n)||0).toFixed(2).replace('.', ',') + " €";
@@ -423,15 +423,15 @@
       }
     });
 
-    // Util: charger image en DataURL (logo PDF)
+    // Util: charger image en DataURL (logo PDF) en respectant le ratio
     function loadImageDataURL(src){
       return new Promise((resolve,reject)=>{
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.onload = () => {
+          const targetW = 180;                 // largeur souhaitée dans le PDF
+          const ratio = img.height / img.width; // ratio d'origine
           const canvas = document.createElement('canvas');
-          const targetW = 180;
-          const ratio = img.height / img.width;
           canvas.width = targetW;
           canvas.height = Math.round(targetW * ratio);
           const ctx = canvas.getContext('2d');
@@ -443,7 +443,7 @@
       });
     }
 
-    // ===================== EXPORT PDF (mise en page soignée) + ENVOI MAIL =====================
+    // ===================== EXPORT PDF (logo non déformé) + ENVOI MAIL =====================
     document.getElementById("btnPdf").addEventListener("click", async () => {
       try{
         const { jsPDF } = window.jspdf;
@@ -462,17 +462,23 @@
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 40;
 
-        // Logo
-        let logoData = null;
-        try { logoData = await loadImageDataURL("./assets/logo cofel.jpg"); } catch(e){ /* pas de logo */ }
+        // Logo (respect du ratio via getImageProperties)
+        let logoData = null, logoW = 120, logoH = 0;
+        try {
+          logoData = await loadImageDataURL("./assets/logo cofel.jpg");
+          const props = doc.getImageProperties(logoData);
+          const ratio = props.height / props.width;
+          logoH = Math.round(logoW * ratio);
+        } catch(e){ /* pas de logo */ }
 
         // Header
         const drawHeader = () => {
           const yTop = margin;
-          const logoW = 120;
+
           if (logoData){
-            doc.addImage(logoData, "JPEG", margin, yTop, logoW, logoW*0.28);
+            doc.addImage(logoData, "JPEG", margin, yTop, logoW, logoH);
           }
+
           doc.setFont("Helvetica", "bold"); doc.setFontSize(18);
           doc.setTextColor(...COLOR_PRIMARY);
           doc.text("DEVIS", pageWidth - margin, yTop + 6, { align:"right" });
@@ -486,9 +492,11 @@
           ];
           rightLines.forEach((t,i)=> doc.text(t, pageWidth - margin, yTop + 26 + i*14, { align:"right" }));
 
+          // Ligne sous le logo (toujours sous l'image si elle existe)
+          const lineY = yTop + (logoData ? (logoH + 14) : 54);
           doc.setDrawColor(...COLOR_PRIMARY);
           doc.setLineWidth(1);
-          doc.line(margin, yTop + 54, pageWidth - margin, yTop + 54);
+          doc.line(margin, lineY, pageWidth - margin, lineY);
         };
 
         const drawFooter = (pageNum, pageCount) => {
@@ -574,7 +582,8 @@
 
         // Première page
         drawHeader();
-        let currentY = drawClientCard(margin + 66);
+        let currentY = (margin + (logoData ? (logoH + 14) : 54)) + 12; // démarre sous la ligne
+        currentY = drawClientCard(currentY);
 
         // Tableau
         doc.autoTable({
@@ -590,9 +599,7 @@
           },
           theme:"grid",
           margin:{ left: margin, right: margin },
-          didDrawPage: () => {
-            drawHeader();
-          }
+          didDrawPage: () => { drawHeader(); }
         });
 
         // Totaux sous le tableau (dernière page)
@@ -606,7 +613,7 @@
           drawFooter(i, pageCount);
         }
 
-        // === 1) Télécharger localement pour l'utilisateur
+        // === 1) Télécharger localement
         const filename = "Devis-Cofel.pdf";
         doc.save(filename);
 
@@ -627,7 +634,6 @@
               lines:  d.lignes || []
             };
 
-            // text/plain pour éviter la pré-requête CORS (OPTIONS) sur GitHub Pages
             await fetch(WEBHOOK, {
               method: "POST",
               headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -661,15 +667,12 @@
         if (mod && mod.AUTH_SETTINGS && mod.AUTH_SETTINGS.siteId) {
           siteId = mod.AUTH_SETTINGS.siteId;
         }
-      } catch(e) {
-        // silencieux : si la config ne se charge pas, on utilise la valeur par défaut
-      }
+      } catch(e) { /* silencieux */ }
       const TOKEN_KEY = `auth_token_${siteId}`;
       const btn = document.getElementById("logoutBtn");
       if (btn){
         btn.addEventListener("click", ()=>{
           try { localStorage.removeItem(TOKEN_KEY); } catch {}
-          // Redirection vers la page de login
           location.href = "./auth/login.html";
         });
       }
