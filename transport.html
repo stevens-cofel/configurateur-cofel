@@ -9,12 +9,11 @@
   <style>
     :root{
       --cofel:#5a2d82; --cofel-2:#7838a7;
-      --txt:#f5f7ff; --txt-dim:#e6e6ff;
-      --accent:#c9b7ff;
-      --glass: rgba(255,255,255,.10);
-      --glass-2: rgba(255,255,255,.06);
-      --radius:18px; --blur:18px;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --txt:#f5f7ff; --txt-dim:#e6e6ff; --accent:#c9b7ff;
+      --glass1: rgba(255,255,255,.16); --glass2: rgba(255,255,255,.06);
+      --border: rgba(255,255,255,.2);
+      --inputbg: rgba(255,255,255,.10); --inputbd: rgba(255,255,255,.22);
+      --radius:18px; --blur:18px; --shadow: 0 10px 30px rgba(0,0,0,.35);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -34,7 +33,7 @@
       display:flex; align-items:center; gap:12px;
       padding:10px 14px; border-radius:14px;
       background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-      border:1px solid rgba(255,255,255,.2);
+      border:1px solid var(--border);
       backdrop-filter: blur(var(--blur));
       box-shadow: var(--shadow);
     }
@@ -48,8 +47,8 @@
 
     /* CARDS */
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
-      border:1px solid rgba(255,255,255,.2);
+      background: linear-gradient(180deg, var(--glass1), var(--glass2));
+      border:1px solid var(--border);
       border-radius:20px; padding:18px; box-shadow:var(--shadow);
       backdrop-filter: blur(var(--blur));
       margin-bottom:16px;
@@ -57,37 +56,36 @@
     h2{ margin:0 0 12px; font-size: clamp(18px, 2.4vw, 22px); letter-spacing:.2px; }
     label{font-weight:700; font-size:12px; color:var(--accent)}
 
+    /* Inputs style identique à tes configurateurs */
     .grid{ display:grid; gap:12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     select{
       width:100%; padding:12px;
-      background: rgba(255,255,255,.10); color:var(--txt);
-      border:1px solid rgba(255,255,255,.22); border-radius:12px; outline:none;
+      color:var(--txt);
+      background: var(--inputbg);
+      border:1px solid var(--inputbd);
+      border-radius:12px; outline:none;
     }
+    select:focus{ border-color: rgba(255,255,255,.34); background: rgba(255,255,255,.12); }
 
     .price-box{
-      display:flex; align-items:center; justify-content:space-between;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
       background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-      border:1px solid rgba(255,255,255,.22); border-radius:16px;
+      border:1px solid var(--inputbd); border-radius:16px;
       padding:14px 16px; margin-top:10px;
     }
-    .price{ font-size:22px; font-weight:800; letter-spacing:.2px; }
+    .price{ font-size:24px; font-weight:800; letter-spacing:.2px; }
     .muted{ color:var(--txt-dim); font-size:12px; }
 
-    table{ width:100%; border-collapse:collapse; min-width:560px; }
-    th, td{ padding:10px 12px; text-align:left; }
-    thead tr{ background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); }
-    th{ font-size:12px; color:var(--accent); letter-spacing:.2px; }
-    tbody tr + tr td{ border-top:1px solid rgba(255,255,255,.12); }
-
-    .note{ color:var(--txt-dim); font-size:12px; margin-top:8px; }
     .btn{
       appearance:none; border:none; cursor:pointer; font-weight:800;
       color:#0b0b0b; background:#fff; border-radius:12px; padding:10px 14px;
       box-shadow: 0 10px 24px rgba(0,0,0,.25);
+      transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
     }
+    .btn:active{ transform: translateY(1px); box-shadow: 0 6px 16px rgba(0,0,0,.28); }
     .btn-ghost{
       color:var(--txt); background: transparent;
-      border:1px solid rgba(255,255,255,.22);
+      border:1px solid var(--inputbd);
     }
 
     @media (max-width:720px){
@@ -148,43 +146,20 @@
         </div>
       </div>
 
-      <div class="note">
-        Astuce : les tarifs affichés sont les <strong>prix de vente client HT</strong> issus de vos grilles.  
-        Cette page est destinée aux tests internes avant intégration.
+      <div class="muted" style="margin-top:8px">
+        Les montants affichés sont les <strong>prix de vente client HT</strong> issus de vos grilles.
       </div>
-    </section>
-
-    <!-- Tableau du département -->
-    <section class="card">
-      <h2>📋 Détails pour le département sélectionné</h2>
-      <div style="overflow:auto; border-radius:14px; border:1px solid rgba(255,255,255,.16);">
-        <table id="detailsTable">
-          <thead>
-            <tr id="theadRow">
-              <!-- Colonnes dynamiques -->
-            </tr>
-          </thead>
-          <tbody id="tbodyRows">
-            <tr><td colspan="3" class="muted">Choisissez un département pour voir les lignes disponibles.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="note" id="tableNote"></div>
     </section>
   </main>
 
   <script>
-    // === CONFIG DES SOURCES CSV (adapter si besoin) ==========================
-    const CSV_MESSAGERIE_URL = "./data/transport_messagerie.csv";
+    // === SOURCES CSV ========================================================
+    const CSV_MESSAGERIE_URL  = "./data/transport_messagerie.csv";
     const CSV_AFFRETEMENT_URL = "./data/transport_affretement.csv";
 
-    // === UTILITAIRES ========================================================
-    const fmtEUR = n => {
-      const v = Number(n || 0);
-      return v.toFixed(2).replace('.', ',') + " €";
-    };
+    // === UTILITAIRES =======================================================
+    const fmtEUR = n => (Number(n||0)).toFixed(2).replace('.', ',') + " €";
 
-    // CSV très simple (séparateur virgule, pas de guillemets imbriqués)
     async function loadCSV(url){
       const res = await fetch(url, { cache: "no-store" });
       if(!res.ok) throw new Error("Erreur chargement " + url + " : " + res.status);
@@ -199,26 +174,19 @@
       });
       return { headers, rows };
     }
+    const uniqueSorted = (arr, map=v=>v) => Array.from(new Set(arr.map(map))).filter(Boolean).sort((a,b)=>a<b?-1:a>b?1:0);
+    const byDept = (rows, dept) => rows.filter(r => String(r.departement||"").trim() === String(dept).trim());
 
-    function uniqueSorted(arr, mapper = v=>v){
-      const s = new Set(arr.map(mapper));
-      return Array.from(s).filter(Boolean).sort((a,b)=> (a < b ? -1 : a > b ? 1 : 0));
-    }
-
-    function byDept(rows, dept){
-      return rows.filter(r => String(r.departement || "").trim() === String(dept).trim());
-    }
-
-    // === ETAT ===============================================================
+    // === ETAT ==============================================================
     const state = {
-      type: "messagerie",        // "messagerie" | "affretement"
+      type: "messagerie",
       departement: "",
-      third: "",                 // poids_kg (messagerie) ou longueur_m (affrètement)
+      third: "",
       messagerie: { headers:[], rows:[] },
       affretement: { headers:[], rows:[] }
     };
 
-    // === DOM ================================================================
+    // === DOM ===============================================================
     const typeSelect   = document.getElementById("typeSelect");
     const deptSelect   = document.getElementById("deptSelect");
     const thirdSelect  = document.getElementById("thirdSelect");
@@ -227,45 +195,33 @@
     const priceValue   = document.getElementById("priceValue");
     const resetBtn     = document.getElementById("resetBtn");
 
-    const theadRow     = document.getElementById("theadRow");
-    const tbodyRows    = document.getElementById("tbodyRows");
-    const tableNote    = document.getElementById("tableNote");
-
     // === RENDU ==============================================================
     function renderDepartments(){
       const rows = state.type === "messagerie" ? state.messagerie.rows : state.affretement.rows;
-      const depts = uniqueSorted(rows.map(r => String(r.departement || "").trim()));
+      const depts = uniqueSorted(rows.map(r => String(r.departement||"").trim()));
       deptSelect.innerHTML = `<option value="">— Choisir un département —</option>` +
         depts.map(d => `<option value="${d}">${d}</option>`).join("");
-      // reset dependent select
       thirdSelect.innerHTML = `<option value="">— Choisir —</option>`;
       thirdSelect.disabled = true;
-      state.departement = "";
-      state.third = "";
+      state.departement = ""; state.third = "";
       renderPrice();
-      renderTable();
     }
 
     function renderThirdSelector(){
       const isMess = state.type === "messagerie";
       thirdLabel.textContent = isMess ? "Poids (kg)" : "Longueur palette (m)";
       thirdSelect.disabled = !state.departement;
-
       if(!state.departement){
         thirdSelect.innerHTML = `<option value="">— Choisir —</option>`;
         return;
       }
-
-      const rows = state.type === "messagerie" ? state.messagerie.rows : state.affretement.rows;
-      const rowsDept = byDept(rows, state.departement);
+      const rowsDept = byDept(isMess ? state.messagerie.rows : state.affretement.rows, state.departement);
       const key = isMess ? "poids_kg" : "longueur_m";
-      const opts = uniqueSorted(rowsDept.map(r => String(r[key] || "").trim()), v => v);
-
+      const opts = uniqueSorted(rowsDept.map(r => String(r[key]||"").trim()));
       thirdSelect.innerHTML = `<option value="">— Choisir —</option>` +
         opts.map(v => `<option value="${v}">${v}</option>`).join("");
       state.third = "";
       renderPrice();
-      renderTable();
     }
 
     function renderPrice(){
@@ -284,50 +240,8 @@
         return;
       }
       currentCtx.textContent = `${isMess ? "Messagerie" : "Affrètement"} • Dept ${state.departement} • ${isMess ? "Poids" : "Longueur"}: ${state.third}`;
-      const price = Number(String(match.prix_ht || "0").replace(",", "."));
+      const price = Number(String(match.prix_ht||"0").replace(",", "."));
       priceValue.textContent = isFinite(price) ? fmtEUR(price) : "—";
-    }
-
-    function renderTable(){
-      // En-têtes
-      const isMess = state.type === "messagerie";
-      theadRow.innerHTML = `
-        <th>Département</th>
-        <th>${isMess ? "Poids (kg)" : "Longueur palette (m)"}</th>
-        <th>Prix client HT</th>
-      `;
-
-      // Lignes du département
-      const rows = isMess ? state.messagerie.rows : state.affretement.rows;
-      if(!state.departement){
-        tbodyRows.innerHTML = `<tr><td colspan="3" class="muted">Choisissez un département pour voir les lignes disponibles.</td></tr>`;
-        tableNote.textContent = "";
-        return;
-      }
-      const rowsDept = byDept(rows, state.departement);
-      if(!rowsDept.length){
-        tbodyRows.innerHTML = `<tr><td colspan="3" class="muted">Aucune ligne pour ce département.</td></tr>`;
-        tableNote.textContent = "";
-        return;
-      }
-      const key = isMess ? "poids_kg" : "longueur_m";
-      const sorted = rowsDept.slice().sort((a,b)=>{
-        const na = parseFloat(String(a[key]).replace(",", "."));
-        const nb = parseFloat(String(b[key]).replace(",", "."));
-        return (isFinite(na) && isFinite(nb)) ? (na - nb) : String(a[key]).localeCompare(String(b[key]));
-      });
-      tbodyRows.innerHTML = sorted.map(r=>{
-        const price = Number(String(r.prix_ht || "0").replace(",", "."));
-        return `
-          <tr>
-            <td>${r.departement || ""}</td>
-            <td>${r[key] || ""}</td>
-            <td>${isFinite(price) ? fmtEUR(price) : ""}</td>
-          </tr>
-        `;
-      }).join("");
-
-      tableNote.textContent = `${rowsDept.length} ligne(s) — source: ${isMess ? "transport_messagerie.csv" : "transport_affretement.csv"}`;
     }
 
     function resetAll(){
@@ -336,18 +250,9 @@
     }
 
     // === EVENTS =============================================================
-    typeSelect.addEventListener("change", ()=>{
-      state.type = typeSelect.value;
-      renderDepartments();
-    });
-    deptSelect.addEventListener("change", ()=>{
-      state.departement = deptSelect.value;
-      renderThirdSelector();
-    });
-    thirdSelect.addEventListener("change", ()=>{
-      state.third = thirdSelect.value;
-      renderPrice();
-    });
+    typeSelect.addEventListener("change", ()=>{ state.type = typeSelect.value; renderDepartments(); });
+    deptSelect.addEventListener("change", ()=>{ state.departement = deptSelect.value; renderThirdSelector(); });
+    thirdSelect.addEventListener("change", ()=>{ state.third = thirdSelect.value; renderPrice(); });
     resetBtn.addEventListener("click", resetAll);
 
     // === BOOT ===============================================================
@@ -357,27 +262,25 @@
           loadCSV(CSV_MESSAGERIE_URL),
           loadCSV(CSV_AFFRETEMENT_URL)
         ]);
-        // Normalisation attendue: departement, poids_kg, prix_ht  /  departement, longueur_m, prix_ht
         state.messagerie = {
           headers: mess.headers,
           rows: mess.rows.map(r=>({
-            departement: String(r.departement || "").trim(),
-            poids_kg: String(r.poids_kg || "").trim(),
-            prix_ht: String(r.prix_ht || "").trim()
+            departement: String(r.departement||"").trim(),
+            poids_kg:   String(r.poids_kg||"").trim(),
+            prix_ht:    String(r.prix_ht||"").trim()
           }))
         };
         state.affretement = {
           headers: affr.headers,
           rows: affr.rows.map(r=>({
-            departement: String(r.departement || "").trim(),
-            longueur_m: String(r.longueur_m || "").trim(),
-            prix_ht: String(r.prix_ht || "").trim()
+            departement: String(r.departement||"").trim(),
+            longueur_m:  String(r.longueur_m||"").trim(),
+            prix_ht:     String(r.prix_ht||"").trim()
           }))
         };
-
-        renderDepartments(); // initialise liste des départements
+        renderDepartments();
       }catch(err){
-        alert("Erreur de chargement des CSV de transport. Vérifiez les chemins dans le haut du fichier.\n" + err.message);
+        alert("Erreur de chargement des CSV. Vérifie les chemins en haut du fichier.\n" + err.message);
         console.error(err);
       }
     })();
