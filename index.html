@@ -5,10 +5,10 @@
   <title>Accès Cofel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Configuration -->
+  <!-- Configuration mot de passe -->
   <script>
-    const PASSWORD   = "cofel2025"; // 🔑 ton mot de passe
-    const TARGET_URL = "configurateur-cofel/index.html"; // la vraie page à ouvrir après login
+    const PASSWORD   = "cofel2025"; // 🔑 Ton mot de passe
+    const TARGET_URL = "configurateur-cofel/home.html"; // 🔁 Page de garde réelle
 
     // Si déjà connecté, redirige directement
     if (localStorage.getItem("cofel_auth") === "1") {
@@ -25,19 +25,21 @@
     }
     .box{
       background:rgba(255,255,255,0.08);
-      padding:32px 36px; border-radius:14px; text-align:center;
-      backdrop-filter: blur(10px); box-shadow:0 10px 30px rgba(0,0,0,.28); max-width:380px;
+      padding:36px 40px; border-radius:16px; text-align:center;
+      backdrop-filter: blur(10px); box-shadow:0 10px 30px rgba(0,0,0,.3);
+      max-width:400px; width:90%;
     }
-    h2{ margin:0 0 8px; font-size:20px; }
-    p{ margin:0 0 14px; color:rgba(255,255,255,.9) }
+    h2{ margin:0 0 8px; font-size:22px; }
+    p{ margin:0 0 16px; color:rgba(255,255,255,.9) }
     input{
-      width:100%; padding:10px 12px; border-radius:10px; border:none;
+      width:100%; padding:12px; border-radius:10px; border:none;
       outline:none; text-align:center; font-size:15px;
     }
     button{
-      margin-top:12px; padding:10px 14px; border-radius:10px; border:none;
+      margin-top:14px; padding:10px 14px; border-radius:10px; border:none;
       background:#fff; color:#0b0b0b; font-weight:700; cursor:pointer;
     }
+    button:hover{ background:#f0f0f0; }
     #msg{ margin-top:10px; min-height:18px; color:#ffb3b3; font-size:14px; }
     .small{ font-size:13px; color:rgba(255,255,255,.8); margin-top:8px }
   </style>
@@ -45,7 +47,7 @@
 <body>
   <div class="box" role="main" aria-labelledby="title-login">
     <h2 id="title-login">🔒 Accès réservé Cofel</h2>
-    <p>Entrez le mot de passe communiqué par votre contact.</p>
+    <p>Merci d’entrer le mot de passe communiqué par votre contact.</p>
 
     <input id="pwd" type="password" placeholder="Mot de passe" aria-label="Mot de passe">
     <button id="btnEnter" type="button">Entrer</button>
@@ -59,10 +61,10 @@
       const val = document.getElementById("pwd").value.trim();
       const msg = document.getElementById("msg");
       if (val === PASSWORD) {
-        localStorage.setItem("cofel_auth","1"); // ✅ on mémorise la connexion
-        window.location.href = TARGET_URL;      // 🔁 redirection vers ton configurateur
+        localStorage.setItem("cofel_auth","1"); // ✅ Connexion persistante
+        window.location.href = TARGET_URL;      // 🔁 Redirection vers home.html
       } else {
-        msg.textContent = "Mot de passe incorrect.";
+        msg.textContent = "❌ Mot de passe incorrect.";
       }
     }
 
