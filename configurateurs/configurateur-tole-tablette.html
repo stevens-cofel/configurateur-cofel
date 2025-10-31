@@ -259,11 +259,12 @@
 
     <div id="fixChassis" class="hidden">
       <!-- ⚠️ Tarifs retirés visuellement -->
-      <div class="hint" style="margin-top:8px">
+      <!-- ⬇️ Masqué visuellement, conservé au DOM pour ne rien casser -->
+      <div class="hint hidden" style="margin-top:8px">
         Linéaire châssis = <b>périmètre</b> (2×(L+H)).<br />
         Goussets = minimum 4, puis +4 par m² (arrondi à l’entier sup.).
       </div>
-      <div style="margin-top:8px">
+      <div class="hidden" style="margin-top:8px">
         <label for="goussetPrixU">Gousset €/u</label>
         <input type="number" id="goussetPrixU" placeholder="€/u (auto/manuel)" min="0" step="0.01" />
       </div>
@@ -487,7 +488,7 @@ function compute(){
     const chLinCost = CHASSIS_PRICE_ML * P; // périmètre × (interne)
     nbGoussets = Math.max(4, Math.ceil(4 + 4 * A)); // min 4 puis +4/m²
     let gusU = autoFindPrice(/gousset/,'u');
-    if(!isFinite(gusU)) gusU = Number(elGoussetPrixU.value||0);
+    if(!isFinite(gusU)) gusU = Number(elGoussetPrixU?.value||0);
     const gusCost = (isFinite(gusU)?gusU:0) * nbGoussets;
     fix_interne = chLinCost + gusCost;
 
@@ -527,7 +528,7 @@ function toggleBlocks(){
     optLED, ...fixRadios, goussetPrixU,
     ...document.querySelectorAll('input[name="boiteMat"]')
   ].forEach(el=>{
-    el.addEventListener(evt, e=>{
+    el.addEventListener?.(evt, e=>{
       if(e.target===btnCopySurface){
         e.preventDefault();
         pmmaSurface.value = areaM2(largeur.value, hauteur.value).toFixed(3);
