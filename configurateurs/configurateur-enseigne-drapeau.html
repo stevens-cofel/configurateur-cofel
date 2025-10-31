@@ -568,7 +568,7 @@
       const totalHT=unit*UPLIFT_PUBLIC*2; // 120 * 2 * 2 = 480
       console.assert(totalHT===480, 'Test4 failed');
 
-      status.textContent='✔ tests OK';
+      status.textContent='';
     }catch(err){
       console.warn('Tests error', err);
       if(status) status.textContent='⚠ tests partiels';
@@ -611,3 +611,4 @@
 
 </body>
 </html>
+
