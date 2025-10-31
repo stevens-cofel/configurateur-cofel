@@ -495,14 +495,32 @@
     return pool;
   }
 
+  // ===== FIX: conserver la dimension choisie quand les options changent =====
   function populateDimensions(){
-    const pool=filteredPool();
-    const dims = distinct(pool.map(r=>String(r[MAP.DIM]||'').trim()).filter(Boolean))
-                  .sort((a,b)=>a.localeCompare(b,'fr',{numeric:true}));
-    elDim.innerHTML='<option value="">(choisir la dimension)</option>';
-    dims.forEach(v=> elDim.innerHTML+=`<option>${v}</option>`);
-    elHelpDim.textContent=dims.length?`Dimensions dispo : ${dims.slice(0,10).join(' • ')}${dims.length>10?' …':''}`:'';
-    rebuildCustom(elDim);
+    const prev = elDim.value;               // mémoriser la dimension choisie
+    const pool = filteredPool();
+    const dims = distinct(
+      pool.map(r => String(r[MAP.DIM] || '').trim()).filter(Boolean)
+    ).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true}));
+
+    // reconstruire la liste en pré-sélectionnant l'ancienne valeur si elle existe encore
+    let html = '<option value="">(choisir la dimension)</option>';
+    for(const v of dims){
+      const selected = (v === prev) ? ' selected' : '';
+      html += `<option value="${v}"${selected}>${v}</option>`;
+    }
+    elDim.innerHTML = html;
+
+    // si l'ancienne valeur n'existe plus, on laisse vide
+    if (prev && !dims.includes(prev)) {
+      elDim.value = "";
+    }
+
+    elHelpDim.textContent = dims.length
+      ? `Dimensions dispo : ${dims.slice(0,10).join(' • ')}${dims.length>10?' …':''}`
+      : '';
+
+    rebuildCustom(elDim); // met à jour le select custom
   }
 
   function findRow(){
@@ -599,10 +617,7 @@
       pu_public_ht
     });
 
-    alert(`✅ Ajouté au devis !
-${designation}
-Qté : ${quantite}
-PU HT : ${pu_public_ht.toFixed(2)} €`);
+    alert(`✅ Ajouté au devis !\n${designation}\nQté : ${quantite}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
   });
   </script>
 
