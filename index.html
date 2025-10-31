@@ -477,10 +477,10 @@
       });
     }
 
-    // Envoi e-mail (sans pièce jointe) — en text/plain pour éviter le préflight
+    // === Envoi e-mail (silencieux côté client) =========================
     async function sendEmail({client, devis}){
       try{
-        const t = totalsExcludingTransportDiscount(devis); // 👉 totaux corrigés
+        const t = totalsExcludingTransportDiscount(devis);
         const subject = `Devis Cofel — ${client?.societe||"Sans société"} — ${client?.chantier||"Sans chantier"} — ${((Number(t.total_ttc)||0).toFixed(2)).replace('.',',')} € — ${new Date().toLocaleDateString("fr-FR")}`;
         const body = {
           subject,
@@ -500,24 +500,15 @@
 
         const resp = await fetch(MAIL_WEBHOOK, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" }, // <- évite le préflight CORS
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, // évite le préflight CORS
           body: JSON.stringify(body)
         });
         const text = await resp.text().catch(()=>"(no text)");
+        // Silencieux: logs uniquement en console (dev)
         console.log("[MAIL] status", resp.status, "body:", text);
-
-        if (!resp.ok) {
-          showToast(`❌ Mail non envoyé (HTTP ${resp.status})`, false);
-          return;
-        }
-        try {
-          const json = JSON.parse(text || "{}");
-          if (!json.ok) return showToast("❌ Mail non envoyé (réponse négative du webhook)", false);
-        } catch {}
-        showToast("✅ Email envoyé");
       }catch(err){
+        // Silencieux: pas d'UI, uniquement log dev
         console.warn("Envoi email échoué:", err);
-        showToast("❌ Erreur envoi email (voir console)", false);
       }
     }
 
@@ -684,7 +675,7 @@
           drawFooter(i, pageCount);
         }
 
-        // 👉 Envoi e-mail (sans pièce jointe)
+        // 👉 Envoi e-mail (silencieux)
         await sendEmail({ client, devis: d });
 
         // 👉 Téléchargement utilisateur
