@@ -161,8 +161,8 @@
       <div class="opt-row" id="ralRow">
         <label style="display:flex;align-items:center;gap:10px;margin:0">
           <input type="checkbox" id="optRAL" disabled />
-          <span>Laquage au RAL (112 €/m², 2 faces)</span>
-          <span class="note" id="ralNote"></span>
+          <span>Laquage au RAL</span>
+          <span class="note" id="ralNote" style="display:none"></span>
         </label>
       </div>
 
@@ -197,7 +197,7 @@ let RAW_TARIFFS = []; let RAW_OPTIONS = [];
 let RAW_HEADERS_T = []; let RAW_HEADERS_O = [];
 let HEADS_T = []; let HEADS_O = []; let TARIFFS = []; let OPTIONS = [];
 
-// === Défaults basés sur normalizeKey() des CSV actuels
+// === Défauts basés sur normalizeKey() des CSV actuels
 const MAP_T_DEFAULT = { type:'forme', h:'hauteurmm', l:'largeurmm', price:'prixbaseeur' };
 const MAP_O_DEFAULT = { type:'typedoption', hmin:'hauteurminmm', hmax:'hauteurmaxmm', price:'prixunitaireht', actif:'actif' };
 
@@ -218,7 +218,7 @@ const elRalNote = document.getElementById('ralNote');
 
 /* ------- HELPERS ------- */
 function num(v){
-  const s = String(v ?? '').replace(/\u202F/g,'').replace(/\s/g,'').replace(',', '.');
+  const s = String(v == null ? '' : v).replace(/\u202F/g,'').replace(/\s/g,'').replace(',', '.');
   const m = s.match(/-?\d+(\.\d+)?/);
   return m ? parseFloat(m[0]) : NaN;
 }
@@ -239,29 +239,29 @@ function csvSplit(line, sep){
     cur += ch;
   }
   out.push(cur);
-  return out.map(c=>c.trim());
+  return out.map(function(c){ return c.trim(); });
 }
 function parseCSVAuto(text){
   text = text.replace(/^\uFEFF/, '').trim();
-  let lines = text.split(/[\r\n]+/).filter(l=>l.trim().length>0);
+  let lines = text.split(/[\r\n]+/).filter(function(l){ return l.trim().length>0; });
 
   let rawHeads = [], heads = [], rows = [];
 
   if(lines.length > 1){
     const first = lines[0];
-    const sep = (first.match(/;/g)||[]).length > (first.match(/,/g)||[]).length ? ';' : ',';
+    const sep = ((first.match(/;/g)||[]).length > (first.match(/,/g)||[]).length) ? ';' : ',';
     rawHeads = csvSplit(first, sep);
-    heads = rawHeads.map(h=>normalizeKey(h.replace(/^"+|"+$/g,'')));
-    rows = lines.slice(1).map(line=>{
-      const cells = csvSplit(line, sep).map(c=>c.replace(/^"+|"+$/g,''));
-      const o={}; heads.forEach((h,i)=>o[h]=cells[i]??''); return o;
+    heads = rawHeads.map(function(h){ return normalizeKey(h.replace(/^"+|"+$/g,'')); });
+    rows = lines.slice(1).map(function(line){
+      const cells = csvSplit(line, sep).map(function(c){ return c.replace(/^"+|"+$/g,''); });
+      const o={}; heads.forEach(function(h,i){ o[h]=cells[i] == null ? '' : cells[i]; }); return o;
     });
-    return { rows, rawHeads, heads };
+    return { rows: rows, rawHeads: rawHeads, heads: heads };
   }
 
   if(lines.length === 1){
     const chunk = lines[0];
-    const sep = (chunk.match(/;/g)||[]).length > (chunk.match(/,/g)||[]).length ? ';' : ',';
+    const sep = ((chunk.match(/;/g)||[]).length > (chunk.match(/,/g)||[]).length) ? ';' : ',';
     let fields = [];
     if(chunk.includes(sep)){
       fields = csvSplit(chunk, sep);
@@ -270,24 +270,27 @@ function parseCSVAuto(text){
     }
     if(fields.length < 4){ return { rows:[], rawHeads:[], heads:[] }; }
     rawHeads = fields.slice(0,5);
-    heads    = rawHeads.map(h=>normalizeKey(h));
+    heads    = rawHeads.map(function(h){ return normalizeKey(h); });
     const nCols = rawHeads.length;
     const data = fields.slice(nCols);
     for(let i=0;i<data.length;i+=nCols){
       const rec = data.slice(i,i+nCols);
-      if(rec.length===nCols){ const o={}; heads.forEach((h,idx)=>o[h]=rec[idx]??''); rows.push(o); }
+      if(rec.length===nCols){ const o={}; heads.forEach(function(h,idx){ o[h]=rec[idx] == null ? '' : rec[idx]; }); rows.push(o); }
     }
-    return { rows, rawHeads, heads };
+    return { rows: rows, rawHeads: rawHeads, heads: heads };
   }
 
   return { rows:[], rawHeads:[], heads:[] };
 }
 function uniqueSortedNumeric(arr){
-  return [...new Set(arr)].map(num).filter(n=>!isNaN(n)).sort((a,b)=>a-b).map(String);
+  return Array.from(new Set(arr)).map(num).filter(function(n){ return !isNaN(n); }).sort(function(a,b){ return a-b; }).map(String);
 }
 function fillSelect(sel, heads, rawHeads){
-  sel.innerHTML = '<option value="">— choisir —</option>' +
-    heads.map((k,i)=>`<option value="${k}">${rawHeads[i]}</option>`).join('');
+  let html = '<option value="">— choisir —</option>';
+  for(let i=0;i<heads.length;i++){
+    html += '<option value="'+heads[i]+'">'+rawHeads[i]+'</option>';
+  }
+  sel.innerHTML = html;
 }
 function isActive(v){
   const s = String(v||'').trim().toLowerCase();
@@ -297,11 +300,11 @@ function isActive(v){
 
 /* ------- AUTO-MAPPING ------- */
 function keysExistIn(heads, keysObj){
-  return Object.values(keysObj).every(k => heads.includes(k));
+  return Object.values(keysObj).every(function(k){ return heads.includes(k); });
 }
 function suggestMapTarifs(){
   if(keysExistIn(HEADS_T, MAP_T_DEFAULT)) { MAP_T = { ...MAP_T_DEFAULT }; return; }
-  const f = (re)=> HEADS_T.find(k=>re.test(k));
+  const f = function(re){ return HEADS_T.find(function(k){ return re.test(k); }); };
   MAP_T.type  = MAP_T.type  || f(/type/);
   MAP_T.h     = MAP_T.h     || f(/hauteur|height/);
   MAP_T.l     = MAP_T.l     || f(/largeur|width/);
@@ -309,7 +312,7 @@ function suggestMapTarifs(){
 }
 function suggestMapOptions(){
   if(keysExistIn(HEADS_O, MAP_O_DEFAULT)) { MAP_O = { ...MAP_O_DEFAULT }; return; }
-  const f = (re)=> HEADS_O.find(k=>re.test(k));
+  const f = function(re){ return HEADS_O.find(function(k){ return re.test(k); }); };
   MAP_O.type  = MAP_O.type  || f(/type|famille|option|libelle|designation/);
   MAP_O.hmin  = MAP_O.hmin  || f(/h(min|auteur.*min)|min.*h(auteur)?/);
   MAP_O.hmax  = MAP_O.hmax  || f(/h(max|auteur.*max)|max.*h(auteur)?/);
@@ -317,12 +320,12 @@ function suggestMapOptions(){
   MAP_O.actif = MAP_O.actif || f(/actif|active|isactive|true|oui|1|vrai|yes|enabled/);
 
   if(!MAP_O.type){
-    const candidates = HEADS_O.filter(h=>{
+    const candidates = HEADS_O.filter(function(h){
       if(/(prix|ht|eur|price|pu|montant|hmin|hmax|min|max|hauteur|largeur|mm|cm|m)/.test(h)) return false;
-      const values = RAW_OPTIONS.slice(0,20).map(r=>String(r[h]||'').trim());
-      const nonEmpty = values.filter(v=>v!=='');
+      const values = RAW_OPTIONS.slice(0,20).map(function(r){ return String(r[h]||'').trim(); });
+      const nonEmpty = values.filter(function(v){ return v!==''; });
       if(!nonEmpty.length) return false;
-      const numish = nonEmpty.every(v=>!isNaN(parseFloat(v.replace(',', '.'))));
+      const numish = nonEmpty.every(function(v){ return !isNaN(parseFloat(v.replace(',', '.'))); });
       if(numish) return false;
       const uniq = new Set(nonEmpty);
       return uniq.size <= 20;
@@ -333,15 +336,18 @@ function suggestMapOptions(){
 
 function applyTarifs(){
   if(!MAP_T.type || !MAP_T.h || !MAP_T.l || !MAP_T.price) return false;
-  TARIFFS = RAW_TARIFFS.map(r=>({
-    type: String(r[MAP_T.type] || '').trim(),
-    h:    String(r[MAP_T.h]    || '').trim(),
-    l:    String(r[MAP_T.l]    || '').trim(),
-    priceBase: num(r[MAP_T.price]) || 0
-  })).filter(r=>r.type && r.h && r.l);
-  const types = [...new Set(TARIFFS.map(r=>r.type))].sort();
-  elType.innerHTML = '<option value="">— sélectionnez —</option>' +
-    types.map(t=>`<option value="${t}">${t}</option>`).join('');
+  TARIFFS = RAW_TARIFFS.map(function(r){
+    return {
+      type: String(r[MAP_T.type] || '').trim(),
+      h:    String(r[MAP_T.h]    || '').trim(),
+      l:    String(r[MAP_T.l]    || '').trim(),
+      priceBase: num(r[MAP_T.price]) || 0
+    };
+  }).filter(function(r){ return r.type && r.h && r.l; });
+  const types = Array.from(new Set(TARIFFS.map(function(r){ return r.type; }))).sort();
+  let html = '<option value="">— sélectionnez —</option>';
+  types.forEach(function(t){ html += '<option value="'+t+'">'+t+'</option>'; });
+  elType.innerHTML = html;
   localStorage.setItem('MAP_T', JSON.stringify(MAP_T));
   try{
     const sigT = URL_TARIFS + '|' + HEADS_T.join('|');
@@ -352,17 +358,17 @@ function applyTarifs(){
 }
 function applyOptions(){
   if(!MAP_O.type || !MAP_O.price) return false;
-  OPTIONS = RAW_OPTIONS.map(r=>{
+  OPTIONS = RAW_OPTIONS.map(function(r){
     const hmin = MAP_O.hmin ? num(r[MAP_O.hmin]) : NaN;
     const hmax = MAP_O.hmax ? num(r[MAP_O.hmax]) : NaN;
     const actif = MAP_O.actif ? isActive(r[MAP_O.actif]) : true;
     return {
       typeOption: String(r[MAP_O.type] || '').trim(),
-      hmin, hmax,
+      hmin: hmin, hmax: hmax,
       priceUnit: num(r[MAP_O.price]),
-      actif
+      actif: actif
     };
-  }).filter(o=>o.typeOption && !isNaN(o.priceUnit));
+  }).filter(function(o){ return o.typeOption && !isNaN(o.priceUnit); });
   localStorage.setItem('MAP_O', JSON.stringify(MAP_O));
   try{
     const sigO = URL_OPTIONS + '|' + HEADS_O.join('|');
@@ -375,36 +381,87 @@ function applyOptions(){
 /* ------- UI ------- */
 function populateHL(){
   const t = elType.value;
-  const filtered = TARIFFS.filter(r => r.type === t);
-  const H = uniqueSortedNumeric(filtered.map(r=>r.h));
-  const L = uniqueSortedNumeric(filtered.map(r=>r.l));
-  elH.innerHTML = '<option value="">— sélectionnez —</option>' + H.map(v=>`<option value="${v}">${v}</option>`).join('');
-  elL.innerHTML = '<option value="">— sélectionnez —</option>' + L.map(v=>`<option value="${v}">${v}</option>`).join('');
+  const filtered = TARIFFS.filter(function(r){ return r.type === t; });
+  const H = uniqueSortedNumeric(filtered.map(function(r){ return r.h; }));
+  const L = uniqueSortedNumeric(filtered.map(function(r){ return r.l; }));
+
+  var htmlH = '<option value="">— sélectionnez —</option>';
+  H.forEach(function(v){ htmlH += '<option value="'+v+'">'+v+'</option>'; });
+  elH.innerHTML = htmlH;
+
+  var htmlL = '<option value="">— sélectionnez —</option>';
+  L.forEach(function(v){ htmlL += '<option value="'+v+'">'+v+'</option>'; });
+  elL.innerHTML = htmlL;
+
   updateRALState();
 }
 function renderOptionsCheckboxes(){
-  const families = [...new Set(OPTIONS.map(o=>o.typeOption))].filter(Boolean).sort();
-  if(!families.length){ elOptsBox.innerHTML = '<div class="opt-row"><em>Aucune option disponible.</em></div>'; updateRALState(); return; }
+  const families = Array.from(new Set(OPTIONS.map(function(o){ return o.typeOption; }))).filter(Boolean).sort();
+  if(!families.length){
+    elOptsBox.innerHTML = '<div class="opt-row"><em>Aucune option disponible.</em></div>';
+    updateRALState();
+    return;
+  }
   const h = num(elH.value);
-  const isValid = (fam)=>{
+  const isValid = function(fam){
     if(!h) return false;
-    const rows = OPTIONS.filter(o => o.typeOption===fam && o.actif);
+    const rows = OPTIONS.filter(function(o){ return o.typeOption===fam && o.actif; });
     if(!rows.length) return false;
-    return rows.some(o => (isNaN(o.hmin) || h>=o.hmin) && (isNaN(o.hmax) || h<=o.hmax));
+    return rows.some(function(o){ return (isNaN(o.hmin) || h>=o.hmin) && (isNaN(o.hmax) || h<=o.hmax); });
   };
-  elOptsBox.innerHTML = families.map(f=>{
+  elOptsBox.innerHTML = families.map(function(f){
     const ok = isValid(f);
-    const note = ok ? '' : ` <span class="note">(non dispo pour H=${elH.value||'—'})</span>`;
-    return `
-      <label class="opt-row">
-        <input type="checkbox" name="opt" value="${f}" ${ok?'':'disabled'}>
-        <span>${f}</span>${note}
-      </label>
-    `;
+    const note = ok ? '' : ' <span class="note">(non dispo pour H='+(elH.value||'—')+')</span>';
+    return ''
+      + '<label class="opt-row">'
+      +   '<input type="checkbox" name="opt" value="'+f.replace(/"/g,'&quot;')+'" '+(ok?'':'disabled')+'>'
+      +   '<span>'+f+'</span>'+note
+      + '</label>';
   }).join('');
-  [...elOptsBox.querySelectorAll('input[name="opt"]')].forEach(cb=>{ cb.addEventListener('change', compute); });
-  if(!h){ elMsg.textContent = "Choisis d’abord la hauteur pour activer les options."; }
-  else{ const valides = families.filter(f=>!elOptsBox.querySelector(\`input[value="\${f}"]\`)?.disabled); elMsg.textContent = \`Hauteur sélectionnée: \${elH.value} | Options valides: \${valides.join(', ') || 'aucune'}\`; }
+
+  Array.prototype.slice.call(elOptsBox.querySelectorAll('input[name="opt"]')).forEach(function(cb){
+    cb.addEventListener('change', compute);
+  });
+
+  // —— Règle métier : "Panier de crosses" implique automatiquement "Platine"
+  var inputs = Array.prototype.slice.call(elOptsBox.querySelectorAll('input[name="opt"]'));
+  function _normOptLabel(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+  var cbPlatine = inputs.find(function(i){ return _normOptLabel(i.value).includes('platine'); });
+  var cbPanier  = inputs.find(function(i){ var v=_normOptLabel(i.value); return v.includes('panier') && (v.includes('crosse')||v.includes('crosses')); });
+
+  if(cbPanier){
+    cbPanier.addEventListener('change', function(){
+      if(cbPanier.checked){
+        if(cbPlatine && !cbPlatine.disabled){
+          cbPlatine.checked = true;
+          cbPlatine.dispatchEvent(new Event('change'));
+        }else if(cbPlatine && cbPlatine.disabled){
+          // Platine indisponible → on empêche le panier
+          cbPanier.checked = false;
+          alert('Le panier de crosses nécessite la platine.');
+        }
+      }
+    });
+  }
+  if(cbPlatine){
+    cbPlatine.addEventListener('change', function(){
+      if(!cbPlatine.checked && cbPanier && cbPanier.checked){
+        cbPanier.checked = false;
+        cbPanier.dispatchEvent(new Event('change'));
+      }
+    });
+  }
+
+  if(!h){
+    elMsg.textContent = 'Choisis d’abord la hauteur pour activer les options.';
+  }else{
+    var valides = families.filter(function(f){
+      var sel = 'input[name="opt"][value="'+f.replace(/"/g,'\\"')+'"]';
+      var input = elOptsBox.querySelector(sel);
+      return input && !input.disabled;
+    });
+    elMsg.textContent = 'Hauteur sélectionnée: ' + elH.value + ' | Options valides: ' + (valides.join(', ') || 'aucune');
+  }
   updateRALState();
 }
 
@@ -412,30 +469,39 @@ function renderOptionsCheckboxes(){
 function area2FacesM2(){
   const h = num(elH.value), l = num(elL.value);
   if(!h || !l) return 0;
-  const perFace = (h * l) / 1_000_000; // m²
+  const perFace = (h * l) / 1000000; // m²
   return perFace * 2; // 2 faces
 }
 function updateRALState(){
   const enabled = !!(num(elH.value) && num(elL.value));
   elOptRAL.disabled = !enabled;
-  if(!enabled){ elOptRAL.checked = false; elRalNote.textContent = ''; return; }
-  const addPerUnit = area2FacesM2() * RAL_PRICE_PUBLIC_M2; // public / unité
-  elRalNote.textContent = ` (+${addPerUnit.toFixed(2).replace('.', ',')} € / u)`;
+  if(!enabled){
+    elOptRAL.checked = false;
+    elRalNote.textContent = '';
+    return;
+  }
+  // (masqué à l’utilisateur) — on ne montre pas le supplément unitaire
+elRalNote.textContent = '';
 }
 
 /* ------- CALCUL ------- */
 function priceBase(){
   const t = elType.value; const h = num(elH.value); const l = num(elL.value);
   if(!t||!h||!l) return 0;
-  const row = TARIFFS.find(r => r.type===t && Math.abs(num(r.h)-h)<0.001 && Math.abs(num(r.l)-l)<0.001);
+  const row = TARIFFS.find(function(r){ return r.type===t && Math.abs(num(r.h)-h)<0.001 && Math.abs(num(r.l)-l)<0.001; });
   return row ? row.priceBase : 0; // interne
 }
 function priceOptionsSum(){
-  const checked = [...elOptsBox.querySelectorAll('input[name="opt"]:checked')].map(c=>c.value);
-  if(!checked.length) return 0; const h = num(elH.value);
-  return checked.reduce((sum, fam)=>{
-    const rows = OPTIONS.filter(o => o.typeOption===fam && o.actif && (isNaN(o.hmin) || h>=o.hmin) && (isNaN(o.hmax) || h<=o.hmax));
-    if(!rows.length) return sum; const unit = Math.max(...rows.map(o=>o.priceUnit).filter(v=>!isNaN(v)));
+  const checked = Array.prototype.slice.call(elOptsBox.querySelectorAll('input[name="opt"]:checked')).map(function(c){ return c.value; });
+  if(!checked.length) return 0;
+  const h = num(elH.value);
+  return checked.reduce(function(sum, fam){
+    const rows = OPTIONS.filter(function(o){
+      return o.typeOption===fam && o.actif && (isNaN(o.hmin) || h>=o.hmin) && (isNaN(o.hmax) || h<=o.hmax);
+    });
+    if(!rows.length) return sum;
+    const units = rows.map(function(o){ return o.priceUnit; }).filter(function(v){ return !isNaN(v); });
+    const unit = units.length ? Math.max.apply(null, units) : NaN;
     return sum + (isFinite(unit)?unit:0);
   }, 0); // interne
 }
@@ -462,9 +528,11 @@ function compute(){
 /* ------- CHARGEMENT ------- */
 async function loadAll(){
   try{
-    const [rt, ro] = await Promise.all([fetch(URL_TARIFS), fetch(URL_OPTIONS)]);
+    const rt = await fetch(URL_TARIFS);
+    const ro = await fetch(URL_OPTIONS);
     if(!rt.ok || !ro.ok) throw new Error('Chargement réseau impossible (CSV).');
-    const [txtT, txtO] = await Promise.all([rt.text(), ro.text()]);
+    const txtT = await rt.text();
+    const txtO = await ro.text();
     const pT = parseCSVAuto(txtT); const pO = parseCSVAuto(txtO);
     RAW_TARIFFS = pT.rows; RAW_HEADERS_T = pT.rawHeads; HEADS_T = pT.heads;
     RAW_OPTIONS = pO.rows; RAW_HEADERS_O = pO.rawHeads; HEADS_O = pO.heads;
@@ -481,7 +549,12 @@ async function loadAll(){
     const mapTarifsBox  = document.getElementById('mapTarifsBox');
     const mapOptionsBox = document.getElementById('mapOptionsBox');
 
-    const setSel = (id, heads, raws, val)=>{ const el = document.getElementById(id); fillSelect(el, heads, raws); if(val) el.value = val; return el; };
+    const setSel = function(id, heads, raws, val){
+      const el = document.getElementById(id);
+      fillSelect(el, heads, raws);
+      if(val) el.value = val;
+      return el;
+    };
     const sTtype  = setSel('mapT_Type',  HEADS_T, RAW_HEADERS_T, MAP_T.type);
     const sTh     = setSel('mapT_H',     HEADS_T, RAW_HEADERS_T, MAP_T.h);
     const sTl     = setSel('mapT_L',     HEADS_T, RAW_HEADERS_T, MAP_T.l);
@@ -499,27 +572,30 @@ async function loadAll(){
     mapTarifsBox.style.display  = (okT ? 'none' : 'block');
     mapOptionsBox.style.display = (okO ? 'none' : 'block');
 
-    document.getElementById('applyMapTarifs').onclick=()=>{
+    document.getElementById('applyMapTarifs').onclick=function(){
       MAP_T.type=sTtype.value||null; MAP_T.h=sTh.value||null; MAP_T.l=sTl.value||null; MAP_T.price=sTprice.value||null;
       if(applyTarifs()){ mapTarifsBox.style.display='none'; populateHL(); compute(); }
       else alert('Merci de sélectionner les 4 colonnes TARIFS.');
     };
-    document.getElementById('applyMapOptions').onclick=()=>{
+    document.getElementById('applyMapOptions').onclick=function(){
       MAP_O.type=sOtype.value||null; MAP_O.hmin=sOhmin.value||null; MAP_O.hmax=sOhmax.value||null; MAP_O.price=sOprice.value||null; MAP_O.actif=sOactif.value||null;
       if(applyOptions()){ mapOptionsBox.style.display='none'; renderOptionsCheckboxes(); compute(); }
       else alert('Merci de sélectionner les 5 colonnes OPTIONS.');
     };
 
-    elType.addEventListener('change', ()=>{ populateHL(); renderOptionsCheckboxes(); compute(); });
-    elH.addEventListener('change',   ()=>{ renderOptionsCheckboxes(); updateRALState(); compute(); });
-    elL.addEventListener('change',   ()=>{ updateRALState(); compute(); });
+    elType.addEventListener('change', function(){ populateHL(); renderOptionsCheckboxes(); compute(); });
+    elH.addEventListener('change',   function(){ renderOptionsCheckboxes(); updateRALState(); compute(); });
+    elL.addEventListener('change',   function(){ updateRALState(); compute(); });
     elQte.addEventListener('input', compute);
     elOptRAL.addEventListener('change', compute);
 
-    elMsg.textContent = `Données chargées.\nEn-têtes TARIFS : ${RAW_HEADERS_T.join(' | ')}\nEn-têtes OPTIONS : ${RAW_HEADERS_O.join(' | ')}`;
+    elMsg.textContent = 'Données chargées.\nEn-têtes TARIFS : ' + RAW_HEADERS_T.join(' | ') + '\nEn-têtes OPTIONS : ' + RAW_HEADERS_O.join(' | ');
 
     if(okT && okO){ populateHL(); renderOptionsCheckboxes(); compute(); }
-  }catch(e){ elMsg.textContent = "Erreur de chargement : " + e.message; console.error(e); }
+  }catch(e){
+    elMsg.textContent = 'Erreur de chargement : ' + e.message;
+    console.error(e);
+  }
 }
 loadAll();
 
@@ -544,9 +620,15 @@ loadAll();
 <script>
 (function(){
   const btn = document.getElementById('btnAddDevis'); if(!btn) return;
-  function parseHTPublic(){ const t = (document.getElementById('prixHT').innerText || '0').trim(); return Number(t.replace(/\s/g,'').replace(',', '.')) || 0; }
-  function selectedOptionsList(){ const cbs = [...document.querySelectorAll('#optionsBox input[name="opt"]:checked')]; return cbs.map(cb=>cb.value); }
-  btn.addEventListener('click', ()=>{
+  function parseHTPublic(){
+    const t = (document.getElementById('prixHT').innerText || '0').trim();
+    return Number(t.replace(/\s/g,'').replace(',', '.')) || 0;
+  }
+  function selectedOptionsList(){
+    const cbs = Array.prototype.slice.call(document.querySelectorAll('#optionsBox input[name="opt"]:checked'));
+    return cbs.map(function(cb){ return cb.value; });
+  }
+  btn.addEventListener('click', function(){
     try{
       if(!window.Devis) throw new Error('Moteur de devis introuvable.');
       const typeFace = document.getElementById('type').value || '';
@@ -558,15 +640,18 @@ loadAll();
       const pu_public_ht = Number((total_ht_public / qte).toFixed(2));
 
       const opts = selectedOptionsList();
-      // ✅ Ajout de l’info Laquage RAL dans la désignation si cochée
-      const ralChecked = document.getElementById('optRAL')?.checked;
+      const ralChecked = document.getElementById('optRAL') && document.getElementById('optRAL').checked;
       if(ralChecked) opts.push('Laquage au RAL');
 
-      const designation = ['Totem', typeFace, `H ${H} mm × L ${L} mm`, opts.length ? `Options: ${opts.join(', ')}` : null].filter(Boolean).join(' — ');
+      const parts = ['Totem', typeFace, 'H ' + H + ' mm × L ' + L + ' mm', opts.length ? 'Options: ' + opts.join(', ') : null];
+      const designation = parts.filter(Boolean).join(' — ');
 
-      Devis.addLine({ type: 'Totem', designation, quantite: qte, pu_public_ht });
-      alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${qte}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
-    }catch(err){ console.error(err); alert('Erreur lors de l’ajout au devis : ' + err.message); }
+      Devis.addLine({ type: 'Totem', designation: designation, quantite: qte, pu_public_ht: pu_public_ht });
+      alert('✅ Ligne ajoutée au devis !\n' + designation + '\nQté : ' + qte + '\nPU HT : ' + pu_public_ht.toFixed(2) + ' €');
+    }catch(err){
+      console.error(err);
+      alert('Erreur lors de l’ajout au devis : ' + err.message);
+    }
   });
 })();
 </script>
