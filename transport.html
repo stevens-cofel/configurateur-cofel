@@ -30,7 +30,6 @@
     .brand img{height:42px; width:auto; border-radius:10px}
     .brand h1{ margin:0; font-size:20px; letter-spacing:.2px; }
     .hero-actions{ display:flex; align-items:center; gap:10px; }
-    .tagline{ color:var(--txt-dim); font-size:12px; }
 
     .wrap{ max-width:1100px; margin:20px auto 40px; padding:0 20px; }
     .card{
@@ -79,7 +78,6 @@
         <h1>Calculateur Transport — Cofel</h1>
       </div>
       <div class="hero-actions">
-        <div class="brand"><div class="tagline">Page de test dédiée (hors page d’accueil)</div></div>
         <a href="./index.html" class="btn btn-ghost">⟵ Accueil</a>
       </div>
     </div>
@@ -115,10 +113,6 @@
           <button id="addBtn" class="btn" disabled>➕ Ajouter au devis</button>
           <button id="resetBtn" class="btn btn-ghost">Réinitialiser</button>
         </div>
-      </div>
-
-      <div class="muted" style="margin-top:8px">
-        Les montants affichés sont les <strong>prix de vente client HT</strong> issus de vos grilles.
       </div>
     </section>
   </main>
@@ -190,7 +184,6 @@
       addBtn.disabled = false;
     }
 
-    // Ajout au devis via localStorage (clé consommée par index.html)
     function addToDevis(){
       const isMess = state.type==="messagerie";
       const label = isMess ? `Transport — Messagerie — Dept ${state.dept} — ${state.third} kg`
@@ -200,7 +193,7 @@
         id: 'tr_'+Date.now(),
         designation: label,
         quantite: 1,
-        pu_net_ht: pu,           // pas de *2.0 ici
+        pu_net_ht: pu,
         type: 'transport',
         ts: Date.now()
       };
