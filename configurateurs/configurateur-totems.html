@@ -3,25 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Configurateur — Totems Cofel</title>
+<title>Configurateur — Totems Cofel (auto-mapping)</title>
 
-<!-- (Optionnel) si tu as des styles communs -->
 <link rel="stylesheet" href="../styles/cofel.css" />
 <link rel="stylesheet" href="../styles/cofel-config.css" />
 
 <style>
-  /* ====== DA Cofel : verre violet (même esprit que Tôle Tablette) ====== */
   :root{
-    --violet:#5a2d82;
-    --violet-2:#7838a7;
-    --glass: rgba(255,255,255,.08);
-    --glass-hr: rgba(255,255,255,.14);
-    --txt:#f5f7ff;
-    --txt-dim:#e6e6ff;
-    --accent:#c9b7ff;
-    --radius:18px;
-    --blur:18px;
-    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --violet:#5a2d82; --violet-2:#7838a7; --glass: rgba(255,255,255,.08);
+    --glass-hr: rgba(255,255,255,.14); --txt:#f5f7ff; --txt-dim:#e6e6ff;
+    --accent:#c9b7ff; --radius:18px; --blur:18px; --shadow: 0 10px 30px rgba(0,0,0,.35);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -33,117 +24,50 @@
       radial-gradient(800px 500px at 110% 10%, rgba(255,255,255,.08), transparent 60%),
       linear-gradient(135deg, var(--violet), var(--violet-2));
   }
-
-  /* ===== Header (cohérent accueil) ===== */
-  .cofel-header{
-    position:sticky; top:0; z-index:1000; color:#fff;
+  .cofel-header{ position:sticky; top:0; z-index:1000; color:#fff;
     background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-    border-bottom:1px solid rgba(255,255,255,.18);
-    backdrop-filter: blur(var(--blur));
-  }
-  .cofel-header .row{
-    max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:16px; padding:10px 14px;
-  }
-  .cofel-back{
-    color:#fff; text-decoration:none; border:1px solid rgba(255,255,255,.35);
-    padding:8px 12px; border-radius:12px; backdrop-filter: blur(10px);
-  }
+    border-bottom:1px solid rgba(255,255,255,.18); backdrop-filter: blur(var(--blur)); }
+  .cofel-header .row{ max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:16px; padding:10px 14px; }
+  .cofel-back{ color:#fff; text-decoration:none; border:1px solid rgba(255,255,255,.35); padding:8px 12px; border-radius:12px; backdrop-filter: blur(10px); }
   .cofel-brand{display:flex; align-items:center; gap:10px}
   .cofel-brand img{height:36px; border-radius:8px; object-fit:cover}
   .cofel-title{font-size:18px; margin:0}
   .cofel-container{max-width:1100px; margin:0 auto; padding:18px}
-
   h1{margin:8px 0 14px; text-align:center; letter-spacing:.2px}
-
-  /* ===== Cartes / fieldsets “verre” ===== */
   fieldset{
-    border:1px solid rgba(255,255,255,.2);
-    border-radius:20px; padding:16px; margin:16px 0;
+    border:1px solid rgba(255,255,255,.2); border-radius:20px; padding:16px; margin:16px 0;
     background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
-    box-shadow: var(--shadow); backdrop-filter: blur(var(--blur));
-    overflow:visible;
-  }
-  legend{
-    padding:0 10px; font-weight:800; color:#fff; letter-spacing:.2px;
-  }
+    box-shadow: var(--shadow); backdrop-filter: blur(var(--blur)); overflow:visible; }
+  legend{ padding:0 10px; font-weight:800; color:#fff; letter-spacing:.2px; }
   label{font-weight:700; font-size:13px; color:var(--accent); display:block; margin-top:10px}
-
-  input[type="number"],
-  input[type="text"],
-  select{
-    width:100%; margin-top:6px; padding:12px 12px; min-height:42px;
-    background: rgba(255,255,255,.10); color:var(--txt);
-    border:1px solid rgba(255,255,255,.24); border-radius:14px; outline:none;
-    transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
-    position:relative; z-index:1;
-  }
+  input[type="number"], input[type="text"], select{
+    width:100%; margin-top:6px; padding:12px 12px; min-height:42px; background: rgba(255,255,255,.10); color:var(--txt);
+    border:1px solid rgba(255,255,255,.24); border-radius:14px; outline:none; transition: border-color .18s ease, background .18s ease, box-shadow .18s ease; position:relative; z-index:1; }
   input::placeholder{color:#f0edff; opacity:.75}
-  input:focus, select:focus{
-    border-color: rgba(255,255,255,.38);
-    background: rgba(255,255,255,.16);
-    box-shadow: 0 0 0 4px rgba(255,255,255,.08) inset;
-  }
-
-  /* Menu déroulant harmonisé (fond violet pour la liste) */
+  input:focus, select:focus{ border-color: rgba(255,255,255,.38); background: rgba(255,255,255,.16); box-shadow: 0 0 0 4px rgba(255,255,255,.08) inset; }
   select{ appearance:auto; }
   select option{ background:#3c1f61; color:#fff; }
   fieldset, .options-wrap{ position:relative; z-index:1; }
   select:focus{ z-index:1001; }
-
   .grid{display:grid; gap:16px}
   @media(min-width:820px){ .grid{grid-template-columns:1fr 1fr} }
-
-  /* Mapping (resté discret) */
-  .mapping{
-    margin:16px 0; padding:12px;
-    background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
-    border:1px solid rgba(255,255,255,.18); border-radius:16px;
-  }
+  .mapping{ margin:16px 0; padding:12px; background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05)); border:1px solid rgba(255,255,255,.18); border-radius:16px; }
   .mapping h3{margin:0 0 8px; color:#fff}
   .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(max-width:720px){ .two{grid-template-columns:1fr} }
-
-  /* Options */
-  .options-wrap{
-    margin-top:8px;border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:10px;
-    background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-  }
-  .opt-row{
-    display:flex;align-items:center;gap:10px;margin:6px 0;
-    border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 12px;
-    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.08));
-  }
+  .options-wrap{ margin-top:8px;border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:10px; background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)); }
+  .opt-row{ display:flex;align-items:center;gap:10px;margin:6px 0; border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 12px; background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.08)); }
   .opt-row input[type="checkbox"]{transform:scale(1.1); accent-color:#cbb3ff}
   .opt-row .note{color:var(--txt-dim);font-size:12px}
-
-  /* Résultats */
-  .result{
-    margin-top:18px;padding:16px;text-align:center;font-size:18px;
-    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
-    border:1px solid rgba(255,255,255,.24); border-radius:20px;
-    box-shadow: var(--shadow); backdrop-filter: blur(var(--blur));
-  }
+  .result{ margin-top:18px;padding:16px;text-align:center;font-size:18px; background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06)); border:1px solid rgba(255,255,255,.24); border-radius:20px; box-shadow: var(--shadow); backdrop-filter: blur(var(--blur)); }
   .result span{ font-weight:800; }
-
-  /* Bouton Ajouter au devis */
-  #btnAddDevis{
-    position:fixed; right:20px; bottom:20px; padding:12px 18px;
-    background:#fff; color:#0b0b0b; border:none; border-radius:14px;
-    box-shadow:0 10px 24px rgba(0,0,0,.25); cursor:pointer; font-weight:800; z-index:2000;
-    transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
-  }
+  #btnAddDevis{ position:fixed; right:20px; bottom:20px; padding:12px 18px; background:#fff; color:#0b0b0b; border:none; border-radius:14px; box-shadow:0 10px 24px rgba(0,0,0,.25); cursor:pointer; font-weight:800; z-index:2000; transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease; }
   #btnAddDevis:active{ transform: translateY(1px); box-shadow: 0 6px 16px rgba(0,0,0,.28); }
-
-  /* Footer */
-  .cofel-footer{
-    color:#f3ecff; font-size:12px; text-align:center; padding:24px 10px; opacity:.9;
-  }
+  .cofel-footer{ color:#f3ecff; font-size:12px; text-align:center; padding:24px 10px; opacity:.9; }
   .muted{color:var(--txt-dim);font-size:12px;margin-top:8px;white-space:pre-wrap}
 </style>
 </head>
 <body>
-
-<!-- Bandeau violet / retour -->
 <header class="cofel-header">
   <div class="row">
     <a class="cofel-back" href="../index.html">⬅ Retour aux configurateurs</a>
@@ -247,32 +171,28 @@
   </div>
 </div>
 
-<!-- Pied de page -->
 <footer class="cofel-footer">
   © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
 </footer>
 
-<!-- ===== JS (fonctionnel, avec tarif PUBLIC x2) ===== -->
 <script>
 /* ------- CONFIG ------- */
 const URL_TARIFS  = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/Tarifs_Totems_.csv";
 const URL_OPTIONS = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/option%20platine%20et%20panier%20de%20crosses%20(1).csv";
 const TVA = 0.20;
-// IMPORTANT : affichage PUBLIC = x2
-const UPLIFT_PUBLIC = 2.0;
+const UPLIFT_PUBLIC = 2.0; // affichage PUBLIC x2
 
 /* ------- STATE ------- */
-let RAW_TARIFFS = [];
-let RAW_OPTIONS = [];
-let RAW_HEADERS_T = [];
-let RAW_HEADERS_O = [];
-let HEADS_T = [];
-let HEADS_O = [];
-let TARIFFS = [];
-let OPTIONS = [];
+let RAW_TARIFFS = []; let RAW_OPTIONS = [];
+let RAW_HEADERS_T = []; let RAW_HEADERS_O = [];
+let HEADS_T = []; let HEADS_O = []; let TARIFFS = []; let OPTIONS = [];
 
-const MAP_T = JSON.parse(localStorage.getItem('MAP_T') || 'null') || {type:null,h:null,l:null,price:null};
-const MAP_O = JSON.parse(localStorage.getItem('MAP_O') || 'null') || {type:null,hmin:null,hmax:null,price:null,actif:null};
+// === Défaults basés sur normalizeKey() des CSV actuels
+const MAP_T_DEFAULT = { type:'typedeface', h:'hauteurmm', l:'largeurmm', price:'prixbaseht' };
+const MAP_O_DEFAULT = { type:'typedoption', hmin:'hauteurminmm', hmax:'hauteurmaxmm', price:'prixunitaireht', actif:'actif' };
+
+let MAP_T = JSON.parse(localStorage.getItem('MAP_T') || 'null') || { ...MAP_T_DEFAULT };
+let MAP_O = JSON.parse(localStorage.getItem('MAP_O') || 'null') || { ...MAP_O_DEFAULT };
 
 /* ------- ELEMENTS ------- */
 const elType = document.getElementById('type');
@@ -320,8 +240,13 @@ function isActive(v){
   return ['true','1','oui','vrai','yes','y','x'].includes(s);
 }
 
-/* ------- MAPPAGE ------- */
+/* ------- AUTO-MAPPING ------- */
+function keysExistIn(heads, keysObj){
+  return Object.values(keysObj).every(k => heads.includes(k));
+}
+
 function suggestMapTarifs(){
+  if(keysExistIn(HEADS_T, MAP_T_DEFAULT)) { MAP_T = { ...MAP_T_DEFAULT }; return; }
   const f = (re)=> HEADS_T.find(k=>re.test(k));
   MAP_T.type  = MAP_T.type  || f(/type/);
   MAP_T.h     = MAP_T.h     || f(/hauteur|height/);
@@ -329,6 +254,7 @@ function suggestMapTarifs(){
   MAP_T.price = MAP_T.price || f(/prix|base|eur|ht/);
 }
 function suggestMapOptions(){
+  if(keysExistIn(HEADS_O, MAP_O_DEFAULT)) { MAP_O = { ...MAP_O_DEFAULT }; return; }
   const f = (re)=> HEADS_O.find(k=>re.test(k));
   MAP_O.type  = MAP_O.type  || f(/type/);
   MAP_O.hmin  = MAP_O.hmin  || f(/min/);
@@ -336,6 +262,7 @@ function suggestMapOptions(){
   MAP_O.price = MAP_O.price || f(/prix|ht|unitaire|price/);
   MAP_O.actif = MAP_O.actif || f(/actif|active|isactive|true|oui|1|vrai|yes/);
 }
+
 function applyTarifs(){
   if(!MAP_T.type || !MAP_T.h || !MAP_T.l || !MAP_T.price) return false;
   TARIFFS = RAW_TARIFFS.map(r=>({
@@ -344,11 +271,15 @@ function applyTarifs(){
     l:    String(r[MAP_T.l]    || '').trim(),
     priceBase: num(r[MAP_T.price]) || 0
   })).filter(r=>r.type && r.h && r.l);
-
   const types = [...new Set(TARIFFS.map(r=>r.type))].sort();
   elType.innerHTML = '<option value="">— sélectionnez —</option>' +
     types.map(t=>`<option value="${t}">${t}</option>`).join('');
   localStorage.setItem('MAP_T', JSON.stringify(MAP_T));
+  try{
+    const sigT = URL_TARIFS + '|' + HEADS_T.join('|');
+    const dict = JSON.parse(localStorage.getItem('MAP_T_BY_SIG') || '{}');
+    dict[sigT] = MAP_T; localStorage.setItem('MAP_T_BY_SIG', JSON.stringify(dict));
+  }catch(_){ }
   return true;
 }
 function applyOptions(){
@@ -361,6 +292,11 @@ function applyOptions(){
     actif: isActive(r[MAP_O.actif])
   }));
   localStorage.setItem('MAP_O', JSON.stringify(MAP_O));
+  try{
+    const sigO = URL_OPTIONS + '|' + HEADS_O.join('|');
+    const dict = JSON.parse(localStorage.getItem('MAP_O_BY_SIG') || '{}');
+    dict[sigO] = MAP_O; localStorage.setItem('MAP_O_BY_SIG', JSON.stringify(dict));
+  }catch(_){ }
   return true;
 }
 
@@ -373,25 +309,15 @@ function populateHL(){
   elH.innerHTML = '<option value="">— sélectionnez —</option>' + H.map(v=>`<option value="${v}">${v}</option>`).join('');
   elL.innerHTML = '<option value="">— sélectionnez —</option>' + L.map(v=>`<option value="${v}">${v}</option>`).join('');
 }
-
 function renderOptionsCheckboxes(){
   const families = [...new Set(OPTIONS.map(o=>o.typeOption))].filter(Boolean).sort();
-  if(!families.length){
-    elOptsBox.innerHTML = '<div class="opt-row"><em>Aucune option disponible.</em></div>';
-    return;
-  }
+  if(!families.length){ elOptsBox.innerHTML = '<div class="opt-row"><em>Aucune option disponible.</em></div>'; return; }
   const h = num(elH.value);
   const isValid = (fam)=>{
     if(!h) return false;
-    const rows = OPTIONS.filter(o =>
-      o.typeOption===fam &&
-      !isNaN(o.hmin) && !isNaN(o.hmax) &&
-      h>=o.hmin && h<=o.hmax &&
-      o.actif
-    );
+    const rows = OPTIONS.filter(o => o.typeOption===fam && !isNaN(o.hmin) && !isNaN(o.hmax) && h>=o.hmin && h<=o.hmax && o.actif);
     return rows.length>0;
   };
-
   elOptsBox.innerHTML = families.map(f=>{
     const ok = isValid(f);
     const note = ok ? '' : ` <span class="note">(non dispo pour H=${elH.value||'—'})</span>`;
@@ -402,54 +328,31 @@ function renderOptionsCheckboxes(){
       </label>
     `;
   }).join('');
-
-  [...elOptsBox.querySelectorAll('input[name="opt"]')].forEach(cb=>{
-    cb.addEventListener('change', compute);
-  });
-
-  if(!h){
-    elMsg.textContent = "Choisis d’abord la hauteur pour activer les options.";
-  }else{
-    const valides = families.filter(f=>!elOptsBox.querySelector(`input[value="${f}"]`)?.disabled);
-    elMsg.textContent = `Hauteur sélectionnée: ${elH.value} | Options valides: ${valides.join(', ') || 'aucune'}`;
-  }
+  [...elOptsBox.querySelectorAll('input[name="opt"]')].forEach(cb=>{ cb.addEventListener('change', compute); });
+  if(!h){ elMsg.textContent = "Choisis d’abord la hauteur pour activer les options."; }
+  else{ const valides = families.filter(f=>!elOptsBox.querySelector(`input[value="${f}"]`)?.disabled); elMsg.textContent = `Hauteur sélectionnée: ${elH.value} | Options valides: ${valides.join(', ') || 'aucune'}`; }
 }
 
-/* ------- CALCUL (affichage PUBLIC x2) ------- */
+/* ------- CALCUL ------- */
 function priceBase(){
-  const t = elType.value;
-  const h = num(elH.value);
-  const l = num(elL.value);
+  const t = elType.value; const h = num(elH.value); const l = num(elL.value);
   if(!t||!h||!l) return 0;
-
-  const row = TARIFFS.find(r =>
-    r.type===t &&
-    Math.abs(num(r.h)-h)<0.001 &&
-    Math.abs(num(r.l)-l)<0.001
-  );
+  const row = TARIFFS.find(r => r.type===t && Math.abs(num(r.h)-h)<0.001 && Math.abs(num(r.l)-l)<0.001);
   return row ? row.priceBase : 0; // interne
 }
 function priceOptionsSum(){
   const checked = [...elOptsBox.querySelectorAll('input[name="opt"]:checked')].map(c=>c.value);
-  if(!checked.length) return 0;
-  const h = num(elH.value);
+  if(!checked.length) return 0; const h = num(elH.value);
   return checked.reduce((sum, fam)=>{
     const rows = OPTIONS.filter(o => o.typeOption===fam && h>=o.hmin && h<=o.hmax && o.actif);
-    if(!rows.length) return sum;
-    const unit = Math.max(...rows.map(o=>o.priceUnit).filter(v=>!isNaN(v)));
+    if(!rows.length) return sum; const unit = Math.max(...rows.map(o=>o.priceUnit).filter(v=>!isNaN(v)));
     return sum + (isFinite(unit)?unit:0);
   }, 0); // interne
 }
 function compute(){
-  const base_interne = priceBase();
-  const opt_interne  = priceOptionsSum();
-  const qte  = Math.max(1, parseInt(elQte.value||'1',10));
-
-  // → PUBLIC x2
+  const base_interne = priceBase(); const opt_interne  = priceOptionsSum(); const qte  = Math.max(1, parseInt(elQte.value||'1',10));
   const unit_public  = (base_interne + opt_interne) * UPLIFT_PUBLIC;
-  const totalHT_pub  = unit_public * qte;
-  const totalTTC_pub = totalHT_pub * (1+TVA);
-
+  const totalHT_pub  = unit_public * qte; const totalTTC_pub = totalHT_pub * (1+TVA);
   elHT.textContent  = totalHT_pub.toFixed(2).replace('.', ',');
   elTTC.textContent = totalTTC_pub.toFixed(2).replace('.', ',');
 }
@@ -460,41 +363,46 @@ async function loadAll(){
     const [rt, ro] = await Promise.all([fetch(URL_TARIFS), fetch(URL_OPTIONS)]);
     if(!rt.ok || !ro.ok) throw new Error('Chargement réseau impossible (CSV).');
     const [txtT, txtO] = await Promise.all([rt.text(), ro.text()]);
-    const pT = parseCSVAuto(txtT);
-    const pO = parseCSVAuto(txtO);
-
+    const pT = parseCSVAuto(txtT); const pO = parseCSVAuto(txtO);
     RAW_TARIFFS = pT.rows; RAW_HEADERS_T = pT.rawHeads; HEADS_T = pT.heads;
     RAW_OPTIONS = pO.rows; RAW_HEADERS_O = pO.rawHeads; HEADS_O = pO.heads;
 
+    // --- Empreintes pour mémoriser le mappage quand les en-têtes n'ont pas changé
+    const sigT = URL_TARIFS  + '|' + HEADS_T.join('|');
+    const sigO = URL_OPTIONS + '|' + HEADS_O.join('|');
+    const savedBySigT = JSON.parse(localStorage.getItem('MAP_T_BY_SIG') || '{}');
+    const savedBySigO = JSON.parse(localStorage.getItem('MAP_O_BY_SIG') || '{}');
+    MAP_T = savedBySigT[sigT] || MAP_T || { ...MAP_T_DEFAULT };
+    MAP_O = savedBySigO[sigO] || MAP_O || { ...MAP_O_DEFAULT };
+
+    // Auto-suggestion (ou forçage défaut si clés présentes)
     suggestMapTarifs(); suggestMapOptions();
 
+    // Si l'auto-mapping est OK, on applique immédiatement et on masque les panneaux
     const mapTarifsBox  = document.getElementById('mapTarifsBox');
     const mapOptionsBox = document.getElementById('mapOptionsBox');
 
-    const setSel = (id, heads, raws, val)=>{
-      const el = document.getElementById(id);
-      fillSelect(el, heads, raws);
-      if(val) el.value = val;
-      return el;
-    };
+    // Préparer les selects (au cas très rare où l'utilisateur devra mapper)
+    const setSel = (id, heads, raws, val)=>{ const el = document.getElementById(id); fillSelect(el, heads, raws); if(val) el.value = val; return el; };
     const sTtype  = setSel('mapT_Type',  HEADS_T, RAW_HEADERS_T, MAP_T.type);
     const sTh     = setSel('mapT_H',     HEADS_T, RAW_HEADERS_T, MAP_T.h);
     const sTl     = setSel('mapT_L',     HEADS_T, RAW_HEADERS_T, MAP_T.l);
     const sTprice = setSel('mapT_Price', HEADS_T, RAW_HEADERS_T, MAP_T.price);
-
     const sOtype  = setSel('mapO_Type',  HEADS_O, RAW_HEADERS_O, MAP_O.type);
     const sOhmin  = setSel('mapO_HMin',  HEADS_O, RAW_HEADERS_O, MAP_O.hmin);
     const sOhmax  = setSel('mapO_HMax',  HEADS_O, RAW_HEADERS_O, MAP_O.hmax);
     const sOprice = setSel('mapO_Price', HEADS_O, RAW_HEADERS_O, MAP_O.price);
     const sOactif = setSel('mapO_Actif', HEADS_O, RAW_HEADERS_O, MAP_O.actif);
 
-    mapTarifsBox.style.display  = (MAP_T.type && MAP_T.h && MAP_T.l && MAP_T.price) ? 'none' : 'block';
-    mapOptionsBox.style.display = (MAP_O.type && MAP_O.hmin && MAP_O.hmax && MAP_O.price && MAP_O.actif) ? 'none' : 'block';
-
     let okT=false, okO=false;
-    if(mapTarifsBox.style.display==='none') okT=applyTarifs();
-    if(mapOptionsBox.style.display==='none') okO=applyOptions();
+    if(MAP_T.type && MAP_T.h && MAP_T.l && MAP_T.price) okT=applyTarifs();
+    if(MAP_O.type && MAP_O.hmin && MAP_O.hmax && MAP_O.price && MAP_O.actif) okO=applyOptions();
 
+    // Cacher les panneaux si tout est bon, sinon offrir le mapping manuel (rare)
+    mapTarifsBox.style.display  = (okT ? 'none' : 'block');
+    mapOptionsBox.style.display = (okO ? 'none' : 'block');
+
+    // Boutons d'application manuelle
     document.getElementById('applyMapTarifs').onclick=()=>{
       MAP_T.type=sTtype.value||null; MAP_T.h=sTh.value||null; MAP_T.l=sTl.value||null; MAP_T.price=sTprice.value||null;
       if(applyTarifs()){ mapTarifsBox.style.display='none'; populateHL(); compute(); }
@@ -506,88 +414,44 @@ async function loadAll(){
       else alert('Merci de sélectionner les 5 colonnes OPTIONS.');
     };
 
-    // Écouteurs
+    // Écouteurs UI
     elType.addEventListener('change', ()=>{ populateHL(); renderOptionsCheckboxes(); compute(); });
     elH.addEventListener('change',   ()=>{ renderOptionsCheckboxes(); compute(); });
     elL.addEventListener('change', compute);
     elQte.addEventListener('input', compute);
 
-    elMsg.textContent =
-      `Données chargées.\n` +
-      `En-têtes TARIFS : ${RAW_HEADERS_T.join(' | ')}\n` +
-      `En-têtes OPTIONS : ${RAW_HEADERS_O.join(' | ')}`;
+    elMsg.textContent = `Données chargées.\nEn-têtes TARIFS : ${RAW_HEADERS_T.join(' | ')}\nEn-têtes OPTIONS : ${RAW_HEADERS_O.join(' | ')}`;
 
     if(okT && okO){ populateHL(); renderOptionsCheckboxes(); compute(); }
-  }catch(e){
-    elMsg.textContent = "Erreur de chargement : " + e.message;
-    console.error(e);
-  }
+  }catch(e){ elMsg.textContent = "Erreur de chargement : " + e.message; console.error(e); }
 }
 loadAll();
 </script>
 
-<!-- ===== Intégration Devis (PU PUBLIC) ===== -->
 <script src="../js/devis-core.js"></script>
 <button id="btnAddDevis">➕ Ajouter au devis</button>
-
 <script>
 (function(){
-  const btn = document.getElementById('btnAddDevis');
-  if(!btn) return;
-
-  function parseHTPublic(){
-    const t = (document.getElementById('prixHT').innerText || '0').trim();
-    return Number(t.replace(/\s/g,'').replace(',', '.')) || 0; // total HT PUBLIC affiché
-  }
-  function selectedOptionsList(){
-    const cbs = [...document.querySelectorAll('#optionsBox input[name="opt"]:checked')];
-    return cbs.map(cb=>cb.value);
-  }
-
+  const btn = document.getElementById('btnAddDevis'); if(!btn) return;
+  function parseHTPublic(){ const t = (document.getElementById('prixHT').innerText || '0').trim(); return Number(t.replace(/\s/g,'').replace(',', '.')) || 0; }
+  function selectedOptionsList(){ const cbs = [...document.querySelectorAll('#optionsBox input[name="opt"]:checked')]; return cbs.map(cb=>cb.value); }
   btn.addEventListener('click', ()=>{
     try{
       if(!window.Devis) throw new Error('Moteur de devis introuvable.');
-
       const typeFace = document.getElementById('type').value || '';
       const H = document.getElementById('hauteur').value || '';
       const L = document.getElementById('largeur').value || '';
       const qte = Math.max(1, parseInt(document.getElementById('quantite').value||'1',10));
-
-      if(!typeFace || !H || !L){
-        alert('Merci de sélectionner le type de face, la hauteur et la largeur.');
-        return;
-      }
-
-      const total_ht_public = parseHTPublic();
-      if(total_ht_public <= 0){
-        alert('Le total est à 0, vérifie la configuration.');
-        return;
-      }
-
+      if(!typeFace || !H || !L){ alert('Merci de sélectionner le type de face, la hauteur et la largeur.'); return; }
+      const total_ht_public = parseHTPublic(); if(total_ht_public <= 0){ alert('Le total est à 0, vérifie la configuration.'); return; }
       const pu_public_ht = Number((total_ht_public / qte).toFixed(2));
       const opts = selectedOptionsList();
-      const designation = [
-        'Totem',
-        typeFace,
-        `H ${H} mm × L ${L} mm`,
-        opts.length ? `Options: ${opts.join(', ')}` : null
-      ].filter(Boolean).join(' — ');
-
-      Devis.addLine({
-        type: 'Totem',
-        designation,
-        quantite: qte,
-        pu_public_ht
-      });
-
+      const designation = ['Totem', typeFace, `H ${H} mm × L ${L} mm`, opts.length ? `Options: ${opts.join(', ')}` : null].filter(Boolean).join(' — ');
+      Devis.addLine({ type: 'Totem', designation, quantite: qte, pu_public_ht });
       alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${qte}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
-    }catch(err){
-      console.error(err);
-      alert('Erreur lors de l’ajout au devis : ' + err.message);
-    }
+    }catch(err){ console.error(err); alert('Erreur lors de l’ajout au devis : ' + err.message); }
   });
 })();
 </script>
-
 </body>
 </html>
