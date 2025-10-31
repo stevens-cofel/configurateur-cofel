@@ -157,6 +157,15 @@
         <div class="opt-row"><em>Aucune option disponible tant que la hauteur n’est pas choisie.</em></div>
       </div>
 
+      <!-- ✅ Option fixe : Laquage au RAL (prix PUBLIC déjà x2) -->
+      <div class="opt-row" id="ralRow">
+        <label style="display:flex;align-items:center;gap:10px;margin:0">
+          <input type="checkbox" id="optRAL" disabled />
+          <span>Laquage au RAL (112 €/m², 2 faces)</span>
+          <span class="note" id="ralNote"></span>
+        </label>
+      </div>
+
       <label for="quantite">Quantité</label>
       <input type="number" id="quantite" value="1" min="1"/>
     </fieldset>
@@ -181,6 +190,7 @@ const URL_TARIFS  = "https://raw.githubusercontent.com/stevens-cofel/configurate
 const URL_OPTIONS = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/option%20platine%20et%20panier%20de%20crosses%20(1).csv";
 const TVA = 0.20;
 const UPLIFT_PUBLIC = 2.0; // affichage PUBLIC x2
+const RAL_PRICE_PUBLIC_M2 = 112; // ✅ déjà prix PUBLIC (x2 inclus)
 
 /* ------- STATE ------- */
 let RAW_TARIFFS = []; let RAW_OPTIONS = [];
@@ -203,6 +213,8 @@ const elQte  = document.getElementById('quantite');
 const elHT   = document.getElementById('prixHT');
 const elTTC  = document.getElementById('prixTTC');
 const elMsg  = document.getElementById('msg');
+const elOptRAL = document.getElementById('optRAL');
+const elRalNote = document.getElementById('ralNote');
 
 /* ------- HELPERS ------- */
 function num(v){
@@ -216,10 +228,7 @@ function normalizeKey(k){
     .replace(/[^a-z0-9]+/g,'').trim();
 }
 function csvSplit(line, sep){
-  // Split CSV respecting quotes and escaped quotes
-  const out = [];
-  let cur = '';
-  let inQ = false;
+  const out = []; let cur = ''; let inQ = false;
   for(let i=0;i<line.length;i++){
     const ch = line[i];
     if(ch === '"'){
@@ -233,17 +242,11 @@ function csvSplit(line, sep){
   return out.map(c=>c.trim());
 }
 function parseCSVAuto(text){
-  // Retire BOM, trim
   text = text.replace(/^\uFEFF/, '').trim();
-
-  // Découpe en lignes robustes (CR, LF, CRLF)
   let lines = text.split(/[\r\n]+/).filter(l=>l.trim().length>0);
 
-  let rawHeads = [];
-  let heads = [];
-  let rows = [];
+  let rawHeads = [], heads = [], rows = [];
 
-  // Cas 1: CSV standard
   if(lines.length > 1){
     const first = lines[0];
     const sep = (first.match(/;/g)||[]).length > (first.match(/,/g)||[]).length ? ';' : ',';
@@ -256,12 +259,9 @@ function parseCSVAuto(text){
     return { rows, rawHeads, heads };
   }
 
-  // Cas 2: tout sur une seule ligne (fallback)
   if(lines.length === 1){
     const chunk = lines[0];
-    // Essaie d'inférer le séparateur
     const sep = (chunk.match(/;/g)||[]).length > (chunk.match(/,/g)||[]).length ? ';' : ',';
-    // Si aucun séparateur détecté, on tente l'extraction de champs quotés
     let fields = [];
     if(chunk.includes(sep)){
       fields = csvSplit(chunk, sep);
@@ -269,7 +269,6 @@ function parseCSVAuto(text){
       const re = /"([^\"]*)"/g; let m; while((m = re.exec(chunk))){ fields.push(m[1]); }
     }
     if(fields.length < 4){ return { rows:[], rawHeads:[], heads:[] }; }
-    // Suppose 5 en-têtes pour tarifs (ajuste si besoin)
     rawHeads = fields.slice(0,5);
     heads    = rawHeads.map(h=>normalizeKey(h));
     const nCols = rawHeads.length;
@@ -300,7 +299,6 @@ function isActive(v){
 function keysExistIn(heads, keysObj){
   return Object.values(keysObj).every(k => heads.includes(k));
 }
-
 function suggestMapTarifs(){
   if(keysExistIn(HEADS_T, MAP_T_DEFAULT)) { MAP_T = { ...MAP_T_DEFAULT }; return; }
   const f = (re)=> HEADS_T.find(k=>re.test(k));
@@ -318,19 +316,16 @@ function suggestMapOptions(){
   MAP_O.price = MAP_O.price || f(/prix|ht|unitaire|price|pu/);
   MAP_O.actif = MAP_O.actif || f(/actif|active|isactive|true|oui|1|vrai|yes|enabled/);
 
-  // Heuristique de secours : si pas de colonne type trouvée, choisir la première colonne "catégorielle"
   if(!MAP_O.type){
     const candidates = HEADS_O.filter(h=>{
-      // Exclure colonnes numériques évidentes
       if(/(prix|ht|eur|price|pu|montant|hmin|hmax|min|max|hauteur|largeur|mm|cm|m)/.test(h)) return false;
-      // Inspecter quelques premières lignes pour voir si non-numérique
       const values = RAW_OPTIONS.slice(0,20).map(r=>String(r[h]||'').trim());
       const nonEmpty = values.filter(v=>v!=='');
       if(!nonEmpty.length) return false;
       const numish = nonEmpty.every(v=>!isNaN(parseFloat(v.replace(',', '.'))));
       if(numish) return false;
       const uniq = new Set(nonEmpty);
-      return uniq.size <= 20; // caté raisonnable
+      return uniq.size <= 20;
     });
     if(candidates.length){ MAP_O.type = candidates[0]; }
   }
@@ -356,7 +351,6 @@ function applyTarifs(){
   return true;
 }
 function applyOptions(){
-  // Type et prix indispensables; hmin/hmax/actif optionnels
   if(!MAP_O.type || !MAP_O.price) return false;
   OPTIONS = RAW_OPTIONS.map(r=>{
     const hmin = MAP_O.hmin ? num(r[MAP_O.hmin]) : NaN;
@@ -386,16 +380,16 @@ function populateHL(){
   const L = uniqueSortedNumeric(filtered.map(r=>r.l));
   elH.innerHTML = '<option value="">— sélectionnez —</option>' + H.map(v=>`<option value="${v}">${v}</option>`).join('');
   elL.innerHTML = '<option value="">— sélectionnez —</option>' + L.map(v=>`<option value="${v}">${v}</option>`).join('');
+  updateRALState();
 }
 function renderOptionsCheckboxes(){
   const families = [...new Set(OPTIONS.map(o=>o.typeOption))].filter(Boolean).sort();
-  if(!families.length){ elOptsBox.innerHTML = '<div class="opt-row"><em>Aucune option disponible.</em></div>'; return; }
+  if(!families.length){ elOptsBox.innerHTML = '<div class="opt-row"><em>Aucune option disponible.</em></div>'; updateRALState(); return; }
   const h = num(elH.value);
   const isValid = (fam)=>{
     if(!h) return false;
     const rows = OPTIONS.filter(o => o.typeOption===fam && o.actif);
     if(!rows.length) return false;
-    // Disponible si aucune contrainte, ou si contraintes respectées
     return rows.some(o => (isNaN(o.hmin) || h>=o.hmin) && (isNaN(o.hmax) || h<=o.hmax));
   };
   elOptsBox.innerHTML = families.map(f=>{
@@ -410,7 +404,23 @@ function renderOptionsCheckboxes(){
   }).join('');
   [...elOptsBox.querySelectorAll('input[name="opt"]')].forEach(cb=>{ cb.addEventListener('change', compute); });
   if(!h){ elMsg.textContent = "Choisis d’abord la hauteur pour activer les options."; }
-  else{ const valides = families.filter(f=>!elOptsBox.querySelector(`input[value="${f}"]`)?.disabled); elMsg.textContent = `Hauteur sélectionnée: ${elH.value} | Options valides: ${valides.join(', ') || 'aucune'}`; }
+  else{ const valides = families.filter(f=>!elOptsBox.querySelector(\`input[value="\${f}"]\`)?.disabled); elMsg.textContent = \`Hauteur sélectionnée: \${elH.value} | Options valides: \${valides.join(', ') || 'aucune'}\`; }
+  updateRALState();
+}
+
+/* ------- LAQUAGE RAL (PUBLIC) ------- */
+function area2FacesM2(){
+  const h = num(elH.value), l = num(elL.value);
+  if(!h || !l) return 0;
+  const perFace = (h * l) / 1_000_000; // m²
+  return perFace * 2; // 2 faces
+}
+function updateRALState(){
+  const enabled = !!(num(elH.value) && num(elL.value));
+  elOptRAL.disabled = !enabled;
+  if(!enabled){ elOptRAL.checked = false; elRalNote.textContent = ''; return; }
+  const addPerUnit = area2FacesM2() * RAL_PRICE_PUBLIC_M2; // public / unité
+  elRalNote.textContent = ` (+${addPerUnit.toFixed(2).replace('.', ',')} € / u)`;
 }
 
 /* ------- CALCUL ------- */
@@ -430,9 +440,21 @@ function priceOptionsSum(){
   }, 0); // interne
 }
 function compute(){
-  const base_interne = priceBase(); const opt_interne  = priceOptionsSum(); const qte  = Math.max(1, parseInt(elQte.value||'1',10));
-  const unit_public  = (base_interne + opt_interne) * UPLIFT_PUBLIC;
-  const totalHT_pub  = unit_public * qte; const totalTTC_pub = totalHT_pub * (1+TVA);
+  const base_interne = priceBase();
+  const opt_interne  = priceOptionsSum();
+  const qte  = Math.max(1, parseInt(elQte.value||'1',10));
+
+  // Prix PUBLIC issus du modèle existant
+  const unit_public_base = (base_interne + opt_interne) * UPLIFT_PUBLIC;
+
+  // ✅ Surcharge PUBLIC Laquage RAL (déjà x2) – calcul par unité
+  const ral_public_unit = elOptRAL.checked ? (area2FacesM2() * RAL_PRICE_PUBLIC_M2) : 0;
+
+  const unit_public_total = unit_public_base + ral_public_unit;
+
+  const totalHT_pub  = unit_public_total * qte;
+  const totalTTC_pub = totalHT_pub * (1+TVA);
+
   elHT.textContent  = totalHT_pub.toFixed(2).replace('.', ',');
   elTTC.textContent = totalTTC_pub.toFixed(2).replace('.', ',');
 }
@@ -447,7 +469,6 @@ async function loadAll(){
     RAW_TARIFFS = pT.rows; RAW_HEADERS_T = pT.rawHeads; HEADS_T = pT.heads;
     RAW_OPTIONS = pO.rows; RAW_HEADERS_O = pO.rawHeads; HEADS_O = pO.heads;
 
-    // --- Empreintes pour mémoriser le mappage quand les en-têtes n'ont pas changé
     const sigT = URL_TARIFS  + '|' + HEADS_T.join('|');
     const sigO = URL_OPTIONS + '|' + HEADS_O.join('|');
     const savedBySigT = JSON.parse(localStorage.getItem('MAP_T_BY_SIG') || '{}');
@@ -455,14 +476,11 @@ async function loadAll(){
     MAP_T = savedBySigT[sigT] || MAP_T || { ...MAP_T_DEFAULT };
     MAP_O = savedBySigO[sigO] || MAP_O || { ...MAP_O_DEFAULT };
 
-    // Auto-suggestion (ou forçage défaut si clés présentes)
     suggestMapTarifs(); suggestMapOptions();
 
-    // Si l'auto-mapping est OK, on applique immédiatement et on masque les panneaux
     const mapTarifsBox  = document.getElementById('mapTarifsBox');
     const mapOptionsBox = document.getElementById('mapOptionsBox');
 
-    // Préparer les selects (au cas très rare où l'utilisateur devra mapper)
     const setSel = (id, heads, raws, val)=>{ const el = document.getElementById(id); fillSelect(el, heads, raws); if(val) el.value = val; return el; };
     const sTtype  = setSel('mapT_Type',  HEADS_T, RAW_HEADERS_T, MAP_T.type);
     const sTh     = setSel('mapT_H',     HEADS_T, RAW_HEADERS_T, MAP_T.h);
@@ -478,11 +496,9 @@ async function loadAll(){
     if(MAP_T.type && MAP_T.h && MAP_T.l && MAP_T.price) okT=applyTarifs();
     if(MAP_O.type && MAP_O.hmin && MAP_O.hmax && MAP_O.price && MAP_O.actif) okO=applyOptions();
 
-    // Cacher les panneaux si tout est bon, sinon offrir le mapping manuel (rare)
     mapTarifsBox.style.display  = (okT ? 'none' : 'block');
     mapOptionsBox.style.display = (okO ? 'none' : 'block');
 
-    // Boutons d'application manuelle
     document.getElementById('applyMapTarifs').onclick=()=>{
       MAP_T.type=sTtype.value||null; MAP_T.h=sTh.value||null; MAP_T.l=sTl.value||null; MAP_T.price=sTprice.value||null;
       if(applyTarifs()){ mapTarifsBox.style.display='none'; populateHL(); compute(); }
@@ -494,11 +510,11 @@ async function loadAll(){
       else alert('Merci de sélectionner les 5 colonnes OPTIONS.');
     };
 
-    // Écouteurs UI
     elType.addEventListener('change', ()=>{ populateHL(); renderOptionsCheckboxes(); compute(); });
-    elH.addEventListener('change',   ()=>{ renderOptionsCheckboxes(); compute(); });
-    elL.addEventListener('change', compute);
+    elH.addEventListener('change',   ()=>{ renderOptionsCheckboxes(); updateRALState(); compute(); });
+    elL.addEventListener('change',   ()=>{ updateRALState(); compute(); });
     elQte.addEventListener('input', compute);
+    elOptRAL.addEventListener('change', compute);
 
     elMsg.textContent = `Données chargées.\nEn-têtes TARIFS : ${RAW_HEADERS_T.join(' | ')}\nEn-têtes OPTIONS : ${RAW_HEADERS_O.join(' | ')}`;
 
@@ -507,9 +523,7 @@ async function loadAll(){
 }
 loadAll();
 
-/* ====== TESTS LÉGERS (console) ======
-   Objectif: s'assurer que parseCSVAuto gère LF, CRLF et une seule ligne.
-*/
+/* ====== TESTS LÉGERS (console) ====== */
 (function runParseTests(){
   try{
     const lf = 'A,B,C\n1,2,3\n4,5,6';
@@ -542,8 +556,14 @@ loadAll();
       if(!typeFace || !H || !L){ alert('Merci de sélectionner le type de face, la hauteur et la largeur.'); return; }
       const total_ht_public = parseHTPublic(); if(total_ht_public <= 0){ alert('Le total est à 0, vérifie la configuration.'); return; }
       const pu_public_ht = Number((total_ht_public / qte).toFixed(2));
+
       const opts = selectedOptionsList();
+      // ✅ Ajout de l’info Laquage RAL dans la désignation si cochée
+      const ralChecked = document.getElementById('optRAL')?.checked;
+      if(ralChecked) opts.push('Laquage au RAL');
+
       const designation = ['Totem', typeFace, `H ${H} mm × L ${L} mm`, opts.length ? `Options: ${opts.join(', ')}` : null].filter(Boolean).join(' — ');
+
       Devis.addLine({ type: 'Totem', designation, quantite: qte, pu_public_ht });
       alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${qte}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
     }catch(err){ console.error(err); alert('Erreur lors de l’ajout au devis : ' + err.message); }
