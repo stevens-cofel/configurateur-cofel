@@ -30,7 +30,7 @@
   }
 
   /* ===================== FORM CONTROLS (inputs) ===================== */
-  label{font-weight:700; font-size:12px; color:var(--accent);}
+  label{font-weight:700; font-size:12px; color:var(--accent);} 
   input[type="text"], input[type="number"], textarea{
     width:100%; margin-top:6px; padding:10px 12px; border-radius:12px; outline:none;
     color:var(--txt);
@@ -48,151 +48,59 @@
   }
 
   /* ===================== CUSTOM SELECT (violet unifié) ===================== */
-  .native-select{
-    position:absolute !important;
-    opacity:0 !important;
-    pointer-events:none !important;
-    width:0; height:0; margin:0; padding:0; border:0;
-  }
+  .native-select{ position:absolute !important; opacity:0 !important; pointer-events:none !important; width:0; height:0; margin:0; padding:0; border:0; }
   .cselect{ position:relative; margin-top:6px; }
   .cselect-toggle{
-    width:100%;
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:10px 12px;
-    color:var(--txt);
-    border-radius:12px; cursor:pointer; user-select:none;
-    border:1px solid rgba(255,255,255,.22);
-    box-shadow: var(--shadow);
-    background: var(--violet-ui);
+    width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:10px 12px; color:var(--txt); border-radius:12px; cursor:pointer; user-select:none;
+    border:1px solid rgba(255,255,255,.22); box-shadow: var(--shadow); background: var(--violet-ui);
   }
   .cselect-toggle:hover{ background: var(--violet-ui-pressed); }
   .cselect-toggle:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35); }
   .cselect-label{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1}
-  .cselect-caret{
-    width:10px; height:10px; flex:0 0 auto; opacity:.9;
-    background-image:
-      linear-gradient(45deg, transparent 50%, var(--txt) 50%),
-      linear-gradient(135deg, var(--txt) 50%, transparent 50%);
-    background-size:6px 6px, 6px 6px;
-    background-position:right top, right bottom;
-    background-repeat:no-repeat;
-    transform: translateY(1px);
-  }
+  .cselect-caret{ width:10px; height:10px; flex:0 0 auto; opacity:.9; background-image: linear-gradient(45deg, transparent 50%, var(--txt) 50%), linear-gradient(135deg, var(--txt) 50%, transparent 50%); background-size:6px 6px, 6px 6px; background-position:right top, right bottom; background-repeat:no-repeat; transform: translateY(1px); }
   .cselect[aria-expanded="true"] .cselect-caret{ transform: rotate(180deg); }
-
-  /* Menu porté dans <body> (au-dessus de tout) */
-  .cselect-menu{
-    position:fixed;
-    left:0; top:0; width:240px;
-    z-index:99999;
-    max-height:280px; overflow:auto; padding:6px;
-    border-radius:14px; border:1px solid rgba(255,255,255,.22);
-    box-shadow: 0 16px 40px rgba(0,0,0,.45);
-    background: var(--violet-ui);
-    display:none;
-  }
+  .cselect-menu{ position:fixed; left:0; top:0; width:240px; z-index:99999; max-height:280px; overflow:auto; padding:6px; border-radius:14px; border:1px solid rgba(255,255,255,.22); box-shadow: 0 16px 40px rgba(0,0,0,.45); background: var(--violet-ui); display:none; }
   .cselect[aria-expanded="true"] .cselect-menu{ display:block; }
-
-  .cselect-option{
-    border-radius:10px; margin:4px 0; padding:10px 12px; cursor:pointer;
-    color:var(--txt);
-    border:1px solid rgba(255,255,255,.18);
-    background: rgba(255,255,255,.10);
-  }
-  .cselect-option:hover, .cselect-option[aria-selected="true"]{
-    background: rgba(255,255,255,.22);
-    border-color: rgba(255,255,255,.28);
-  }
+  .cselect-option{ border-radius:10px; margin:4px 0; padding:10px 12px; cursor:pointer; color:var(--txt); border:1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.10); }
+  .cselect-option:hover, .cselect-option[aria-selected="true"]{ background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.28); }
   .cselect-option:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35); }
 
   /* ===================== CHECKBOX (solide lisible) ===================== */
-  .option-item{
-    display:flex; align-items:center; gap:12px; cursor:pointer;
-    border:1px solid rgba(255,255,255,.22);
-    border-radius:12px; padding:12px; user-select:none;
-    box-shadow: var(--shadow);
-    background: var(--violet-ui);
-    color: var(--txt);
-  }
-  .option-item input{
-    appearance:none; -webkit-appearance:none;
-    width:20px; height:20px; border-radius:6px;
-    border:1px solid rgba(255,255,255,.6);
-    background: rgba(255,255,255,.15);
-    position:relative; display:inline-block;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,.2);
-  }
+  .option-item{ display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid rgba(255,255,255,.22); border-radius:12px; padding:12px; user-select:none; box-shadow: var(--shadow); background: var(--violet-ui); color: var(--txt); }
+  .option-item input{ appearance:none; -webkit-appearance:none; width:20px; height:20px; border-radius:6px; border:1px solid rgba(255,255,255,.6); background: rgba(255,255,255,.15); position:relative; display:inline-block; box-shadow: inset 0 1px 2px rgba(0,0,0,.2); }
   .option-item input:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35), inset 0 1px 2px rgba(0,0,0,.2); }
-  .option-item input:checked{
-    background: var(--violet-2);
-    border-color: rgba(255,255,255,.9);
-  }
-  .option-item input:checked::after{
-    content:""; position:absolute; inset:3px 5px 5px 3px;
-    border-right:3px solid #fff; border-bottom:3px solid #fff;
-    transform: rotate(45deg);
-  }
+  .option-item input:checked{ background: var(--violet-2); border-color: rgba(255,255,255,.9); }
+  .option-item input:checked::after{ content:""; position:absolute; inset:3px 5px 5px 3px; border-right:3px solid #fff; border-bottom:3px solid #fff; transform: rotate(45deg); }
 
   /* ===================== HERO & LAYOUT ===================== */
   .hero{position:relative; z-index:1; padding:40px 20px 24px;}
-  .hero-inner{
-    max-width:1200px; margin:0 auto;
-    display:flex; align-items:center; justify-content:space-between; gap:16px;
-  }
-  .brand{
-    display:flex; align-items:center; gap:14px;
-    backdrop-filter: blur(var(--blur));
-    background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-    border:1px solid rgba(255,255,255,.18);
-    padding:10px 14px; border-radius:14px;
-    box-shadow: var(--shadow);
-  }
+  .hero-inner{ max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .brand{ display:flex; align-items:center; gap:14px; backdrop-filter: blur(var(--blur)); background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)); border:1px solid rgba(255,255,255,.18); padding:10px 14px; border-radius:14px; box-shadow: var(--shadow); }
   .brand img{height:42px; width:auto; object-fit:contain; border-radius:10px}
   .brand h1{font-size: clamp(18px, 2.6vw, 22px); margin:0; letter-spacing:.2px; font-weight:700;}
   .tagline{max-width:1200px;margin:18px auto 0;padding:0 20px;color:var(--txt-dim)}
   .wrap{max-width:1200px; margin:26px auto; padding:0 20px 40px; position:relative; z-index:1;}
-  .panel{
-    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
-    border:1px solid rgba(255,255,255,.2);
-    border-radius:20px; padding:18px; box-shadow:var(--shadow);
-    backdrop-filter: blur(var(--blur));
-    margin-bottom:18px;
-    position:relative; z-index:1;
-    overflow:visible;
-  }
+  .panel{ background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06)); border:1px solid rgba(255,255,255,.2); border-radius:20px; padding:18px; box-shadow:var(--shadow); backdrop-filter: blur(var(--blur)); margin-bottom:18px; position:relative; z-index:1; overflow:visible; }
   .panel h2{margin:0 0 12px; font-size: clamp(18px,2.4vw,22px); letter-spacing:.2px}
-  .card{
-    background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-    border:1px solid rgba(255,255,255,.18);
-    border-radius:16px; padding:14px; box-shadow:var(--shadow); backdrop-filter: blur(var(--blur));
-  }
+  .card{ background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)); border:1px solid rgba(255,255,255,.18); border-radius:16px; padding:14px; box-shadow:var(--shadow); backdrop-filter: blur(var(--blur)); }
   .grid{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
   .muted{color:var(--txt-dim); font-size:12px; margin-top:6px; white-space:pre-wrap}
 
   /* Résultat */
-  .result{
-    text-align:center; padding:16px;
-    background: var(--violet-ui);
-    border:1px solid rgba(255,255,255,.22); border-radius:16px;
-    box-shadow:0 8px 22px rgba(0,0,0,.28);
-    font-size:18px;
-  }
+  .result{ text-align:center; padding:16px; background: var(--violet-ui); border:1px solid rgba(255,255,255,.22); border-radius:16px; box-shadow:0 8px 22px rgba(0,0,0,.28); font-size:18px; }
   .result b{font-size:20px}
 
   /* Buttons */
-  .btn{
-    appearance:none; border:none; cursor:pointer; font-weight:700;
-    color:#0b0b0b; background:#fff; border-radius:12px; padding:10px 14px;
-    box-shadow: 0 10px 24px rgba(0,0,0,.25);
-    transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
-  }
+  .btn{ appearance:none; border:none; cursor:pointer; font-weight:700; color:#0b0b0b; background:#fff; border-radius:12px; padding:10px 14px; box-shadow: 0 10px 24px rgba(0,0,0,.25); transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease; }
   .btn:active{ transform: translateY(1px); box-shadow: 0 6px 16px rgba(0,0,0,.28); }
   .btn-ghost{ background: transparent; color: var(--txt); border:1px solid rgba(255,255,255,.24); }
 
-  footer{
-    color:#f3ecff; font-size:12px; text-align:center; padding:24px 10px; opacity:.9;
-  }
+  footer{ color:#f3ecff; font-size:12px; text-align:center; padding:24px 10px; opacity:.9; }
   @media (max-width:720px){ .brand h1{display:none;} }
+
+  /* tiny test badge */
+  #testStatus{display:inline-block; margin:6px 0 0; font-size:12px; padding:4px 8px; border-radius:8px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25);}
 </style>
 </head>
 <body>
@@ -208,7 +116,7 @@
         ⬅ Retour aux configurateurs
       </a>
     </div>
-    <div class="tagline">Choisissez la forme, la dimension et les options. Les montants s’actualisent automatiquement.</div>
+    <div class="tagline">Choisissez la forme, la dimension et les options. Les montants s’actualisent automatiquement. <span id="testStatus" aria-live="polite"></span></div>
   </div>
 
   <!-- ===================== CONTENU ===================== -->
@@ -259,21 +167,27 @@
       </div>
     </section>
 
-    <!-- Options -->
+    <!-- Options (finition obligatoire) -->
     <section class="panel" aria-label="Options">
       <h2>🎛️ Options</h2>
-      <div class="grid">
-        <label class="option-item">
-          <input type="checkbox" id="optLaquage" />
-          <span>Laquage (drapeau carré – base prélaqué)</span>
-        </label>
-
-        <label class="option-item">
-          <input type="checkbox" id="optAjourLumi" />
-          <span>Ajourage + PMMA 3 mm + lumineux + laquage</span>
-        </label>
-      </div>
-      <!-- (plus de message CSV ici) -->
+      <fieldset class="card" style="border:none; padding:0;">
+        <legend class="muted" style="margin-bottom:8px;">Finition (obligatoire)</legend>
+        <div class="grid">
+          <label class="option-item">
+            <input type="radio" name="finition" id="finPre" value="prelaque" checked />
+            <span>Prélaqué (base)</span>
+          </label>
+          <label class="option-item">
+            <input type="radio" name="finition" id="finLq" value="laque" />
+            <span>Laqué</span>
+          </label>
+          <label class="option-item">
+            <input type="radio" name="finition" id="finAj" value="ajour" />
+            <span>Ajourage + PMMA 3 mm + lumineux (laqué)</span>
+          </label>
+        </div>
+        <div id="helpFinition" class="muted"></div>
+      </fieldset>
     </section>
 
     <!-- Récap prix -->
@@ -308,9 +222,9 @@
   let HEADS=[], ROWS=[], MAP=null;
   const $ = id=>document.getElementById(id);
   const elForme=$("forme"), elQ=$("quantite"), elDim=$("dimension");
-  const elLaq=$("optLaquage"), elAJL=$("optAjourLumi");
+  const elFinPre=$("finPre"), elFinLq=$("finLq"), elFinAj=$("finAj");
   const elHT=$("prixHT"), elTTC=$("prixTTC");
-  const elHelpDim=$("helpDim"), elNote=$("noteForme");
+  const elHelpDim=$("helpDim"), elNote=$("noteForme"), elHelpFinition=$("helpFinition");
 
   /* ===== Utils ===== */
   function normKey(k){
@@ -386,13 +300,8 @@
       div.className='cselect-option'; div.setAttribute('role','option'); div.tabIndex=-1;
       div.dataset.value=opt.value; div.textContent=opt.textContent;
       if(opt.selected) div.setAttribute('aria-selected','true');
-      div.addEventListener('click', ()=>{
-        setNativeValue(native, opt.value);
-        closeMenu(native.id);
-      });
-      div.addEventListener('keydown', (e)=>{
-        if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setNativeValue(native, opt.value); closeMenu(native.id); }
-      });
+      div.addEventListener('click', ()=>{ setNativeValue(native, opt.value); closeMenu(native.id); });
+      div.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setNativeValue(native, opt.value); closeMenu(native.id); } });
       menu.appendChild(div);
     });
     labelSpan.textContent = (native.selectedOptions[0] || native.options[0])?.textContent || '';
@@ -471,8 +380,19 @@
                   .sort((a,b)=>a.localeCompare(b));
     elForme.innerHTML='<option value="">(choisir)</option>';
     formes.forEach(v=> elForme.innerHTML+=`<option value="${v}">${v}</option>`);
-    document.getElementById('noteForme').textContent = formes.length ? "" : "Aucune forme disponible dans le CSV.";
+    elNote.textContent = formes.length ? "" : "Aucune forme disponible dans le CSV.";
     rebuildCustom(elForme);
+  }
+
+  function getFinition(){
+    if(elFinAj.checked) return 'ajour';
+    if(elFinLq.checked) return 'laque';
+    return 'prelaque';
+  }
+  function setFinition(val){
+    elFinPre.checked = (val==='prelaque');
+    elFinLq.checked  = (val==='laque');
+    elFinAj.checked  = (val==='ajour');
   }
 
   function filteredPool(){
@@ -481,21 +401,33 @@
     const fin=r=>String(r[MAP.FIN]).trim().toLowerCase();
     const opt=r=>String(r[MAP.OPTAJL]).trim().toLowerCase();
 
+    const finSel = getFinition();
+
     if(elForme.value==='carré'){
-      if(elAJL.checked){ pool=pool.filter(r=>opt(r)==='vrai'&&fin(r)==='laqué'); }
-      else{
-        if(elLaq.checked) pool=pool.filter(r=>fin(r)==='laqué'&&opt(r)!=='vrai');
-        else pool=pool.filter(r=>fin(r)==='prélaqué'&&opt(r)!=='vrai');
+      if(finSel==='ajour'){
+        pool=pool.filter(r=>opt(r)==='vrai' && fin(r)==='laqué');
+      } else if(finSel==='laque'){
+        pool=pool.filter(r=>fin(r)==='laqué' && opt(r)!=='vrai');
+      } else { // prélaqué
+        pool=pool.filter(r=>fin(r)==='prélaqué' && opt(r)!=='vrai');
       }
-    }else if(elForme.value==='rond'){
-      pool=pool.filter(r=>fin(r)==='laqué');
-      if(elAJL.checked) pool=pool.filter(r=>opt(r)==='vrai');
-      else pool=pool.filter(r=>opt(r)!=='vrai');
+    } else if(elForme.value==='rond'){
+      // rond = toujours laqué; l'ajourage est possible si indiqué dans le CSV
+      if(finSel==='ajour'){
+        pool=pool.filter(r=>fin(r)==='laqué' && opt(r)==='vrai');
+      } else { // laqué simple (forcer si prélaqué sélectionné)
+        pool=pool.filter(r=>fin(r)==='laqué' && opt(r)!=='vrai');
+      }
+    } else {
+      // forme non choisie: filtrer seulement par finition sélectionnée
+      if(finSel==='ajour') pool=pool.filter(r=>opt(r)==='vrai');
+      else if(finSel==='laque') pool=pool.filter(r=>fin(r)==='laqué' && opt(r)!=='vrai');
+      else pool=pool.filter(r=>fin(r)==='prélaqué' && opt(r)!=='vrai');
     }
     return pool;
   }
 
-  // ===== FIX: conserver la dimension choisie quand les options changent =====
+  // ===== Conserver la dimension choisie quand les options changent =====
   function populateDimensions(){
     const prev = elDim.value;               // mémoriser la dimension choisie
     const pool = filteredPool();
@@ -530,11 +462,22 @@
     return pool[0];
   }
 
+  function syncFinitionUI(){
+    // Règles d'ergonomie en fonction de la forme
+    if(elForme.value==='rond'){
+      // Prélaqué indisponible pour les ronds
+      elFinPre.disabled = true;
+      if(elFinPre.checked){ setFinition('laque'); }
+      elHelpFinition.textContent = 'Pour les drapeaux ronds, la finition est toujours laquée (ajourage possible si dispo).';
+    } else {
+      elFinPre.disabled = false;
+      elHelpFinition.textContent = '';
+    }
+  }
+
   /* Compute */
   function compute(){
-    if(elForme.value==='rond'){ elLaq.checked=true; elLaq.disabled=true; }
-    else if(elForme.value==='carré'){ elLaq.disabled=elAJL.checked; }
-    else { elLaq.disabled=false; }
+    syncFinitionUI();
 
     const row=findRow();
     const Q=Math.max(1,Number(elQ.value||1));
@@ -559,7 +502,6 @@
       const {rawHeads,rows}=parseCSVAuto(txt);
       HEADS=rawHeads; ROWS=rows; MAP=buildMapping(HEADS);
       populateFormes(); populateDimensions(); compute();
-      /* pas d’affichage "CSV OK" */
     }catch(e){
       console.error(e);
       alert("Erreur lors du chargement des données. Réessayez plus tard.");
@@ -568,9 +510,11 @@
 
   /* Events */
   ["input","change"].forEach(evt=>{
-    [elForme, elQ, elLaq, elAJL, elDim].forEach(el=>{
-      el.addEventListener(evt,e=>{
-        if(e.target===elForme || e.target===elLaq || e.target===elAJL) populateDimensions();
+    [elForme, elQ, elDim, elFinPre, elFinLq, elFinAj].forEach(el=>{
+      el.addEventListener(evt, e=>{
+        if(e.target===elForme || e.target===elFinPre || e.target===elFinLq || e.target===elFinAj){
+          populateDimensions();
+        }
         compute();
       });
     });
@@ -578,7 +522,7 @@
 
   function resetAll(){
     elForme.value=""; elDim.value=""; elQ.value=1;
-    elLaq.checked=false; elAJL.checked=false; elLaq.disabled=false;
+    setFinition('prelaque');
     populateFormes(); populateDimensions(); compute();
   }
 
@@ -587,6 +531,53 @@
   buildCustomFromNative(elDim);
   document.getElementById("btnReset")?.addEventListener("click", resetAll);
   loadCSV();
+
+  /* ===================== Tests (basic) ===================== */
+  (function runUnitTests(){
+    const status = document.getElementById('testStatus');
+    const prev = {HEADS, ROWS, MAP};
+    try{
+      const heads=["Forme","Dimension (mm)","Finition","Prix EUR l.","Opt_Ajourage + lumineux"];
+      const rows=[
+        {"Forme":"carré","Dimension (mm)":"400x400","Finition":"prélaqué","Prix EUR l.":"100","Opt_Ajourage + lumineux":"faux"},
+        {"Forme":"carré","Dimension (mm)":"400x400","Finition":"laqué","Prix EUR l.":"120","Opt_Ajourage + lumineux":"faux"},
+        {"Forme":"carré","Dimension (mm)":"500x500","Finition":"laqué","Prix EUR l.":"150","Opt_Ajourage + lumineux":"vrai"},
+        {"Forme":"rond","Dimension (mm)":"Ø400","Finition":"laqué","Prix EUR l.":"130","Opt_Ajourage + lumineux":"faux"},
+        {"Forme":"rond","Dimension (mm)":"Ø500","Finition":"laqué","Prix EUR l.":"160","Opt_Ajourage + lumineux":"vrai"}
+      ];
+      HEADS=heads; ROWS=rows; MAP=buildMapping(heads);
+
+      // Test 1: carré + prélaqué -> renvoie uniquement prélaqué non ajouré
+      elForme.value='carré'; setFinition('prelaque');
+      let p=filteredPool();
+      console.assert(p.length===1 && p[0][MAP.FIN]==='prélaqué', 'Test1 failed');
+
+      // Test 2: carré + ajour -> laqué + opt vrai
+      setFinition('ajour'); p=filteredPool();
+      console.assert(p.length===1 && p[0][MAP.OPTAJL]==='vrai' && p[0][MAP.FIN]==='laqué', 'Test2 failed');
+
+      // Test 3: rond + prélaqué sélectionné => forcé laqué simple
+      elForme.value='rond'; setFinition('prelaque'); p=filteredPool();
+      console.assert(p.every(r=>r[MAP.FIN]==='laqué'), 'Test3 failed');
+
+      // Test 4: compute montant (mock)
+      elDim.value='400x400'; setFinition('laque'); elQ.value=2;
+      p=filteredPool();
+      const row=p.find(r=>String(r[MAP.DIM]).trim()==='400x400');
+      let unit=numFR(row[MAP.PRIX]);
+      const totalHT=unit*UPLIFT_PUBLIC*2; // 120 * 2 * 2 = 480
+      console.assert(totalHT===480, 'Test4 failed');
+
+      status.textContent='✔ tests OK';
+    }catch(err){
+      console.warn('Tests error', err);
+      if(status) status.textContent='⚠ tests partiels';
+    }finally{
+      // restore real data
+      HEADS=prev.HEADS; ROWS=prev.ROWS; MAP=prev.MAP;
+      elForme.value=""; elDim.value=""; elQ.value=1; setFinition('prelaque');
+    }
+  })();
   </script>
 
   <!-- Charger le moteur de devis -->
@@ -605,17 +596,14 @@
     const dimVal = document.getElementById("dimension").value || "";
     if(formeVal) designationParts.push(formeVal);
     if(dimVal) designationParts.push(dimVal);
-    if(document.getElementById("optAjourLumi").checked) designationParts.push("ajourage lumineux laqué");
-    else if(document.getElementById("optLaquage").checked) designationParts.push("laqué");
+    const finSel = (document.getElementById('finAj').checked ? 'ajour' : (document.getElementById('finLq').checked ? 'laque' : 'prelaque'));
+    if(finSel==='ajour') designationParts.push('ajourage lumineux laqué');
+    else if(finSel==='laque') designationParts.push('laqué');
+    else designationParts.push('prélaqué');
 
     const designation = "Enseigne Drapeau" + (designationParts.length ? " — " + designationParts.join(" / ") : "");
 
-    Devis.addLine({
-      type: "Enseigne Drapeau",
-      designation,
-      quantite,
-      pu_public_ht
-    });
+    Devis.addLine({ type: "Enseigne Drapeau", designation, quantite, pu_public_ht });
 
     alert(`✅ Ajouté au devis !\n${designation}\nQté : ${quantite}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
   });
