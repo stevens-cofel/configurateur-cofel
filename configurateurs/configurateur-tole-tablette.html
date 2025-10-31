@@ -213,13 +213,12 @@
     <div id="blockAjour" class="hidden" style="margin-top:8px">
       <div class="grid">
         <div>
-          <label for="pmmaSurface">Surface PMMA à facturer (m²)</label>
+          <label for="pmmaSurface">Surface ajourée en m²</label>
           <div class="radio-row" style="gap:8px">
             <input type="number" id="pmmaSurface" min="0" step="0.001" placeholder="Ex : 0.75" style="flex:1" />
-            <button class="pill" id="btnCopySurface" style="flex:0 0 auto">Copier surface tôle</button>
           </div>
           <!-- ⚠️ Tarif retiré visuellement -->
-          <div class="hint">Ajourage : /m² × surface PMMA. Les LED utilisent aussi cette surface.</div>
+          <div class="hint">Ajourage : /m² × surface ajourée. Les LED utilisent aussi cette surface.</div>
         </div>
         <div>
           <!-- ⚠️ "(si trouvé dans le CSV)" retiré -->
@@ -231,7 +230,7 @@
       <div class="grid">
         <div>
           <label class="radio-row" style="padding:0;border:none">
-            <span><input type="checkbox" id="optLED" /> Éclairage LED (utilise surface PMMA)</span>
+            <span><input type="checkbox" id="optLED" /> Éclairage LED (utilise surface ajourée)</span>
           </label>
         </div>
       </div>
@@ -316,7 +315,7 @@ const elQ=$('quantite');
 const elL=$('largeur'), elH=$('hauteur'), elSurf=$('surfaceCalc');
 
 const elOptAjour=$('optAjour'), elBlockAjour=$('blockAjour');
-const elPMMA=$('pmmaSel'), elPMMASurface=$('pmmaSurface'), elBtnCopySurface=$('btnCopySurface');
+const elPMMA=$('pmmaSel'), elPMMASurface=$('pmmaSurface');
 
 const elLED=$('optLED');
 
@@ -524,15 +523,13 @@ function toggleBlocks(){
   [
     quantite, largeur, hauteur,
     ...document.querySelectorAll('input[name="matiere"]'),
-    optAjour, pmmaSel, pmmaSurface, btnCopySurface,
+    optAjour, pmmaSel, pmmaSurface,
     optLED, ...fixRadios, goussetPrixU,
     ...document.querySelectorAll('input[name="boiteMat"]')
   ].forEach(el=>{
-    el.addEventListener?.(evt, e=>{
-      if(e.target===btnCopySurface){
-        e.preventDefault();
-        pmmaSurface.value = areaM2(largeur.value, hauteur.value).toFixed(3);
-      }
+    // el peut être undefined (ex: si un id n'existe pas) → on protège l'accès
+    if(!el || !el.addEventListener) return;
+    el.addEventListener(evt, e=>{
       toggleBlocks();
       compute();
     });
