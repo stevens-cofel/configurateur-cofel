@@ -188,7 +188,7 @@ let RAW_HEADERS_T = []; let RAW_HEADERS_O = [];
 let HEADS_T = []; let HEADS_O = []; let TARIFFS = []; let OPTIONS = [];
 
 // === Défaults basés sur normalizeKey() des CSV actuels
-const MAP_T_DEFAULT = { type:'typedeface', h:'hauteurmm', l:'largeurmm', price:'prixbaseht' };
+const MAP_T_DEFAULT = { type:'forme', h:'hauteurmm', l:'largeurmm', price:'prixbaseeur' };
 const MAP_O_DEFAULT = { type:'typedoption', hmin:'hauteurminmm', hmax:'hauteurmaxmm', price:'prixunitaireht', actif:'actif' };
 
 let MAP_T = JSON.parse(localStorage.getItem('MAP_T') || 'null') || { ...MAP_T_DEFAULT };
@@ -215,18 +215,73 @@ function normalizeKey(k){
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .replace(/[^a-z0-9]+/g,'').trim();
 }
+function csvSplit(line, sep){
+  // Split CSV respecting quotes and escaped quotes
+  const out = [];
+  let cur = '';
+  let inQ = false;
+  for(let i=0;i<line.length;i++){
+    const ch = line[i];
+    if(ch === '"'){
+      if(inQ && line[i+1] === '"'){ cur += '"'; i++; continue; }
+      inQ = !inQ; continue;
+    }
+    if(ch === sep && !inQ){ out.push(cur); cur=''; continue; }
+    cur += ch;
+  }
+  out.push(cur);
+  return out.map(c=>c.trim());
+}
 function parseCSVAuto(text){
+  // Retire BOM, trim
   text = text.replace(/^\uFEFF/, '').trim();
-  const first = text.split(/\r?\n/,1)[0] || '';
-  const sep = (first.match(/;/g)||[]).length > (first.match(/,/g)||[]).length ? ';' : ',';
-  const lines = text.split(/\r?\n/).filter(l=>l.trim().length>0);
-  const rawHeads = lines[0].split(sep).map(h=>h.replace(/^"+|"+$/g,'').trim());
-  const heads = rawHeads.map(h=>normalizeKey(h));
-  const rows = lines.slice(1).map(line=>{
-    const cells = line.split(sep).map(c=>c.replace(/^"+|"+$/g,'').trim());
-    const o={}; heads.forEach((h,i)=>o[h]=cells[i]??''); return o;
-  });
-  return { rows, rawHeads, heads };
+
+  // Découpe en lignes robustes (CR, LF, CRLF)
+  let lines = text.split(/[\r\n]+/).filter(l=>l.trim().length>0);
+
+  let rawHeads = [];
+  let heads = [];
+  let rows = [];
+
+  // Cas 1: CSV standard
+  if(lines.length > 1){
+    const first = lines[0];
+    const sep = (first.match(/;/g)||[]).length > (first.match(/,/g)||[]).length ? ';' : ',';
+    rawHeads = csvSplit(first, sep);
+    heads = rawHeads.map(h=>normalizeKey(h.replace(/^"+|"+$/g,'')));
+    rows = lines.slice(1).map(line=>{
+      const cells = csvSplit(line, sep).map(c=>c.replace(/^"+|"+$/g,''));
+      const o={}; heads.forEach((h,i)=>o[h]=cells[i]??''); return o;
+    });
+    return { rows, rawHeads, heads };
+  }
+
+  // Cas 2: tout sur une seule ligne (fallback)
+  if(lines.length === 1){
+    const chunk = lines[0];
+    // Essaie d'inférer le séparateur
+    const sep = (chunk.match(/;/g)||[]).length > (chunk.match(/,/g)||[]).length ? ';' : ',';
+    // Si aucun séparateur détecté, on tente l'extraction de champs quotés
+    let fields = [];
+    if(chunk.includes(sep)){
+      fields = csvSplit(chunk, sep);
+    }else{
+      const re = /"([^\"]*)"/g; let m; while((m = re.exec(chunk))){ fields.push(m[1]); }
+    }
+    if(fields.length < 4){ return { rows:[], rawHeads:[], heads:[] }; }
+    // Suppose 5 en-têtes pour tarifs (ajuste si besoin)
+    rawHeads = fields.slice(0,5);
+    heads    = rawHeads.map(h=>normalizeKey(h));
+    const nCols = rawHeads.length;
+    const data = fields.slice(nCols);
+    for(let i=0;i<data.length;i+=nCols){
+      const rec = data.slice(i,i+nCols);
+      if(rec.length===nCols){ const o={}; heads.forEach((h,idx)=>o[h]=rec[idx]??''); rows.push(o); }
+    }
+    return { rows, rawHeads, heads };
+  }
+
+  return { rows:[], rawHeads:[], heads:[] };
 }
 function uniqueSortedNumeric(arr){
   return [...new Set(arr)].map(num).filter(n=>!isNaN(n)).sort((a,b)=>a-b).map(String);
@@ -237,6 +292,7 @@ function fillSelect(sel, heads, rawHeads){
 }
 function isActive(v){
   const s = String(v||'').trim().toLowerCase();
+  if(s === '') return true; // vide = actif par défaut
   return ['true','1','oui','vrai','yes','y','x'].includes(s);
 }
 
@@ -256,11 +312,28 @@ function suggestMapTarifs(){
 function suggestMapOptions(){
   if(keysExistIn(HEADS_O, MAP_O_DEFAULT)) { MAP_O = { ...MAP_O_DEFAULT }; return; }
   const f = (re)=> HEADS_O.find(k=>re.test(k));
-  MAP_O.type  = MAP_O.type  || f(/type/);
-  MAP_O.hmin  = MAP_O.hmin  || f(/min/);
-  MAP_O.hmax  = MAP_O.hmax  || f(/max/);
-  MAP_O.price = MAP_O.price || f(/prix|ht|unitaire|price/);
-  MAP_O.actif = MAP_O.actif || f(/actif|active|isactive|true|oui|1|vrai|yes/);
+  MAP_O.type  = MAP_O.type  || f(/type|famille|option|libelle|designation/);
+  MAP_O.hmin  = MAP_O.hmin  || f(/h(min|auteur.*min)|min.*h(auteur)?/);
+  MAP_O.hmax  = MAP_O.hmax  || f(/h(max|auteur.*max)|max.*h(auteur)?/);
+  MAP_O.price = MAP_O.price || f(/prix|ht|unitaire|price|pu/);
+  MAP_O.actif = MAP_O.actif || f(/actif|active|isactive|true|oui|1|vrai|yes|enabled/);
+
+  // Heuristique de secours : si pas de colonne type trouvée, choisir la première colonne "catégorielle"
+  if(!MAP_O.type){
+    const candidates = HEADS_O.filter(h=>{
+      // Exclure colonnes numériques évidentes
+      if(/(prix|ht|eur|price|pu|montant|hmin|hmax|min|max|hauteur|largeur|mm|cm|m)/.test(h)) return false;
+      // Inspecter quelques premières lignes pour voir si non-numérique
+      const values = RAW_OPTIONS.slice(0,20).map(r=>String(r[h]||'').trim());
+      const nonEmpty = values.filter(v=>v!=='');
+      if(!nonEmpty.length) return false;
+      const numish = nonEmpty.every(v=>!isNaN(parseFloat(v.replace(',', '.'))));
+      if(numish) return false;
+      const uniq = new Set(nonEmpty);
+      return uniq.size <= 20; // caté raisonnable
+    });
+    if(candidates.length){ MAP_O.type = candidates[0]; }
+  }
 }
 
 function applyTarifs(){
@@ -283,14 +356,19 @@ function applyTarifs(){
   return true;
 }
 function applyOptions(){
-  if(!MAP_O.type || !MAP_O.hmin || !MAP_O.hmax || !MAP_O.price || !MAP_O.actif) return false;
-  OPTIONS = RAW_OPTIONS.map(r=>({
-    typeOption: String(r[MAP_O.type] || '').trim(),
-    hmin: num(r[MAP_O.hmin]),
-    hmax: num(r[MAP_O.hmax]),
-    priceUnit: num(r[MAP_O.price]) || 0,
-    actif: isActive(r[MAP_O.actif])
-  }));
+  // Type et prix indispensables; hmin/hmax/actif optionnels
+  if(!MAP_O.type || !MAP_O.price) return false;
+  OPTIONS = RAW_OPTIONS.map(r=>{
+    const hmin = MAP_O.hmin ? num(r[MAP_O.hmin]) : NaN;
+    const hmax = MAP_O.hmax ? num(r[MAP_O.hmax]) : NaN;
+    const actif = MAP_O.actif ? isActive(r[MAP_O.actif]) : true;
+    return {
+      typeOption: String(r[MAP_O.type] || '').trim(),
+      hmin, hmax,
+      priceUnit: num(r[MAP_O.price]),
+      actif
+    };
+  }).filter(o=>o.typeOption && !isNaN(o.priceUnit));
   localStorage.setItem('MAP_O', JSON.stringify(MAP_O));
   try{
     const sigO = URL_OPTIONS + '|' + HEADS_O.join('|');
@@ -315,8 +393,10 @@ function renderOptionsCheckboxes(){
   const h = num(elH.value);
   const isValid = (fam)=>{
     if(!h) return false;
-    const rows = OPTIONS.filter(o => o.typeOption===fam && !isNaN(o.hmin) && !isNaN(o.hmax) && h>=o.hmin && h<=o.hmax && o.actif);
-    return rows.length>0;
+    const rows = OPTIONS.filter(o => o.typeOption===fam && o.actif);
+    if(!rows.length) return false;
+    // Disponible si aucune contrainte, ou si contraintes respectées
+    return rows.some(o => (isNaN(o.hmin) || h>=o.hmin) && (isNaN(o.hmax) || h<=o.hmax));
   };
   elOptsBox.innerHTML = families.map(f=>{
     const ok = isValid(f);
@@ -344,7 +424,7 @@ function priceOptionsSum(){
   const checked = [...elOptsBox.querySelectorAll('input[name="opt"]:checked')].map(c=>c.value);
   if(!checked.length) return 0; const h = num(elH.value);
   return checked.reduce((sum, fam)=>{
-    const rows = OPTIONS.filter(o => o.typeOption===fam && h>=o.hmin && h<=o.hmax && o.actif);
+    const rows = OPTIONS.filter(o => o.typeOption===fam && o.actif && (isNaN(o.hmin) || h>=o.hmin) && (isNaN(o.hmax) || h<=o.hmax));
     if(!rows.length) return sum; const unit = Math.max(...rows.map(o=>o.priceUnit).filter(v=>!isNaN(v)));
     return sum + (isFinite(unit)?unit:0);
   }, 0); // interne
@@ -426,6 +506,23 @@ async function loadAll(){
   }catch(e){ elMsg.textContent = "Erreur de chargement : " + e.message; console.error(e); }
 }
 loadAll();
+
+/* ====== TESTS LÉGERS (console) ======
+   Objectif: s'assurer que parseCSVAuto gère LF, CRLF et une seule ligne.
+*/
+(function runParseTests(){
+  try{
+    const lf = 'A,B,C\n1,2,3\n4,5,6';
+    const crlf = 'A;B;C\r\n1;2;3\r\n4;5;6';
+    const one = '"A","B","C","1","2","3","4","5","6"';
+    const r1 = parseCSVAuto(lf);
+    const r2 = parseCSVAuto(crlf);
+    const r3 = parseCSVAuto(one);
+    console.log('[TEST] LF heads/rows:', r1.heads, r1.rows.length);
+    console.log('[TEST] CRLF heads/rows:', r2.heads, r2.rows.length);
+    console.log('[TEST] ONE-LINE heads/rows:', r3.heads, r3.rows.length);
+  }catch(e){ console.warn('[TEST] parseCSVAuto error:', e); }
+})();
 </script>
 
 <script src="../js/devis-core.js"></script>
