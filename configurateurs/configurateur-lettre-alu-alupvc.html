@@ -13,7 +13,7 @@
     --cofel:#5a2d82; --cofel-2:#7838a7;
     --violet:#6b39a0; --violet-2:#8752c1;
     --violet-soft:#c9b7ff;
-    --violet-ui:#bda3ff;           /* violet clair des cartes */
+    --violet-ui:#bda3ff;
     --violet-ui-pressed:#a88fff;
     --txt:#f5f7ff; --txt-dim:#e6e6ff; --accent:#c9b7ff;
     --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
@@ -78,7 +78,7 @@
     box-shadow:0 0 0 3px rgba(201,183,255,.25), var(--shadow);
   }
 
-  /* ====== SELECT CUSTOM (même que le configurateur précédent) ====== */
+  /* ====== SELECT CUSTOM ====== */
   .native-select{
     position:absolute !important;
     opacity:0 !important;
@@ -110,7 +110,6 @@
   }
   .cselect[aria-expanded="true"] .cselect-caret{ transform: rotate(180deg); }
 
-  /* Menu porté dans <body> */
   .cselect-menu{
     position:fixed; left:0; top:0; width:240px;
     z-index:99999;
@@ -225,8 +224,9 @@
     <div class="card grid">
       <div>
         <label for="hauteur">Hauteur (mm)</label>
-        <input type="number" id="hauteur" placeholder="Ex : 275" min="1" />
-        <div id="helpRanges" class="muted"></div>
+        <!-- ⛔️ Bloqué à 1500 mm -->
+        <input type="number" id="hauteur" placeholder="Ex : 275" min="1" max="1500" />
+        <div id="helpRanges" class="muted">Hauteur max 1500 mm</div>
       </div>
 
       <div>
@@ -278,6 +278,7 @@
 const TVA = 0.20;
 const UPLIFT_PUBLIC = 2.0;
 const CSV_URL = "https://raw.githubusercontent.com/stevens-cofel/configurateur-cofel/refs/heads/main/lettres/Lettre%20alu%2020_10%20%C3%A8me%20ou%20Type%20Dibond%203%20mm.csv";
+const H_MAX = 1500; // ⛳️ limite haute
 
 /* ===== STATE / DOM ===== */
 let HEADS=[], ROWS=[], MAP=null;
@@ -308,7 +309,7 @@ function numFR(v){
 }
 function euro(n){ return (isFinite(n)?n:0).toFixed(2).replace('.', ','); }
 
-/* ===== SELECT CUSTOM (construction & portail) ===== */
+/* ===== SELECT CUSTOM ===== */
 const customSelects = new Map();
 
 function buildCustomFromNative(native){
@@ -318,27 +319,19 @@ function buildCustomFromNative(native){
   const labelSpan = wrap.querySelector('.cselect-label');
   const menu = wrap.querySelector('.cselect-menu');
 
-  // (Re)construire le menu
   menu.innerHTML = '';
   Array.from(native.options).forEach(opt=>{
     const div=document.createElement('div');
     div.className='cselect-option'; div.setAttribute('role','option'); div.tabIndex=-1;
     div.dataset.value=opt.value; div.textContent=opt.textContent;
     if(opt.selected) div.setAttribute('aria-selected','true');
-    div.addEventListener('click', ()=>{
-      setNativeValue(native, opt.value);
-      closeMenu(native.id);
-    });
-    div.addEventListener('keydown', (e)=>{
-      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setNativeValue(native, opt.value); closeMenu(native.id); }
-    });
+    div.addEventListener('click', ()=>{ setNativeValue(native, opt.value); closeMenu(native.id); });
+    div.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setNativeValue(native, opt.value); closeMenu(native.id); } });
     menu.appendChild(div);
   });
 
-  // Label initial
   labelSpan.textContent = (native.selectedOptions[0] || native.options[0])?.textContent || '';
 
-  // Handlers
   toggle.onclick = ()=> {
     const expanded = wrap.getAttribute('aria-expanded')==='true';
     expanded ? closeMenu(native.id) : openMenu(native.id);
@@ -378,8 +371,6 @@ function openMenu(id){
   const api = customSelects.get(id); if(!api) return;
   const {wrap, toggle, menu} = api;
   wrap.setAttribute('aria-expanded','true');
-
-  // Positionner le menu (portail dans body)
   const r = toggle.getBoundingClientRect();
   menu.style.left  = Math.round(r.left) + 'px';
   menu.style.top   = Math.round(r.bottom + 6) + 'px';
@@ -387,7 +378,6 @@ function openMenu(id){
   if(menu.parentElement !== document.body){ document.body.appendChild(menu); }
   menu.style.display = 'block';
 
-  // Fermer sur scroll / resize / clic extérieur
   const onViewport = ()=> closeMenu(id);
   const onDocClick = (e)=>{ if(!wrap.contains(e.target) && !menu.contains(e.target)) closeMenu(id); };
   window.addEventListener('scroll', onViewport, {passive:true});
@@ -462,16 +452,15 @@ function pickRowForHeight(H){
   }
   return chosen.row;
 }
-function showRanges(){
-  const k=MAP?.hKey; if(!k){ elHelp.textContent=''; return; }
-  const vals=[...new Set(ROWS.map(r=>numFR(r[k])).filter(v=>isFinite(v)))].sort((a,b)=>a-b);
-  elHelp.textContent = vals.length ? `Hauteurs disponibles : ${vals.slice(0,10).join(' • ')}${vals.length>10?' …':''}` : '';
-}
 
 /* ===== Calcul (affichage PUBLIC) ===== */
 function compute(){
-  const H = Number(elH.value||0);
+  // 🔒 clamp hauteur à [1 ; H_MAX]
+  const Hraw = Number(elH.value||0);
+  let H = Math.min(H_MAX, Math.max(1, Hraw||0));
+  if (Hraw !== H) { elH.value = H; } // reflet visuel immédiat
   const Q = Math.max(1, Number(elQ.value||1));
+
   if(!(H>0) || !ROWS.length || !MAP?.hKey){
     elPrixHT.textContent='0,00'; elPrixTTC.textContent='0,00'; return;
   }
@@ -510,7 +499,11 @@ async function loadCSV(){
     const txt = await r.text();
     const {rawHeads, rows} = parseCSVAuto(txt);
     HEADS=rawHeads; ROWS=rows; MAP=buildMapping(HEADS);
-    showRanges(); compute();
+
+    // ✏️ Note fixe (plus de liste de hauteurs)
+    if (elHelp) elHelp.textContent = "Hauteur max 1500 mm";
+
+    compute();
   }catch(e){
     console.error(e);
     alert("Erreur lors du chargement des données. Réessayez plus tard.");
@@ -525,13 +518,14 @@ async function loadCSV(){
 });
 $("btnReset").addEventListener("click", ()=>{
   elH.value=''; elQ.value=1; elFix.checked=false; elFBrut.checked=true; elFLaque.checked=false;
+  if (elHelp) elHelp.textContent = "Hauteur max 1500 mm";
   compute();
 });
 loadCSV();
 
 /* Build custom select for catégorie */
 buildCustomFromNative($("categorie"));
-$("categorie").addEventListener("change", ()=>{ /* rien de spécial ici mais on garde la synchro */ });
+$("categorie").addEventListener("change", ()=>{ /* synchro visuelle ok */ });
 
 </script>
 
@@ -542,7 +536,12 @@ $("btnAddDevis").addEventListener("click", ()=>{
   try{
     if(!window.Devis) throw new Error("Moteur de devis introuvable.");
     const qte = Math.max(1, Number($("quantite").value || 1));
-    const hauteur = Number($("hauteur").value || 0);
+
+    // sécurise la hauteur à H_MAX aussi lors de l'ajout
+    let hauteur = Number($("hauteur").value || 0);
+    if (!isFinite(hauteur) || hauteur < 1) hauteur = 1;
+    if (hauteur > 1500) { hauteur = 1500; $("hauteur").value = 1500; }
+
     const fin = $("finitionLaque").checked ? 'laqué' : 'brut';
     const fix = $("optFixation").checked ? ' + fixations' : '';
     const catVal = $("categorie").value;
