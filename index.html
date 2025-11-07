@@ -569,6 +569,29 @@
           doc.text(`Page ${pageNum} / ${pageCount}`, pageWidth - margin, y, { align:"right" });
         };
 
+        // ⚠️ Cartouche “sous réserve” (à placer en bas de la DERNIÈRE page)
+        function drawTechNotice(yStart){
+          const boxW = pageWidth - margin*2;
+          const boxH = 56; // hauteur du cartouche
+          const x = margin;
+          const y = Math.min(pageHeight - margin - boxH - 18, yStart); // garanti visible
+
+          // fond + bord
+          doc.setFillColor(255, 247, 220);     // jaune très pâle
+          doc.setDrawColor(220, 160, 0);       // orange soutenu
+          doc.setLineWidth(1);
+          doc.roundedRect(x, y, boxW, boxH, 8, 8, "FD");
+
+          // texte centré, bien visible
+          doc.setTextColor(120, 70, 0);
+          doc.setFont("Helvetica","bold");
+          doc.setFontSize(12.5);
+          const msg = "DEVIS SOUS RÉSERVE D'APPROBATION DE NOTRE ÉQUIPE TECHNIQUE";
+          doc.text(msg, x + boxW/2, y + boxH/2 + 4, { align:"center", baseline:"middle" });
+
+          return y + boxH;
+        }
+
         const formatEuros = (n) => (Number(n)||0).toFixed(2).replace(".", ",") + " €";
 
         // Carte client
@@ -665,7 +688,14 @@
 
         // Totaux sous le tableau (dernière page)
         const afterTableY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 16 : (margin + 200);
-        drawTotalsBox(afterTableY);
+        const afterTotalsY = drawTotalsBox(afterTableY);
+
+        // ⚠️ Ajout du cartouche “Sous réserve” sur la DERNIÈRE page
+        const pageCountBefore = doc.internal.getNumberOfPages();
+        const lastPageIndex = pageCountBefore; // 1-based
+        doc.setPage(lastPageIndex);
+        const bannerStartY = Math.max(afterTotalsY + 20, pageHeight - margin - 56 - 26);
+        drawTechNotice(bannerStartY);
 
         // Footer sur toutes les pages
         const pageCount = doc.internal.getNumberOfPages();
