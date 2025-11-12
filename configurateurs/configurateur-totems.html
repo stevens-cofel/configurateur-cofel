@@ -145,6 +145,8 @@
         <div>
           <label for="hauteur">Hauteur (mm)</label>
           <select id="hauteur"><option value="">— sélectionnez —</option></select>
+          <!-- ✅ Note anneau de levage -->
+          <div id="levageMsg" class="muted" style="display:none;margin-top:6px">ℹ️ Pour H ≥ 3500 mm : un anneau de levage est inclus.</div>
         </div>
         <div>
           <label for="largeur">Largeur (mm)</label>
@@ -215,6 +217,7 @@ const elTTC  = document.getElementById('prixTTC');
 const elMsg  = document.getElementById('msg');
 const elOptRAL = document.getElementById('optRAL');
 const elRalNote = document.getElementById('ralNote');
+const elLevage = document.getElementById('levageMsg');
 
 /* ------- HELPERS ------- */
 function num(v){
@@ -393,6 +396,7 @@ function populateHL(){
   L.forEach(function(v){ htmlL += '<option value="'+v+'">'+v+'</option>'; });
   elL.innerHTML = htmlL;
 
+  updateLevageNote();
   updateRALState();
 }
 function renderOptionsCheckboxes(){
@@ -465,6 +469,18 @@ function renderOptionsCheckboxes(){
   updateRALState();
 }
 
+/* ------- NOTE ANNEAU DE LEVAGE ------- */
+function updateLevageNote(){
+  const h = num(elH.value);
+  if(h && h >= 3500){
+    elLevage.style.display = 'block';
+    elLevage.textContent = 'ℹ️ Pour H ≥ 3500 mm : un anneau de levage est inclus.';
+  }else{
+    elLevage.style.display = 'none';
+    elLevage.textContent = '';
+  }
+}
+
 /* ------- LAQUAGE RAL (PUBLIC) ------- */
 function area2FacesM2(){
   const h = num(elH.value), l = num(elL.value);
@@ -480,8 +496,8 @@ function updateRALState(){
     elRalNote.textContent = '';
     return;
   }
-  // (masqué à l’utilisateur) — on ne montre pas le supplément unitaire
-elRalNote.textContent = '';
+  // (masqué à l’utilisateur)
+  elRalNote.textContent = '';
 }
 
 /* ------- CALCUL ------- */
@@ -584,7 +600,7 @@ async function loadAll(){
     };
 
     elType.addEventListener('change', function(){ populateHL(); renderOptionsCheckboxes(); compute(); });
-    elH.addEventListener('change',   function(){ renderOptionsCheckboxes(); updateRALState(); compute(); });
+    elH.addEventListener('change',   function(){ renderOptionsCheckboxes(); updateRALState(); updateLevageNote(); compute(); });
     elL.addEventListener('change',   function(){ updateRALState(); compute(); });
     elQte.addEventListener('input', compute);
     elOptRAL.addEventListener('change', compute);
@@ -657,4 +673,3 @@ loadAll();
 </script>
 </body>
 </html>
-
