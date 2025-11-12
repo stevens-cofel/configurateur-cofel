@@ -168,6 +168,13 @@
           <label for="quantite">Quantité</label>
           <input type="number" id="quantite" min="1" value="1" />
         </div>
+
+        <!-- ✅ Nouveau champ demandé -->
+        <div>
+          <label for="potence">Longueur de potence (mm)</label>
+          <input type="number" id="potence" min="0" step="1" placeholder="ex : 600" />
+          <div class="muted">Indiquez la longueur utile de la potence en millimètres.</div>
+        </div>
       </div>
     </section>
 
@@ -205,7 +212,7 @@
     © Cofel — ZA du Perquoi, 72560 Changé — SIRET 927 659 458 00024 — TVA FR80927659458
   </footer>
 
-  <!-- ===== LOGIQUE (inchangée) ===== -->
+  <!-- ===== LOGIQUE (inchangée sauf reset + désignation) ===== -->
   <script>
   const TVA = 0.20;
   const UPLIFT_PUBLIC = 2.0;
@@ -213,7 +220,7 @@
 
   let HEADS=[], ROWS=[], MAP=null;
   const $ = id=>document.getElementById(id);
-  const elForme=$("forme"), elQ=$("quantite"), elDim=$("dimension");
+  const elForme=$("forme"), elQ=$("quantite"), elDim=$("dimension"), elPot=$("potence");
   const elFinPre=$("finPre"), elFinLq=$("finLq"), elFinAj=$("finAj");
   const elHT=$("prixHT"), elTTC=$("prixTTC");
   const elHelpDim=$("helpDim"), elNote=$("noteForme"), elHelpFinition=$("helpFinition");
@@ -394,7 +401,7 @@
       el.addEventListener(evt, e=>{ if(e.target===elForme || e.target===elFinPre || e.target===elFinLq || e.target===elFinAj){ populateDimensions(); } compute(); });
     });
   });
-  function resetAll(){ elForme.value=""; elDim.value=""; elQ.value=1; setFinition('prelaque'); populateFormes(); populateDimensions(); compute(); }
+  function resetAll(){ elForme.value=""; elDim.value=""; elQ.value=1; if(elPot) elPot.value=""; setFinition('prelaque'); populateFormes(); populateDimensions(); compute(); }
   buildCustomFromNative(elForme); buildCustomFromNative(elDim);
   document.getElementById("btnReset")?.addEventListener("click", resetAll);
   loadCSV();
@@ -434,8 +441,10 @@
     const designationParts = [];
     const formeVal = document.getElementById("forme").value || "";
     const dimVal = document.getElementById("dimension").value || "";
+    const potVal = (document.getElementById('potence')?.value || '').trim();
     if(formeVal) designationParts.push(formeVal);
     if(dimVal) designationParts.push(dimVal);
+    if(potVal) designationParts.push(`potence ${potVal} mm`);
     const finSel = (document.getElementById('finAj').checked ? 'ajour' : (document.getElementById('finLq').checked ? 'laque' : 'prelaque'));
     if(finSel==='ajour') designationParts.push('ajourage lumineux laqué');
     else if(finSel==='laque') designationParts.push('laqué');
