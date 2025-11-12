@@ -79,7 +79,7 @@
     box-shadow:0 0 0 3px rgba(201,183,255,.25), var(--shadow);
   }
 
-  /* ====== SELECT CUSTOM (même composant que les précédents) ====== */
+  /* ====== SELECT CUSTOM ====== */
   .native-select{
     position:absolute !important;
     opacity:0 !important;
@@ -272,7 +272,17 @@ const elDibondRule=$("dibondRule");
 
 /* ======================= UTILS ======================= */
 function normKey(k){return String(k||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'').trim();}
-function numFR(v){if(v==null)return NaN;let s=String(v).trim().replace(/€/g,'').replace(/[\u00A0\u202F]/g,'');if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'');s=s.replace(',','.');const m=s.match(/-?\d+(\.\d+)?/);return m?parseFloat(m[0]):NaN;}
+function numFR(v){
+  if(v==null) return NaN;
+  // supprime € + espaces insécables + espaces fines
+  let s = String(v).trim().replace(/€/g,'').replace(/[\u00A0\u202F]/g,'').replace(/\s+/g,'');
+  // si on a des milliers '.' et décimales ',', retire les points
+  if (s.includes(',') && s.includes('.')) s = s.replace(/\./g,'');
+  // virgule -> point
+  s = s.replace(',','.');
+  const m=s.match(/-?\d+(\.\d+)?/);
+  return m ? parseFloat(m[0]) : NaN;
+}
 function euro(n){return (isFinite(n)?n:0).toFixed(2).replace('.',',');}
 
 /* ======= Custom select (build/sync/portal) ======= */
@@ -403,11 +413,11 @@ function buildVariantUI(){
   elVarHelp.textContent = values.length ? `Filtre sur « ${key} ».` : '';
   buildCustomFromNative(elVar);
 }
-/* === MODIFIÉ : au lieu d'afficher toutes les plages, on affiche juste "Hauteur maximale X mm" === */
+/* Affiche juste "Hauteur maximale X mm" en respectant le filtre d’éclairage */
 function buildRangesHelp(){
   if(!MAP?.hmaxKey){ elRanges.innerHTML=''; return; }
   const kmax = MAP.hmaxKey;
-  const rows = filterRowsByVariant(ROWS); // respecte le filtre d’éclairage
+  const rows = filterRowsByVariant(ROWS);
   const maxVals = rows.map(r => numFR(r[kmax])).filter(Number.isFinite);
   if(!maxVals.length){ elRanges.innerHTML=''; return; }
   const maxH = Math.max(...maxVals);
@@ -427,25 +437,42 @@ function filterRowsByVariant(rows){
   const v=elVar.value; if(!v) return rows;
   return rows.filter(r=>String(r[MAP.variantKey]||'').trim()===v);
 }
+
+/* >>> Correctif : clamp vers la plage la plus proche si aucune ne contient H */
 function findRowForHeight(H){
   const kmin=MAP.hminKey, kmax=MAP.hmaxKey;
   let rows=filterRowsByVariant(ROWS);
   if(!rows.length) return null;
-  rows=rows.slice().sort((a,b)=>{
-    const amin=numFR(kmin? a[kmin]:0), amax=numFR(a[kmax]);
-    const bmin=numFR(kmin? b[kmin]:0), bmax=numFR(b[kmax]);
-    if(amin!==bmin) return amin-bmin; return amax-bmax;
-  });
-  const first=rows[0], firstMax=numFR(first[kmax]);
-  if(Number.isFinite(firstMax) && H<=firstMax) return first;
+
+  rows = rows.slice().map(r=>{
+    const a = numFR(kmin ? r[kmin] : 0);
+    const b = numFR(r[kmax]);
+    return { ...r, __a:a, __b:b };
+  }).filter(r => Number.isFinite(r.__b))
+    .sort((a,b)=> a.__a!==b.__a ? a.__a - b.__a : a.__b - b.__b);
+
+  const exact = rows.find(r => Number.isFinite(r.__a) && Number.isFinite(r.__b) && H>=r.__a && H<=r.__b);
+  if (exact) return exact;
+
+  // Pas de match : choisir la plage la plus proche (distance minimale)
+  let best=null, bestDist=Infinity;
   for(const r of rows){
-    const a=numFR(kmin? r[kmin]:0), b=numFR(r[kmax]);
-    if(Number.isFinite(a)&&Number.isFinite(b)&&H>=a&&H<=b) return r;
+    const d = (H < r.__a) ? (r.__a - H) : (H - r.__b);
+    if (d < bestDist || (d === bestDist && r.__a > (best?.__a ?? -Infinity))){
+      best = r; bestDist = d;
+    }
   }
-  return rows[rows.length-1]||null;
+  return best || rows[0];
 }
+
 function compute(){
   const H=Number(elH.value||0), Q=Math.max(1,Number(elQ.value||1));
+
+  // >>> Garde-fou : si la colonne Eclairage existe mais rien n'est choisi, on bloque le calcul
+  if (MAP?.variantKey && !elVar.value){
+    elHT.textContent='0,00'; elTTC.textContent='0,00'; updateDibondRule(); return;
+  }
+
   if(!(H>0)||!ROWS.length||!MAP?.hmaxKey||!MAP?.baseKey){
     elHT.textContent='0,00'; elTTC.textContent='0,00'; updateDibondRule(); return;
   }
@@ -502,6 +529,8 @@ document.getElementById("btnAddDevis").addEventListener("click", ()=>{
     const H=Number(document.getElementById("hauteur").value||0);
     if(!(H>0)){ alert("Saisis une hauteur valide."); return; }
     const variant=document.getElementById("variant").value;
+
+    // Prix total déjà affiché (public HT)
     const total_ht=parseFloat(document.getElementById("prixHT").innerText.replace(',','.'))||0;
     if(total_ht<=0){ alert("Le prix est à 0, vérifie la famille/hauteur/éclairage."); return; }
     const pu_public_ht = qte>0 ? (total_ht/qte) : 0;
@@ -519,5 +548,3 @@ PU HT : ${pu_public_ht.toFixed(2)} €`);
 
 </body>
 </html>
-
-
