@@ -49,7 +49,6 @@
 <body>
   <main class="card">
     <div class="brand">
-      <!-- chemin relatif (pas de "/assets/...") -->
       <img src="../assets/logo cofel.jpg" alt="Cofel">
       <h1>Connexion requise</h1>
     </div>
@@ -62,8 +61,13 @@
         <button class="btn" type="submit">Se connecter</button>
         <label class="sub"><input type="checkbox" id="remember" checked> Rester connecté 24&nbsp;h</label>
       </div>
+
+      <!-- Lien "Demander un accès" -->
+      <div class="row" style="justify-content:flex-end; margin-top:8px">
+        <a class="sub" href="./request.html" style="text-decoration:underline">Demander un accès</a>
+      </div>
+
       <div id="err" class="err"></div>
-      <!-- Paragraphe d'aide réinitialisation supprimé -->
     </form>
   </main>
 
@@ -76,14 +80,12 @@
     const remember = document.getElementById("remember");
     const err = document.getElementById("err");
 
-    // base du "project site" -> "/<repo-name>/"
     function getProjectBase() {
       const parts = location.pathname.split("/").filter(Boolean);
       const project = parts.length ? parts[0] : "";
       return `/${project}/`;
     }
 
-    // retour par défaut: index du projet
     const url = new URL(location.href);
     const returnTo = url.searchParams.get("return") || (getProjectBase() + "index.html");
 
@@ -110,11 +112,9 @@
           input.select();
           return;
         }
-        // 🔒 Durée de session forcée à 24 h
         const days = 1; // 24 heures
         const token = makeToken(days);
         localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
-        // Redirection
         location.replace(returnTo);
       }catch(ex){
         err.textContent = "Erreur inattendue. Réessayez.";
