@@ -8,14 +8,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
 <style>
-  /* ===================== THEME (Cofel – verre + violets) ===================== */
+  /* ===================== THEME (Cofel – verre + violets harmonisés) ===================== */
   :root{
-    --cofel:#5a2d82; --cofel-2:#7838a7;
-    --violet:#6b39a0; --violet-2:#8752c1;
-    --violet-soft:#c9b7ff;
-    --violet-ui:#bda3ff;           /* violet clair des cartes */
-    --violet-ui-pressed:#a88fff;
-    --txt:#f5f7ff; --txt-dim:#e6e6ff; --accent:#c9b7ff;
+    --violet:#5a2d82;         /* dégradé fond */
+    --violet-2:#7838a7;       /* dégradé fond */
+    --glass: rgba(255,255,255,.08);  /* cartes & champs */
+    --glass-hr: rgba(255,255,255,.14); /* contours */
+    --txt:#f5f7ff;            /* texte principal */
+    --txt-dim:#e6e6ff;        /* texte atténué */
+    --accent:#c9b7ff;         /* labels & accents */
     --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
   }
   *{box-sizing:border-box}
@@ -26,7 +27,7 @@
     background:
       radial-gradient(800px 500px at 20% -10%, rgba(255,255,255,.10), transparent 60%),
       radial-gradient(800px 500px at 110% 10%, rgba(255,255,255,.08), transparent 60%),
-      linear-gradient(135deg, var(--cofel), var(--cofel-2));
+      linear-gradient(135deg, var(--violet), var(--violet-2));
   }
 
   /* ===================== HERO ===================== */
@@ -47,15 +48,16 @@
   .wrap{max-width:1200px;margin:26px auto;padding:0 20px 40px;}
   .panel{
     background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.06));
-    border:1px solid rgba(255,255,255,.2);
+    border:1px solid var(--glass-hr);
     border-radius:20px;padding:18px;box-shadow:var(--shadow);backdrop-filter:blur(var(--blur));
     margin-bottom:18px;
   }
   .panel h2{margin:0 0 12px;font-size:clamp(18px,2.4vw,22px);letter-spacing:.2px}
   .card{
-    background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));
-    border:1px solid rgba(255,255,255,.18);
+    background:var(--glass);
+    border:1px solid var(--glass-hr);
     border-radius:16px;padding:14px;box-shadow:var(--shadow);
+    backdrop-filter:blur(var(--blur));
   }
   .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
   .muted,.help{color:var(--txt-dim);font-size:12px;margin-top:6px;white-space:pre-wrap}
@@ -63,40 +65,34 @@
   footer{color:#f3ecff;font-size:12px;text-align:center;padding:24px 10px;opacity:.9;}
 
   /* ===================== FIELDS ===================== */
-  label{font-weight:700;font-size:13px;color:var(--accent);}
+  label{font-weight:700;font-size:13px;color:var(--accent);} 
   input[type="number"]{
     width:100%; padding:10px 12px; margin-top:6px;
     border-radius:12px; outline:none; color:var(--txt);
-    border:1px solid rgba(255,255,255,.22);
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)),
-      linear-gradient(135deg, var(--violet-soft), var(--violet-2));
+    border:1px solid var(--glass-hr);
+    background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));
     box-shadow:var(--shadow);
     transition:border-color .18s, box-shadow .18s;
+    backdrop-filter:blur(var(--blur));
   }
   input[type="number"]:focus{
     border-color:rgba(255,255,255,.34);
     box-shadow:0 0 0 3px rgba(201,183,255,.25), var(--shadow);
   }
 
-  /* ====== SELECT CUSTOM ====== */
-  .native-select{
-    position:absolute !important;
-    opacity:0 !important;
-    pointer-events:none !important;
-    width:0;height:0;margin:0;padding:0;border:0;
-  }
+  /* ====== SELECT CUSTOM (verre harmonisé) ====== */
+  .native-select{ position:absolute !important; opacity:0 !important; pointer-events:none !important; width:0;height:0;margin:0;padding:0;border:0; }
   .cselect{ position:relative; margin-top:6px; }
   .cselect-toggle{
-    width:100%;
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px;
     padding:10px 12px; color:var(--txt);
     border-radius:12px; cursor:pointer; user-select:none;
-    border:1px solid rgba(255,255,255,.22);
+    border:1px solid var(--glass-hr);
     box-shadow: var(--shadow);
-    background: var(--violet-ui);
+    background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));
+    backdrop-filter:blur(var(--blur));
   }
-  .cselect-toggle:hover{ background: var(--violet-ui-pressed); }
+  .cselect-toggle:hover{ filter:brightness(1.06); }
   .cselect-toggle:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(201,183,255,.35); }
   .cselect-label{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1}
   .cselect-caret{
@@ -113,19 +109,17 @@
 
   /* Menu porté dans <body> */
   .cselect-menu{
-    position:fixed; left:0; top:0; width:260px;
-    z-index:99999;
-    max-height:280px; overflow:auto; padding:6px;
-    border-radius:14px; border:1px solid rgba(255,255,255,.22);
+    position:fixed; left:0; top:0; width:260px; z-index:99999; max-height:280px; overflow:auto; padding:6px;
+    border-radius:14px; border:1px solid var(--glass-hr);
     box-shadow: 0 16px 40px rgba(0,0,0,.45);
-    background: var(--violet-ui);
+    background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));
+    backdrop-filter:blur(var(--blur));
     display:none;
   }
   .cselect[aria-expanded="true"] .cselect-menu{ display:block; }
   .cselect-option{
-    border-radius:10px; margin:4px 0; padding:10px 12px; cursor:pointer;
-    color:var(--txt);
-    border:1px solid rgba(255,255,255,.18);
+    border-radius:10px; margin:4px 0; padding:10px 12px; cursor:pointer; color:var(--txt);
+    border:1px solid var(--glass-hr);
     background: rgba(255,255,255,.10);
   }
   .cselect-option:hover, .cselect-option[aria-selected="true"]{
@@ -134,18 +128,16 @@
   }
 
   /* ===================== BADGES & NOTE ===================== */
-  .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--violet-ui);color:var(--txt);font-size:12px;border:1px solid rgba(255,255,255,.25);margin:6px 6px 0 0}
-  .note{
-    margin-top:10px;background:#fff7e6;border:1px solid #ffd38a;border-radius:10px;padding:10px;font-size:13px;color:#5a430e;display:none
-  }
+  .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.14);color:var(--txt);font-size:12px;border:1px solid var(--glass-hr);margin:6px 6px 0 0}
+  .note{ margin-top:10px;background:#fff7e6;border:1px solid #ffd38a;border-radius:10px;padding:10px;font-size:13px;color:#5a430e;display:none }
 
   /* ===================== RESULT + BUTTONS ===================== */
   .result{
     text-align:center;padding:16px;
-    background:var(--violet-ui);
-    border:1px solid rgba(255,255,255,.22); border-radius:16px;
+    background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));
+    border:1px solid var(--glass-hr); border-radius:16px;
     box-shadow:0 8px 22px rgba(0,0,0,.28);
-    font-size:18px;
+    font-size:18px; backdrop-filter:blur(var(--blur));
   }
   .result b{font-size:20px}
   .btn{
@@ -155,7 +147,7 @@
     transition:transform .16s, box-shadow .16s;
   }
   .btn:active{transform:translateY(1px);box-shadow:0 6px 16px rgba(0,0,0,.28);}
-  .btn-ghost{background:transparent;color:var(--txt);border:1px solid rgba(255,255,255,.24);}
+  .btn-ghost{background:transparent;color:var(--txt);border:1px solid var(--glass-hr);} 
 </style>
 </head>
 <body>
@@ -274,11 +266,8 @@ const elDibondRule=$("dibondRule");
 function normKey(k){return String(k||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'').trim();}
 function numFR(v){
   if(v==null) return NaN;
-  // supprime € + espaces insécables + espaces fines
   let s = String(v).trim().replace(/€/g,'').replace(/[\u00A0\u202F]/g,'').replace(/\s+/g,'');
-  // si on a des milliers '.' et décimales ',', retire les points
   if (s.includes(',') && s.includes('.')) s = s.replace(/\./g,'');
-  // virgule -> point
   s = s.replace(',','.');
   const m=s.match(/-?\d+(\.\d+)?/);
   return m ? parseFloat(m[0]) : NaN;
@@ -308,8 +297,7 @@ function buildCustomFromNative(native){
     const exp=wrap.getAttribute('aria-expanded')==='true';
     if((e.key==='ArrowDown'||e.key==='ArrowUp')&&!exp){e.preventDefault();openMenu(native.id);(menu.querySelector('.cselect-option')||{}).focus?.();}
     else if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle.click();}
-    else if(e.key==='Escape'&&exp){closeMenu(native.id);}
-  };
+    else if(e.key==='Escape'&&exp){closeMenu(native.id);} };
   customSelects.set(native.id,{wrap,toggle,labelSpan:label,menu,native});
 }
 function setNativeValue(native,val){
@@ -354,9 +342,8 @@ function parseCSVLine(line,sep=','){
     const ch=line[i], nx=line[i+1];
     if(ch==='"'){
       if(inQ && nx==='"'){ cur+='"'; i++; } else inQ=!inQ;
-    }else if(ch===sep && !inQ){
-      out.push(cur); cur='';
-    }else cur+=ch;
+    }else if(ch===sep && !inQ){ out.push(cur); cur=''; }
+    else cur+=ch;
   }
   out.push(cur); return out;
 }
@@ -367,7 +354,7 @@ function normalizeWeirdCSV(text){
     t=t.replace(/""/g,'"'); const blocks=[],re=/"([^"]*)"/g; let m; while((m=re.exec(t))!==null) blocks.push(m[1]);
     if(!blocks.length) return text;
     const cols=parseCSVLine(blocks[0],',').length, lines=[];
-    for(let i=0;i<blocks.length;i+=cols) lines.push(blocks.slice(i,i+cols).map(s=>`"${s}"`).join(','));
+    for(let i=0;i<blocks.length;i+=cols) lines.push(blocks.slice(i,i+cols).map(s=>'"'+s+'"').join(','));
     return lines.join('\n');
   }
   return t.split('\n').map(l=>{const s=l.trim();return (s.startsWith('"')&&s.endsWith('"'))?s.slice(1,-1):s;}).join('\n');
@@ -438,7 +425,6 @@ function filterRowsByVariant(rows){
   return rows.filter(r=>String(r[MAP.variantKey]||'').trim()===v);
 }
 
-/* >>> Correctif : clamp vers la plage la plus proche si aucune ne contient H */
 function findRowForHeight(H){
   const kmin=MAP.hminKey, kmax=MAP.hmaxKey;
   let rows=filterRowsByVariant(ROWS);
@@ -454,7 +440,6 @@ function findRowForHeight(H){
   const exact = rows.find(r => Number.isFinite(r.__a) && Number.isFinite(r.__b) && H>=r.__a && H<=r.__b);
   if (exact) return exact;
 
-  // Pas de match : choisir la plage la plus proche (distance minimale)
   let best=null, bestDist=Infinity;
   for(const r of rows){
     const d = (H < r.__a) ? (r.__a - H) : (H - r.__b);
@@ -468,7 +453,6 @@ function findRowForHeight(H){
 function compute(){
   const H=Number(elH.value||0), Q=Math.max(1,Number(elQ.value||1));
 
-  // >>> Garde-fou : si la colonne Eclairage existe mais rien n'est choisi, on bloque le calcul
   if (MAP?.variantKey && !elVar.value){
     elHT.textContent='0,00'; elTTC.textContent='0,00'; updateDibondRule(); return;
   }
@@ -530,7 +514,6 @@ document.getElementById("btnAddDevis").addEventListener("click", ()=>{
     if(!(H>0)){ alert("Saisis une hauteur valide."); return; }
     const variant=document.getElementById("variant").value;
 
-    // Prix total déjà affiché (public HT)
     const total_ht=parseFloat(document.getElementById("prixHT").innerText.replace(',','.'))||0;
     if(total_ht<=0){ alert("Le prix est à 0, vérifie la famille/hauteur/éclairage."); return; }
     const pu_public_ht = qte>0 ? (total_ht/qte) : 0;
@@ -538,10 +521,7 @@ document.getElementById("btnAddDevis").addEventListener("click", ()=>{
     const designation = `${familleName} — H ${H} mm` + (variant?` — Éclairage: ${variant}`:'');
     Devis.addLine({ type:'Lettres Boîtiers', designation, quantite:qte, pu_public_ht:Number(pu_public_ht.toFixed(2)) });
 
-    alert(`✅ Ligne ajoutée au devis !
-${designation}
-Qté : ${qte}
-PU HT : ${pu_public_ht.toFixed(2)} €`);
+    alert(`✅ Ligne ajoutée au devis !\n${designation}\nQté : ${qte}\nPU HT : ${pu_public_ht.toFixed(2)} €`);
   }catch(err){ console.error(err); alert('Erreur lors de l’ajout au devis : '+err.message); }
 });
 </script>
