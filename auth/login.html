@@ -60,13 +60,10 @@
       <input id="pw" name="pw" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
       <div class="row">
         <button class="btn" type="submit">Se connecter</button>
-        <label class="sub"><input type="checkbox" id="remember" checked> Rester connecté 7&nbsp;jours</label>
+        <label class="sub"><input type="checkbox" id="remember" checked> Rester connecté 24&nbsp;h</label>
       </div>
       <div id="err" class="err"></div>
-      <p class="sub">
-        Besoin de réinitialiser le mot de passe ? Générez une nouvelle empreinte dans
-        <a href="./hash.html" style="text-decoration:underline;">/auth/hash.html</a> puis mettez à jour <code>/auth/config.js</code>.
-      </p>
+      <!-- Paragraphe d'aide réinitialisation supprimé -->
     </form>
   </main>
 
@@ -113,7 +110,8 @@
           input.select();
           return;
         }
-        const days = remember.checked ? AUTH_SETTINGS.tokenDays : 1;
+        // 🔒 Durée de session forcée à 24 h
+        const days = 1; // 24 heures
         const token = makeToken(days);
         localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
         // Redirection
