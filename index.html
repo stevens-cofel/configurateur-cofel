@@ -560,8 +560,13 @@
         const margin = 40;
 
         // Logo (pleine résolution, sans réduction préalable)
-        let logoData = null;
-        try { logoData = await loadImageDataURL("./assets/logo cofel.jpg"); } catch(e){ /* pas de logo */ }
+       let logoData = null;
+try {
+  logoData = await loadImageDataURL("./assets/logo cofel.jpg");
+  window.__cofelLogoData = logoData;
+} catch(e){
+  window.__cofelLogoData = null;
+}
 
         // Header
        // HEADER PREMIUM – moderne + sans doublon + identifie le chantier
