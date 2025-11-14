@@ -66,17 +66,23 @@
     }
 
     .btn-row{
-      padding:4px 10px;
+      padding:4px 8px;
       font-size:11px;
       box-shadow:none;
       border-radius:999px;
       white-space:nowrap;
       border:1px solid rgba(0,0,0,.2);
+      cursor:pointer;
     }
     .btn-row-secondary{
       background:transparent;
       color:var(--txt);
       border:1px solid rgba(255,255,255,.4);
+    }
+    .btn-row-reset{
+      background:transparent;
+      color:#ffe9b5;
+      border:1px solid rgba(255, 202, 116, .7);
     }
 
     .card{
@@ -157,7 +163,7 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:900px;
+      min-width:980px;
       font-size:13px;
     }
     thead{
@@ -197,7 +203,7 @@
     .col-discount{min-width:80px; text-align:right;}
     .col-status{min-width:90px;}
     .col-date{min-width:130px; white-space:nowrap;}
-    .col-actions{min-width:150px; text-align:right;}
+    .col-actions{min-width:220px; text-align:right;}
 
     .empty{
       text-align:center;
@@ -251,7 +257,7 @@
           <img src="../assets/logo cofel.jpg" alt="Cofel">
           <div>
             <h1>Administration des comptes clients</h1>
-            <p class="tagline">Visualisez les comptes, remises et statuts liés au portail configurateurs.</p>
+            <p class="tagline">Visualisez les comptes, remises, statuts et réinitialisez les mots de passe.</p>
           </div>
         </div>
       </div>
@@ -320,7 +326,7 @@
 
     function formatDiscount(rate){
       const r = Number(rate || 0);
-      const pct = Math.round(r * 1000) / 10; // 0.5 -> 50.0
+      const pct = Math.round(r * 1000) / 10;
       return pct.toLocaleString('fr-FR', {maximumFractionDigits:1}) + ' %';
     }
 
@@ -351,7 +357,6 @@
         const status = (c.status || '').toLowerCase();
         const statusClass = status === 'active' ? 'status-active' : 'status-inactive';
         const statusLabel = status === 'active' ? 'Actif' : 'Inactif';
-
         const actionLabel = status === 'active' ? '🔒 Bloquer' : '🔓 Réactiver';
 
         return `
@@ -380,9 +385,12 @@
               <div>${formatDate(c.last_login_at)}</div>
             </td>
             <td class="col-actions">
-              <button class="btn btn-row btn-row-edit" data-email="${c.email || ''}">✏ Remise</button>
-              <button class="btn btn-row btn-row-secondary btn-row-toggle" data-email="${c.email || ''}">
+              <button class="btn-row btn-row-edit" data-email="${c.email || ''}">✏ Remise</button>
+              <button class="btn-row btn-row-secondary btn-row-toggle" data-email="${c.email || ''}">
                 ${actionLabel}
+              </button>
+              <button class="btn-row btn-row-reset" data-email="${c.email || ''}">
+                🔁 Reset MDP
               </button>
             </td>
           </tr>
@@ -441,22 +449,38 @@
       return data;
     }
 
-    // Recherche temps réel
+    async function resetClientPassword(email){
+      const res = await fetch(`${WORKER_BASE}/client-reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      });
+      if (!res.ok){
+        throw new Error('HTTP ' + res.status);
+      }
+      const data = await res.json();
+      if (!data.ok){
+        throw new Error('Réponse Worker non ok');
+      }
+      return data;
+    }
+
     searchInput.addEventListener('input', () => {
       renderTable(searchInput.value);
     });
 
-    // Bouton retour
     btnBack.addEventListener('click', () => {
       const parts = location.pathname.split('/').filter(Boolean);
       const project = parts.length ? parts[0] : '';
       location.href = `/${project}/index.html`;
     });
 
-    // Gestion des clics sur le tableau (remise + blocage)
     tbody.addEventListener('click', async (e) => {
       const editBtn = e.target.closest('.btn-row-edit');
       const toggleBtn = e.target.closest('.btn-row-toggle');
+      const resetBtn = e.target.closest('.btn-row-reset');
 
       // ✏ Modifier la remise
       if (editBtn) {
@@ -466,13 +490,13 @@
         const client = allClients.find(c => c.email === email);
         if (!client) return;
 
-        const currentPct = Math.round(Number(client.discount_rate || 0) * 1000) / 10; // ex: 0.5 -> 50.0
+        const currentPct = Math.round(Number(client.discount_rate || 0) * 1000) / 10;
 
         const input = prompt(
           `Nouvelle remise pour ${client.company || client.email} (en %) :`,
           currentPct.toString().replace('.', ',')
         );
-        if (input === null) return; // annulé
+        if (input === null) return;
 
         const parsed = parseFloat(String(input).replace(',', '.'));
         if (isNaN(parsed) || parsed < 0 || parsed > 90){
@@ -480,7 +504,7 @@
           return;
         }
 
-        const newRate = parsed / 100; // 50 -> 0.5
+        const newRate = parsed / 100;
 
         try{
           errBox.textContent = '';
@@ -540,6 +564,44 @@
           console.error('Erreur update statut :', err);
           errBox.style.color = '#ffe3e3';
           errBox.textContent = "Erreur lors de la mise à jour du statut.";
+        }
+
+        return;
+      }
+
+      // 🔁 Reset MDP
+      if (resetBtn) {
+        const email = resetBtn.getAttribute('data-email');
+        if (!email) return;
+
+        const client = allClients.find(c => c.email === email);
+        if (!client) return;
+
+        const ok = confirm(
+          `Réinitialiser le mot de passe pour ${client.company || client.email} ?\n\n` +
+          `Un nouveau mot de passe sera généré et remplacera l'ancien.`
+        );
+        if (!ok) return;
+
+        try {
+          errBox.textContent = '';
+          errBox.style.color = '#ffe3e3';
+
+          const { password } = await resetClientPassword(email);
+
+          errBox.style.color = '#b7ffcf';
+          errBox.textContent =
+            `Nouveau mot de passe pour ${email} : ${password} (copiez-le tout de suite, il ne sera plus affiché).`;
+
+          alert(
+            `Nouveau mot de passe pour ${email} :\n\n` +
+            `${password}\n\n` +
+            `Copiez-le maintenant, il ne sera plus visible ensuite.`
+          );
+        } catch (err) {
+          console.error('Erreur reset MDP :', err);
+          errBox.style.color = '#ffe3e3';
+          errBox.textContent = "Erreur lors de la réinitialisation du mot de passe.";
         }
       }
     });
