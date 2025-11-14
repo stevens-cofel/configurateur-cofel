@@ -812,7 +812,14 @@ doc.autoTable({
   ttc: formatEuros(t.total_ttc)
 };
 
+const totalsFormatted = {
+  ht: formatEuros(t.total_ht),
+  tva: formatEuros(t.tva),
+  ttc: formatEuros(t.total_ttc)
+};
+
 const afterTotalsY = drawTotalsBox(doc, pageWidth, margin, afterTableY, totalsFormatted);
+
 
 
         // ⚠️ Ajout du cartouche “Sous réserve” sur la DERNIÈRE page
