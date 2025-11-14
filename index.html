@@ -355,28 +355,43 @@
       if(noteInfo){ noteInfo.classList.toggle('hidden', ok); }
     }
 
-    // Prefill client (infos texte)
+    // ✅ Prefill depuis le profil client + sauvegarde devis
     (function hydrateClient(){
+      // 1) Profil client venant de client-login.html
+      try{
+        const rawProfile = localStorage.getItem('cofel_client_profile');
+        if (rawProfile) {
+          const profile = JSON.parse(rawProfile);
+
+          // Entreprise
+          if (profile.company && !elSociete.value) {
+            elSociete.value = profile.company;
+          }
+          // Nom & prénom
+          if (profile.contactName && !elContact.value) {
+            elContact.value = profile.contactName;
+          }
+
+          // Remise : discountRate est un taux (0.5 = 50 %)
+          if (typeof profile.discountRate === 'number' && !isNaN(profile.discountRate)) {
+            const pct = Math.max(0, Math.min(90, Math.round(profile.discountRate * 100)));
+            if (elRemise) {
+              elRemise.value = pct;
+            }
+            Devis.setRemise(pct);
+          }
+        }
+      } catch(e){
+        console.error('Erreur lecture profil client :', e);
+      }
+
+      // 2) Éventuelle sauvegarde d'un devis précédent
       const c = getClient();
       if(c.societe)  elSociete.value  = c.societe;
       if(c.contact)  elContact.value  = c.contact;
       if(c.chantier) elChantier.value = c.chantier;
-      validateExportEnabled();
-    })();
 
-    // ✅ Prefill remise depuis le profil client (localStorage.cofel_client_profile)
-    (function prefillRemiseFromClientProfile(){
-      try{
-        const raw = localStorage.getItem('cofel_client_profile');
-        if (!raw || !elRemise) return;
-        const profile = JSON.parse(raw);
-        const rate = (typeof profile.discountRate === 'number') ? profile.discountRate : 0; // ex: 0.5 pour 50%
-        const pct = Math.max(0, Math.min(90, rate * 100)); // transformé en 50
-        elRemise.value = pct;
-        Devis.setRemise(pct);
-      } catch(e){
-        console.error('Erreur lecture profil client :', e);
-      }
+      validateExportEnabled();
     })();
 
     // Save-as-you-type + revalidate
