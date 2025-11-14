@@ -65,6 +65,14 @@
       font-size:13px;
     }
 
+    .btn-row{
+      padding:4px 10px;
+      font-size:11px;
+      box-shadow:none;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
     .card{
       background: linear-gradient(180deg, var(--glass), var(--glass-soft));
       border-radius:var(--radius);
@@ -143,7 +151,7 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:820px;
+      min-width:900px;
       font-size:13px;
     }
     thead{
@@ -183,6 +191,8 @@
     .col-discount{min-width:80px; text-align:right;}
     .col-status{min-width:90px;}
     .col-date{min-width:130px; white-space:nowrap;}
+    .col-actions{min-width:100px; text-align:right;}
+
     .empty{
       text-align:center;
       padding:18px 10px;
@@ -270,10 +280,11 @@
               <th class="col-status">Statut</th>
               <th class="col-date">Créé le</th>
               <th class="col-date">Dernière connexion</th>
+              <th class="col-actions">Actions</th>
             </tr>
           </thead>
           <tbody id="tbodyClients">
-            <tr><td colspan="7" class="empty">En attente des données…</td></tr>
+            <tr><td colspan="8" class="empty">En attente des données…</td></tr>
           </tbody>
         </table>
       </div>
@@ -326,7 +337,7 @@
         : `Aucun client ne correspond au filtre`;
 
       if (!rows.length){
-        tbody.innerHTML = '<tr><td colspan="7" class="empty">Aucun client à afficher.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="empty">Aucun client à afficher.</td></tr>';
         return;
       }
 
@@ -336,7 +347,7 @@
         const statusLabel = status === 'active' ? 'Actif' : (status || 'Inconnu');
 
         return `
-          <tr>
+          <tr data-email="${c.email || ''}">
             <td class="col-email">
               <div>${c.email || '—'}</div>
             </td>
@@ -360,6 +371,9 @@
             <td class="col-date">
               <div>${formatDate(c.last_login_at)}</div>
             </td>
+            <td class="col-actions">
+              <button class="btn btn-row btn-row-edit" data-email="${c.email || ''}">✏ Modifier</button>
+            </td>
           </tr>
         `;
       }).join('');
@@ -368,6 +382,7 @@
     async function loadClients(){
       loader.style.display = 'flex';
       errBox.textContent = '';
+      errBox.style.color = '#ffe3e3';
       try{
         const res = await fetch(`${WORKER_BASE}/clients`, {
           method: 'GET',
@@ -389,8 +404,30 @@
       }catch(e){
         console.error('Erreur chargement clients :', e);
         loader.style.display = 'none';
+        errBox.style.color = '#ffe3e3';
         errBox.textContent = "Impossible de récupérer la liste des clients. Vérifiez le Worker ou réessayez plus tard.";
       }
+    }
+
+    async function updateClientDiscount(email, newRate){
+      const res = await fetch(`${WORKER_BASE}/client-update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          discountRate: newRate       // ex: 0.5 pour 50%
+        })
+      });
+      if (!res.ok){
+        throw new Error('HTTP ' + res.status);
+      }
+      const data = await res.json();
+      if (!data.ok){
+        throw new Error('Réponse Worker non ok');
+      }
+      return data.discountRate;
     }
 
     // Recherche temps réel
@@ -403,6 +440,51 @@
       const parts = location.pathname.split('/').filter(Boolean);
       const project = parts.length ? parts[0] : '';
       location.href = `/${project}/index.html`;
+    });
+
+    // Click sur "✏ Modifier"
+    tbody.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.btn-row-edit');
+      if (!btn) return;
+
+      const email = btn.getAttribute('data-email');
+      if (!email) return;
+
+      const client = allClients.find(c => c.email === email);
+      if (!client) return;
+
+      const currentPct = Math.round(Number(client.discount_rate || 0) * 1000) / 10; // ex: 0.5 -> 50.0
+
+      const input = prompt(
+        `Nouvelle remise pour ${client.company || client.email} (en %) :`,
+        currentPct.toString().replace('.', ',')
+      );
+      if (input === null) return; // annulé
+
+      const parsed = parseFloat(String(input).replace(',', '.'));
+      if (isNaN(parsed) || parsed < 0 || parsed > 90){
+        alert("Merci d'entrer une remise entre 0 et 90 %.");
+        return;
+      }
+
+      const newRate = parsed / 100; // 50 -> 0.5
+
+      try{
+        errBox.textContent = '';
+        errBox.style.color = '#ffe3e3';
+        const savedRate = await updateClientDiscount(email, newRate);
+
+        // mise à jour locale
+        client.discount_rate = savedRate;
+        renderTable(searchInput.value);
+
+        errBox.style.color = '#b7ffcf';
+        errBox.textContent = "Remise mise à jour avec succès.";
+      }catch(err){
+        console.error('Erreur update remise :', err);
+        errBox.style.color = '#ffe3e3';
+        errBox.textContent = "Erreur lors de la mise à jour de la remise.";
+      }
     });
 
     // Chargement initial
