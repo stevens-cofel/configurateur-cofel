@@ -59,6 +59,13 @@
       color:var(--txt-dim);
     }
 
+    .header-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
     .btn{
       appearance:none; border:none; cursor:pointer; font-weight:700;
       color:#0b0b0b; background:#fff; border-radius:999px; padding:8px 14px;
@@ -169,7 +176,7 @@
       width:100%;
       border-collapse:collapse;
       font-size:13px;
-      table-layout:auto; /* laisse le tableau s’adapter */
+      table-layout:auto;
     }
     thead{
       background:rgba(0,0,0,.25);
@@ -202,12 +209,7 @@
       vertical-align:middle;
     }
 
-    /* Colonnes sans min-width pour éviter le scroll horizontal forcé */
-    .col-email{}
-    .col-company{}
-    .col-contact{}
     .col-discount{text-align:right;}
-    .col-status{}
     .col-date{white-space:nowrap;}
     .col-actions{text-align:right;}
 
@@ -280,7 +282,10 @@
           </div>
         </div>
       </div>
-      <button id="btnBack" class="btn">⬅ Retour aux configurateurs</button>
+      <div class="header-actions">
+        <button id="btnExport" class="btn">⬇ Export CSV</button>
+        <button id="btnBack" class="btn">⬅ Retour aux configurateurs</button>
+      </div>
     </header>
 
     <section class="card">
@@ -333,6 +338,7 @@
     const infoCount = document.getElementById('infoCount');
     const searchInput = document.getElementById('searchInput');
     const btnBack = document.getElementById('btnBack');
+    const btnExport = document.getElementById('btnExport');
 
     let allClients = [];
 
@@ -494,6 +500,11 @@
       const parts = location.pathname.split('/').filter(Boolean);
       const project = parts.length ? parts[0] : '';
       location.href = `/${project}/index.html`;
+    });
+
+    // ⬇ Export CSV : on ouvre directement la route du Worker
+    btnExport.addEventListener('click', () => {
+      window.open(`${WORKER_BASE}/clients-export`, '_blank');
     });
 
     tbody.addEventListener('click', async (e) => {
