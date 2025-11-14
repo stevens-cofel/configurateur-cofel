@@ -71,6 +71,12 @@
       box-shadow:none;
       border-radius:999px;
       white-space:nowrap;
+      border:1px solid rgba(0,0,0,.2);
+    }
+    .btn-row-secondary{
+      background:transparent;
+      color:var(--txt);
+      border:1px solid rgba(255,255,255,.4);
     }
 
     .card{
@@ -191,7 +197,7 @@
     .col-discount{min-width:80px; text-align:right;}
     .col-status{min-width:90px;}
     .col-date{min-width:130px; white-space:nowrap;}
-    .col-actions{min-width:100px; text-align:right;}
+    .col-actions{min-width:150px; text-align:right;}
 
     .empty{
       text-align:center;
@@ -344,7 +350,9 @@
       tbody.innerHTML = rows.map(c => {
         const status = (c.status || '').toLowerCase();
         const statusClass = status === 'active' ? 'status-active' : 'status-inactive';
-        const statusLabel = status === 'active' ? 'Actif' : (status || 'Inconnu');
+        const statusLabel = status === 'active' ? 'Actif' : 'Inactif';
+
+        const actionLabel = status === 'active' ? '🔒 Bloquer' : '🔓 Réactiver';
 
         return `
           <tr data-email="${c.email || ''}">
@@ -372,7 +380,10 @@
               <div>${formatDate(c.last_login_at)}</div>
             </td>
             <td class="col-actions">
-              <button class="btn btn-row btn-row-edit" data-email="${c.email || ''}">✏ Modifier</button>
+              <button class="btn btn-row btn-row-edit" data-email="${c.email || ''}">✏ Remise</button>
+              <button class="btn btn-row btn-row-secondary btn-row-toggle" data-email="${c.email || ''}">
+                ${actionLabel}
+              </button>
             </td>
           </tr>
         `;
@@ -409,7 +420,7 @@
       }
     }
 
-    async function updateClientDiscount(email, newRate){
+    async function updateClient(email, payload){
       const res = await fetch(`${WORKER_BASE}/client-update`, {
         method: 'POST',
         headers: {
@@ -417,7 +428,7 @@
         },
         body: JSON.stringify({
           email,
-          discountRate: newRate       // ex: 0.5 pour 50%
+          ...payload
         })
       });
       if (!res.ok){
@@ -427,7 +438,7 @@
       if (!data.ok){
         throw new Error('Réponse Worker non ok');
       }
-      return data.discountRate;
+      return data;
     }
 
     // Recherche temps réel
@@ -442,48 +453,94 @@
       location.href = `/${project}/index.html`;
     });
 
-    // Click sur "✏ Modifier"
+    // Gestion des clics sur le tableau (remise + blocage)
     tbody.addEventListener('click', async (e) => {
-      const btn = e.target.closest('.btn-row-edit');
-      if (!btn) return;
+      const editBtn = e.target.closest('.btn-row-edit');
+      const toggleBtn = e.target.closest('.btn-row-toggle');
 
-      const email = btn.getAttribute('data-email');
-      if (!email) return;
+      // ✏ Modifier la remise
+      if (editBtn) {
+        const email = editBtn.getAttribute('data-email');
+        if (!email) return;
 
-      const client = allClients.find(c => c.email === email);
-      if (!client) return;
+        const client = allClients.find(c => c.email === email);
+        if (!client) return;
 
-      const currentPct = Math.round(Number(client.discount_rate || 0) * 1000) / 10; // ex: 0.5 -> 50.0
+        const currentPct = Math.round(Number(client.discount_rate || 0) * 1000) / 10; // ex: 0.5 -> 50.0
 
-      const input = prompt(
-        `Nouvelle remise pour ${client.company || client.email} (en %) :`,
-        currentPct.toString().replace('.', ',')
-      );
-      if (input === null) return; // annulé
+        const input = prompt(
+          `Nouvelle remise pour ${client.company || client.email} (en %) :`,
+          currentPct.toString().replace('.', ',')
+        );
+        if (input === null) return; // annulé
 
-      const parsed = parseFloat(String(input).replace(',', '.'));
-      if (isNaN(parsed) || parsed < 0 || parsed > 90){
-        alert("Merci d'entrer une remise entre 0 et 90 %.");
+        const parsed = parseFloat(String(input).replace(',', '.'));
+        if (isNaN(parsed) || parsed < 0 || parsed > 90){
+          alert("Merci d'entrer une remise entre 0 et 90 %.");
+          return;
+        }
+
+        const newRate = parsed / 100; // 50 -> 0.5
+
+        try{
+          errBox.textContent = '';
+          errBox.style.color = '#ffe3e3';
+          const result = await updateClient(email, { discountRate: newRate });
+
+          client.discount_rate = result.discountRate;
+          client.status = result.status || client.status;
+          renderTable(searchInput.value);
+
+          errBox.style.color = '#b7ffcf';
+          errBox.textContent = "Remise mise à jour avec succès.";
+        }catch(err){
+          console.error('Erreur update remise :', err);
+          errBox.style.color = '#ffe3e3';
+          errBox.textContent = "Erreur lors de la mise à jour de la remise.";
+        }
+
         return;
       }
 
-      const newRate = parsed / 100; // 50 -> 0.5
+      // 🔒 Bloquer / 🔓 Réactiver
+      if (toggleBtn) {
+        const email = toggleBtn.getAttribute('data-email');
+        if (!email) return;
 
-      try{
-        errBox.textContent = '';
-        errBox.style.color = '#ffe3e3';
-        const savedRate = await updateClientDiscount(email, newRate);
+        const client = allClients.find(c => c.email === email);
+        if (!client) return;
 
-        // mise à jour locale
-        client.discount_rate = savedRate;
-        renderTable(searchInput.value);
+        const currentStatus = (client.status || 'active').toLowerCase();
+        const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
 
-        errBox.style.color = '#b7ffcf';
-        errBox.textContent = "Remise mise à jour avec succès.";
-      }catch(err){
-        console.error('Erreur update remise :', err);
-        errBox.style.color = '#ffe3e3';
-        errBox.textContent = "Erreur lors de la mise à jour de la remise.";
+        const message = nextStatus === 'inactive'
+          ? `Voulez-vous vraiment bloquer l'accès pour ${client.company || client.email} ?`
+          : `Voulez-vous réactiver l'accès pour ${client.company || client.email} ?`;
+
+        if (!confirm(message)) return;
+
+        try{
+          errBox.textContent = '';
+          errBox.style.color = '#ffe3e3';
+
+          const result = await updateClient(email, { status: nextStatus });
+
+          client.status = result.status || nextStatus;
+          if (typeof result.discountRate === 'number') {
+            client.discount_rate = result.discountRate;
+          }
+
+          renderTable(searchInput.value);
+
+          errBox.style.color = '#b7ffcf';
+          errBox.textContent = nextStatus === 'inactive'
+            ? "Client bloqué avec succès."
+            : "Client réactivé avec succès.";
+        }catch(err){
+          console.error('Erreur update statut :', err);
+          errBox.style.color = '#ffe3e3';
+          errBox.textContent = "Erreur lors de la mise à jour du statut.";
+        }
       }
     });
 
