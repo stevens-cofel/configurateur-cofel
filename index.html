@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -561,12 +562,7 @@
 
         // Logo (pleine résolution, sans réduction préalable)
         let logoData = null;
-try {
-  logoData = await loadImageDataURL("./assets/logo cofel.jpg");
-  window.__cofelLogoData = logoData;
-} catch(e){
-  window.__cofelLogoData = null;
-}
+        try { logoData = await loadImageDataURL("./assets/logo cofel.jpg"); } catch(e){ /* pas de logo */ }
 
         // Header
        // HEADER PREMIUM – moderne + sans doublon + identifie le chantier
