@@ -1,0 +1,412 @@
+<!-- /auth/admin-clients.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Administration clients — Cofel</title>
+
+  <!-- 🔒 Protection par le même mot de passe que le portail interne -->
+  <script src="./lock.js" type="module"></script>
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    :root{
+      --cofel:#5a2d82; --cofel-2:#7838a7;
+      --glass: rgba(255,255,255,.12);
+      --glass-soft: rgba(255,255,255,.06);
+      --txt:#f5f7ff; --txt-dim:#dcd6ff; --accent:#c9b7ff;
+      --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box;}
+    html,body{height:100%;}
+    body{
+      margin:0; color:var(--txt);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(800px 500px at 20% -10%, rgba(255,255,255,.10), transparent 60%),
+        radial-gradient(800px 500px at 110% 10%, rgba(255,255,255,.08), transparent 60%),
+        linear-gradient(135deg, var(--cofel), var(--cofel-2));
+      padding:20px;
+    }
+
+    .shell{
+      max-width:1200px;
+      margin:0 auto;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+    }
+    .brand img{
+      height:40px; width:auto; border-radius:10px; object-fit:contain;
+    }
+    h1{
+      margin:0;
+      font-size:clamp(18px,2.4vw,22px);
+    }
+    .tagline{
+      margin:4px 0 0;
+      font-size:13px;
+      color:var(--txt-dim);
+    }
+
+    .btn{
+      appearance:none; border:none; cursor:pointer; font-weight:700;
+      color:#0b0b0b; background:#fff; border-radius:999px; padding:8px 14px;
+      box-shadow:0 10px 24px rgba(0,0,0,.25);
+      font-size:13px;
+    }
+
+    .card{
+      background: linear-gradient(180deg, var(--glass), var(--glass-soft));
+      border-radius:var(--radius);
+      border:1px solid rgba(255,255,255,.22);
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(var(--blur));
+      padding:16px 16px 10px;
+    }
+
+    .toolbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .toolbar-left{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      font-size:13px;
+      color:var(--txt-dim);
+    }
+    .filter-row{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .filter-row input{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.25);
+      background:rgba(0,0,0,.15);
+      color:var(--txt);
+      font-size:13px;
+      min-width:180px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      padding:3px 8px;
+      border-radius:999px;
+      font-size:11px;
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(0,0,0,.2);
+    }
+
+    .status-pill{
+      display:inline-flex;
+      padding:3px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:600;
+    }
+    .status-active{
+      background:rgba(46, 213, 115, .18);
+      color:#b9ffd4;
+      border:1px solid rgba(46, 213, 115, .4);
+    }
+    .status-inactive{
+      background:rgba(255, 118, 117, .18);
+      color:#ffd6d5;
+      border:1px solid rgba(255, 118, 117, .4);
+    }
+
+    .table-wrap{
+      margin-top:6px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.18);
+      overflow:auto;
+      max-height:70vh;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:820px;
+      font-size:13px;
+    }
+    thead{
+      background:rgba(0,0,0,.25);
+    }
+    th, td{
+      padding:8px 10px;
+      text-align:left;
+    }
+    th{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      color:var(--accent);
+      border-bottom:1px solid rgba(255,255,255,.22);
+      position:sticky;
+      top:0;
+      backdrop-filter: blur(10px);
+      background:rgba(10,5,30,.95);
+      z-index:1;
+      white-space:nowrap;
+    }
+    tbody tr:nth-child(even){
+      background:rgba(0,0,0,.12);
+    }
+    tbody tr:hover{
+      background:rgba(255,255,255,.05);
+    }
+    td{
+      border-bottom:1px solid rgba(255,255,255,.08);
+      vertical-align:middle;
+    }
+
+    .col-email{min-width:200px;}
+    .col-company{min-width:180px;}
+    .col-contact{min-width:150px;}
+    .col-discount{min-width:80px; text-align:right;}
+    .col-status{min-width:90px;}
+    .col-date{min-width:130px; white-space:nowrap;}
+    .empty{
+      text-align:center;
+      padding:18px 10px;
+      color:var(--txt-dim);
+      font-size:13px;
+    }
+
+    .pill-discount{
+      display:inline-flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:4px;
+      min-width:60px;
+    }
+
+    .muted{
+      color:var(--txt-dim);
+      font-size:11px;
+    }
+    .err{
+      color:#ffe3e3;
+      font-size:13px;
+      margin-top:8px;
+      min-height:18px;
+    }
+    .loader{
+      font-size:13px;
+      color:var(--txt-dim);
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .dot{
+      width:6px; height:6px; border-radius:50%; background:var(--accent);
+      animation:bounce 1s infinite alternate;
+    }
+    .dot:nth-child(2){animation-delay:.15s;}
+    .dot:nth-child(3){animation-delay:.3s;}
+    @keyframes bounce{
+      from{ transform:translateY(0); opacity:.6;}
+      to  { transform:translateY(-4px); opacity:1;}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div>
+        <div class="brand">
+          <img src="../assets/logo cofel.jpg" alt="Cofel">
+          <div>
+            <h1>Administration des comptes clients</h1>
+            <p class="tagline">Visualisez les comptes, remises et statuts liés au portail configurateurs.</p>
+          </div>
+        </div>
+      </div>
+      <button id="btnBack" class="btn">⬅ Retour aux configurateurs</button>
+    </header>
+
+    <section class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="filter-row">
+            <span>Recherche :</span>
+            <input id="searchInput" type="text" placeholder="Filtrer par email, société ou contact…">
+          </div>
+          <div>
+            <span id="infoCount" class="badge">Chargement…</span>
+          </div>
+        </div>
+        <div class="loader" id="loader">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span>Récupération des clients…</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-email">Email</th>
+              <th class="col-company">Société</th>
+              <th class="col-contact">Contact</th>
+              <th class="col-discount">Remise</th>
+              <th class="col-status">Statut</th>
+              <th class="col-date">Créé le</th>
+              <th class="col-date">Dernière connexion</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyClients">
+            <tr><td colspan="7" class="empty">En attente des données…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="err" class="err"></div>
+    </section>
+  </div>
+
+  <script>
+    const WORKER_BASE = 'https://cofel-auth.sonveven.workers.dev';
+
+    const tbody = document.getElementById('tbodyClients');
+    const loader = document.getElementById('loader');
+    const errBox = document.getElementById('err');
+    const infoCount = document.getElementById('infoCount');
+    const searchInput = document.getElementById('searchInput');
+    const btnBack = document.getElementById('btnBack');
+
+    let allClients = [];
+
+    function formatDate(iso){
+      if(!iso) return '—';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '—';
+      return d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    }
+
+    function formatDiscount(rate){
+      const r = Number(rate || 0);
+      const pct = Math.round(r * 1000) / 10; // 0.5 -> 50.0
+      return pct.toLocaleString('fr-FR', {maximumFractionDigits:1}) + ' %';
+    }
+
+    function renderTable(filterText = ''){
+      const q = (filterText || '').toLowerCase().trim();
+      let rows = allClients;
+
+      if (q){
+        rows = rows.filter(c => {
+          return (
+            (c.email || '').toLowerCase().includes(q) ||
+            (c.company || '').toLowerCase().includes(q) ||
+            (c.contact_name || '').toLowerCase().includes(q)
+          );
+        });
+      }
+
+      infoCount.textContent = rows.length
+        ? `${rows.length} client(s) affiché(s)`
+        : `Aucun client ne correspond au filtre`;
+
+      if (!rows.length){
+        tbody.innerHTML = '<tr><td colspan="7" class="empty">Aucun client à afficher.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map(c => {
+        const status = (c.status || '').toLowerCase();
+        const statusClass = status === 'active' ? 'status-active' : 'status-inactive';
+        const statusLabel = status === 'active' ? 'Actif' : (status || 'Inconnu');
+
+        return `
+          <tr>
+            <td class="col-email">
+              <div>${c.email || '—'}</div>
+            </td>
+            <td class="col-company">
+              ${c.company || '—'}
+            </td>
+            <td class="col-contact">
+              ${c.contact_name || '—'}
+            </td>
+            <td class="col-discount">
+              <span class="pill-discount">
+                <span>${formatDiscount(c.discount_rate)}</span>
+              </span>
+            </td>
+            <td class="col-status">
+              <span class="status-pill ${statusClass}">${statusLabel}</span>
+            </td>
+            <td class="col-date">
+              <div>${formatDate(c.created_at)}</div>
+            </td>
+            <td class="col-date">
+              <div>${formatDate(c.last_login_at)}</div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function loadClients(){
+      loader.style.display = 'flex';
+      errBox.textContent = '';
+      try{
+        const res = await fetch(`${WORKER_BASE}/clients`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!res.ok){
+          throw new Error('HTTP ' + res.status);
+        }
+        const data = await res.json();
+        if (!data.ok){
+          throw new Error('Réponse invalide du Worker');
+        }
+
+        allClients = data.clients || [];
+        loader.style.display = 'none';
+        renderTable('');
+      }catch(e){
+        console.error('Erreur chargement clients :', e);
+        loader.style.display = 'none';
+        errBox.textContent = "Impossible de récupérer la liste des clients. Vérifiez le Worker ou réessayez plus tard.";
+      }
+    }
+
+    // Recherche temps réel
+    searchInput.addEventListener('input', () => {
+      renderTable(searchInput.value);
+    });
+
+    // Bouton retour
+    btnBack.addEventListener('click', () => {
+      const parts = location.pathname.split('/').filter(Boolean);
+      const project = parts.length ? parts[0] : '';
+      location.href = `/${project}/index.html`;
+    });
+
+    // Chargement initial
+    loadClients();
+  </script>
+</body>
+</html>
