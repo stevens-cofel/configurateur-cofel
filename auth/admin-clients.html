@@ -502,9 +502,9 @@
       location.href = `/${project}/index.html`;
     });
 
-    // ⬇ Export CSV : on ouvre directement la route du Worker
+    // ⬇ Export Excel : on ouvre directement la route du Worker
     btnExport.addEventListener('click', () => {
-      window.open(`${WORKER_BASE}/clients-export`, '_blank');
+      window.open(`${WORKER_BASE}/clients-export-xls`, '_blank');
     });
 
     tbody.addEventListener('click', async (e) => {
