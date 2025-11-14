@@ -766,8 +766,7 @@ document.getElementById('editSave').addEventListener('click', async () => {
   const contact = document.getElementById('editContact').value.trim();
   const discount = Number(document.getElementById('editDiscount').value);
   const status = document.getElementById('editStatus').value;
-
-  try {
+try {
     const res = await fetch(`${WORKER_BASE}/client-edit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
