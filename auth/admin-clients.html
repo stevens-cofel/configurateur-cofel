@@ -94,20 +94,37 @@
     }
 
     #modalNew, #modalEdit{
-      position:fixed;inset:0;background:rgba(0,0,0,.55);
-      display:none;align-items:center;justify-content:center;
-      backdrop-filter:blur(4px);z-index:2000;
-    }
-    .modal-box{
-      background:#1c1530;border-radius:16px;
-      width:320px;padding:20px;
-      border:1px solid rgba(255,255,255,.25);
-    }
-    .modal-box input, .modal-box select{
-      width:100%;padding:8px;margin-bottom:10px;
-      border-radius:8px;border:none;
-    }
-    #modalMsg{color:#ffe3e3;font-size:13px;margin-top:8px;}
+  position:fixed;inset:0;background:rgba(0,0,0,.55);
+  display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);z-index:2000;
+}
+.modal-box{
+  background:#1c1530;border-radius:16px;
+  width:420px;max-width:90vw;
+  padding:22px;
+  border:1px solid rgba(255,255,255,.25);
+  color:var(--txt);
+}
+.modal-box h3{
+  margin:0 0 12px;
+  font-size:18px;
+}
+.modal-box label{
+  display:block;
+  margin:6px 0 2px;
+  font-size:12px;
+  color:var(--accent);
+}
+.modal-box input,
+.modal-box select{
+  width:100%;
+  padding:8px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:none;
+}
+#modalMsg{color:#ffe3e3;font-size:13px;margin-top:8px;}
+
   </style>
 </head>
 
@@ -188,26 +205,38 @@
 <!-- MODALE EDIT -->
 <div id="modalEdit">
   <div class="modal-box">
-    <h3>Modifier client</h3>
+    <h3>Modifier le client</h3>
 
-    <input id="editEmail" placeholder="Email (actuel)">
-    <input id="editNewEmail" placeholder="Nouvel email">
-    <input id="editCompany" placeholder="Société">
-    <input id="editContact" placeholder="Contact">
-    <input id="editDiscount" type="number" placeholder="Remise (%)" min="0" max="90">
+    <label for="editEmail">Email actuel (référence – non modifiable)</label>
+    <input id="editEmail" type="email" readonly>
+
+    <label for="editNewEmail">Nouvel email (optionnel)</label>
+    <input id="editNewEmail" type="email" placeholder="Laisser identique si pas de changement">
+
+    <label for="editCompany">Société</label>
+    <input id="editCompany" type="text">
+
+    <label for="editContact">Nom du contact</label>
+    <input id="editContact" type="text">
+
+    <label for="editDiscount">Remise (%)</label>
+    <input id="editDiscount" type="number" min="0" max="90">
+
+    <label for="editStatus">Statut du compte</label>
     <select id="editStatus">
       <option value="active">Actif</option>
       <option value="inactive">Inactif</option>
     </select>
 
-    <div style="display:flex;justify-content:space-between;">
-      <button id="editSave" class="btn-row">Enregistrer</button>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
       <button id="editCancel" class="btn-row btn-row-secondary">Annuler</button>
+      <button id="editSave" class="btn-row">Enregistrer</button>
     </div>
 
     <div id="editMsg" style="color:#ffe3e3;font-size:13px;margin-top:8px;"></div>
   </div>
 </div>
+
 
 
 <script>
