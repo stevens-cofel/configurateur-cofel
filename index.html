@@ -806,7 +806,14 @@ doc.autoTable({
 
         // Totaux sous le tableau (dernière page)
         const afterTableY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 16 : (margin + 200);
-        const afterTotalsY = drawTotalsBox(afterTableY);
+        const totalsFormatted = {
+  ht: formatEuros(t.total_ht),
+  tva: formatEuros(t.tva),
+  ttc: formatEuros(t.total_ttc)
+};
+
+const afterTotalsY = drawTotalsBox(doc, pageWidth, margin, afterTableY, totalsFormatted);
+
 
         // ⚠️ Ajout du cartouche “Sous réserve” sur la DERNIÈRE page
         const pageCountBefore = doc.internal.getNumberOfPages();
@@ -817,10 +824,11 @@ doc.autoTable({
 
         // Footer sur toutes les pages
         const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++){
-          doc.setPage(i);
-          drawFooter(i, pageCount);
-        }
+for (let i = 1; i <= pageCount; i++){
+  doc.setPage(i);
+  drawFooter(doc, pageWidth, pageHeight, margin, i, pageCount);
+}
+
 
         // 👉 Envoi e-mail (silencieux)
         await sendEmail({ client, devis: d });
