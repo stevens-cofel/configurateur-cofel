@@ -263,6 +263,13 @@ function updateRetroUI(){
 }
 
 function compute(){
+  // === Remise automatique client ===
+  let remiseClient = 1;
+  try {
+      const p = JSON.parse(localStorage.getItem('cofel_client_profile'));
+      if (p && typeof p.discountRate === 'number') remiseClient = 1 - p.discountRate;
+  } catch(e){}
+
   const h=parseFloat($("hauteur").value)||0;
   const e=parseFloat($("epaisseur").value)||0;
   const q=Math.max(1,parseInt($("quantite").value)||1);
@@ -278,7 +285,7 @@ function compute(){
   if(fix) base+=row.fixation||0;
   if(retro && e>=19) base+=row.retro||0;
 
-  const unit=base*UPLIFT_PUBLIC;
+  const unit=base*UPLIFT_PUBLIC*remiseClient;
   const tot=unit*q;
   const ttc=tot*(1+TVA);
 
@@ -313,7 +320,7 @@ document.getElementById("btnAddDevis").addEventListener("click",()=>{
     if(fix) base+=row.fixation||0;
     if(retro && e>=19) base+=row.retro||0;
 
-    const pu=base*UPLIFT_PUBLIC;
+    const pu=base*UPLIFT_PUBLIC*remiseClient;
 
     const designation=`Lettre PVC ${h} mm (ép. ${e} mm)`
       +(laq?" · Laquage":"")
