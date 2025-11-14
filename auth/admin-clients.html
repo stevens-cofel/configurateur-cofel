@@ -41,6 +41,7 @@
       justify-content:space-between;
       gap:16px;
       margin-bottom:18px;
+      flex-wrap:wrap;
     }
     .brand{
       display:flex; align-items:center; gap:12px;
@@ -63,9 +64,11 @@
       color:#0b0b0b; background:#fff; border-radius:999px; padding:8px 14px;
       box-shadow:0 10px 24px rgba(0,0,0,.25);
       font-size:13px;
+      white-space:nowrap;
     }
 
     .btn-row{
+      appearance:none;
       padding:4px 8px;
       font-size:11px;
       box-shadow:none;
@@ -73,6 +76,8 @@
       white-space:nowrap;
       border:1px solid rgba(0,0,0,.2);
       cursor:pointer;
+      background:#fff;
+      color:#111;
     }
     .btn-row-secondary{
       background:transparent;
@@ -158,13 +163,13 @@
       border-radius:14px;
       border:1px solid rgba(255,255,255,.18);
       overflow:auto;
-      max-height:70vh;
+      max-width:100%;
     }
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:980px;
       font-size:13px;
+      table-layout:auto; /* laisse le tableau s’adapter */
     }
     thead{
       background:rgba(0,0,0,.25);
@@ -197,13 +202,27 @@
       vertical-align:middle;
     }
 
-    .col-email{min-width:200px;}
-    .col-company{min-width:180px;}
-    .col-contact{min-width:150px;}
-    .col-discount{min-width:80px; text-align:right;}
-    .col-status{min-width:90px;}
-    .col-date{min-width:130px; white-space:nowrap;}
-    .col-actions{min-width:220px; text-align:right;}
+    /* Colonnes sans min-width pour éviter le scroll horizontal forcé */
+    .col-email{}
+    .col-company{}
+    .col-contact{}
+    .col-discount{text-align:right;}
+    .col-status{}
+    .col-date{white-space:nowrap;}
+    .col-actions{text-align:right;}
+
+    @media (max-width: 900px){
+      .col-email,
+      .col-company,
+      .col-contact{
+        max-width:180px;
+        word-wrap:break-word;
+        white-space:normal;
+      }
+      .col-actions{
+        white-space:normal;
+      }
+    }
 
     .empty{
       text-align:center;
