@@ -217,8 +217,8 @@
           <input type="text" id="chantier" placeholder="Nom du chantier">
         </div>
         <div>
-          <label for="remiseInput">Remise client (%)</label>
-          <input type="number" id="remiseInput" value="0" min="0" max="90" placeholder="0 à 90">
+          <label for="remise-client">Remise client (%)</label>
+          <input type="number" id="remise-client" value="0" min="0" max="90" placeholder="0 à 90">
         </div>
       </div>
 
@@ -334,7 +334,7 @@
     }
 
     // DOM refs
-    const elRemise   = document.getElementById('remiseInput');
+    const elRemise   = document.getElementById('remise-client');
     const body       = document.getElementById('bodyDevis');
     const elHT       = document.getElementById('totHT');
     const elTVA      = document.getElementById('totTVA');
@@ -355,13 +355,28 @@
       if(noteInfo){ noteInfo.classList.toggle('hidden', ok); }
     }
 
-    // Prefill client
+    // Prefill client (infos texte)
     (function hydrateClient(){
       const c = getClient();
       if(c.societe)  elSociete.value  = c.societe;
       if(c.contact)  elContact.value  = c.contact;
       if(c.chantier) elChantier.value = c.chantier;
       validateExportEnabled();
+    })();
+
+    // ✅ Prefill remise depuis le profil client (localStorage.cofel_client_profile)
+    (function prefillRemiseFromClientProfile(){
+      try{
+        const raw = localStorage.getItem('cofel_client_profile');
+        if (!raw || !elRemise) return;
+        const profile = JSON.parse(raw);
+        const rate = (typeof profile.discountRate === 'number') ? profile.discountRate : 0; // ex: 0.5 pour 50%
+        const pct = Math.max(0, Math.min(90, rate * 100)); // transformé en 50
+        elRemise.value = pct;
+        Devis.setRemise(pct);
+      } catch(e){
+        console.error('Erreur lecture profil client :', e);
+      }
     })();
 
     // Save-as-you-type + revalidate
@@ -398,7 +413,7 @@
       elTTC.textContent = fmt(t.total_ttc);
     }
 
-    // Remise
+    // Remise (si l'utilisateur la modifie à la main)
     elRemise?.addEventListener('input', ()=>{
       const v = Math.max(0, Math.min(90, Number(elRemise.value||0)));
       Devis.setRemise(v); elRemise.value = v; render();
@@ -718,19 +733,32 @@
     // Initial render
     render();
 
-    // 🚪 Déconnexion
-    (async () => {
-      let siteId = "cofel-configs"; // par défaut
-      try {
-        const mod = await import("./auth/config.js");
-        if (mod?.AUTH_SETTINGS?.siteId) siteId = mod.AUTH_SETTINGS.siteId;
-      } catch {}
-      const TOKEN_KEY = `auth_token_${siteId}`;
-      document.getElementById("logoutBtn")?.addEventListener("click", ()=>{
-        try { localStorage.removeItem(TOKEN_KEY); } catch {}
-        location.href = "./auth/login.html";
+    // 🚪 Déconnexion (client + admin)
+    (function setupLogout(){
+      const btn = document.getElementById("logoutBtn");
+      if (!btn) return;
+
+      btn.addEventListener("click", () => {
+        try {
+          // Profil client
+          localStorage.removeItem('cofel_client_profile');
+          // Tokens admin éventuels
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('auth_token_')) {
+              localStorage.removeItem(key);
+            }
+          });
+        } catch (e) {
+          console.error("Erreur nettoyage stockage lors de la déconnexion", e);
+        }
+
+        const parts = location.pathname.split("/").filter(Boolean);
+        const project = parts.length ? parts[0] : "";
+        const loginUrl = `/${project}/auth/client-login.html`;
+        location.href = loginUrl;
       });
     })();
+
   })();
   </script>
 </body>
