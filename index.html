@@ -564,46 +564,79 @@
         try { logoData = await loadImageDataURL("./assets/logo cofel.jpg"); } catch(e){ /* pas de logo */ }
 
         // Header
-        const drawHeader = () => {
-          const yTop = margin;
-          if (logoData){
-            const LOGO_W_PT = 180;                         // ← largeur affichée dans le PDF
-            const LOGO_H_PT = Math.round(LOGO_W_PT * 0.28); // ratio visuel approximatif
-            doc.addImage(logoData, "JPEG", margin, yTop, LOGO_W_PT, LOGO_H_PT);
-          }
-          doc.setFont("Helvetica", "bold"); doc.setFontSize(18);
-          doc.setTextColor(...COLOR_PRIMARY);
-          doc.text("DEVIS", pageWidth - margin, yTop + 6, { align:"right" });
+       // HEADER PREMIUM – moderne + sans doublon + identifie le chantier
+function drawHeader(doc, pageWidth, margin, client) {
+  const COLOR_PRIMARY = [90, 45, 130];
+  const COLOR_TEXT = [30, 30, 30];
 
-          doc.setFont("Helvetica", "normal"); doc.setFontSize(10);
-          doc.setTextColor(...COLOR_TEXT);
-          const rightLines = [
-            "COFEL72 — ZA du Perquoi, 72560 Changé",
-            "SIRET 927 659 458 00024 — TVA FR80927659458",
-            "Date : " + new Date().toLocaleDateString("fr-FR")
-          ];
-          rightLines.forEach((t,i)=> doc.text(t, pageWidth - margin, yTop + 26 + i*14, { align:"right" }));
+  const yTop = margin;
 
-          // Sous-titre moderne avec le nom du client
-          if (client && (client.societe || client.contact)) {
-            doc.setFont("Helvetica","bold"); doc.setFontSize(11);
-            doc.setTextColor(...COLOR_TEXT);
-            const line = [client.societe || "", client.chantier || ""].filter(Boolean).join(" — ");
-            if (line) doc.text(line, margin, yTop + 72);
-          }
+  // LOGO
+  if (window.__cofelLogoData) {
+    const LOGO_W_PT = 160;
+    const LOGO_H_PT = Math.round(LOGO_W_PT * 0.28);
+    doc.addImage(window.__cofelLogoData, "JPEG", margin, yTop, LOGO_W_PT, LOGO_H_PT);
+  }
 
-          doc.setDrawColor(...COLOR_PRIMARY);
-          doc.setLineWidth(1);
-          doc.line(margin, yTop + 54, pageWidth - margin, yTop + 54);
-        };
+  // TITRE
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(...COLOR_PRIMARY);
+  doc.text("DEVIS", pageWidth - margin, yTop + 6, { align: "right" });
 
-        const drawFooter = (pageNum, pageCount) => {
-          const y = pageHeight - margin + 8;
-          doc.setFont("Helvetica","normal"); doc.setFontSize(9);
-          doc.setTextColor(...COLOR_MUTED);
-          doc.text("Conditions : Offre valable 30 jours. Délais et transport à confirmer. Paiement selon conditions Cofel.", margin, y);
-          doc.text(`Page ${pageNum} / ${pageCount}`, pageWidth - margin, y, { align:"right" });
-        };
+  // DATE
+  doc.setFont("Helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(...COLOR_TEXT);
+  doc.text(
+    "Date : " + new Date().toLocaleDateString("fr-FR"),
+    pageWidth - margin,
+    yTop + 28,
+    { align: "right" }
+  );
+
+  // Identité chantier (SOCIÉTÉ — CHANTIER)
+  let identity = [];
+  if (client?.societe) identity.push(client.societe);
+  if (client?.chantier) identity.push(client.chantier);
+
+  const line = identity.join(" — ");
+  if (line) {
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text(line, margin, yTop + 70);
+  }
+
+  // Ligne décorative
+  doc.setDrawColor(...COLOR_PRIMARY);
+  doc.setLineWidth(0.8);
+  doc.line(margin, yTop + 86, pageWidth - margin, yTop + 86);
+}
+
+        // Footer premium
+function drawFooter(doc, pageWidth, pageHeight, margin, pageNum, pageCount) {
+  const COLOR_MUTED = [120, 120, 120];
+  const y = pageHeight - margin + 10;
+
+  doc.setFont("Helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...COLOR_MUTED);
+
+  doc.text(
+    "Cofel72 — ZA du Perquoi, 72560 Changé — TVA FR80927659458",
+    pageWidth / 2,
+    y,
+    { align: "center" }
+  );
+
+  doc.text(
+    `Page ${pageNum} / ${pageCount}`,
+    pageWidth - margin,
+    y,
+    { align: "right" }
+  );
+}
+
 
         // ⚠️ Cartouche “sous réserve” (à placer en bas de la DERNIÈRE page)
         function drawTechNotice(yStart){
@@ -631,67 +664,93 @@
         const formatEuros = (n) => (Number(n)||0).toFixed(2).replace(".", ",") + " €";
 
         // Carte client
-        const drawClientCard = (yStart) => {
-          const cardW = pageWidth - margin*2;
-          const cardH = 90;
-          doc.setFillColor(...BG_SOFT);
-          doc.setDrawColor(230,230,240);
-          doc.roundedRect(margin, yStart, cardW, cardH, 8, 8, "FD");
+        // CARTE CLIENT PREMIUM – Modèle C3 (avec icônes 🏢 👤 📧 📞 📍)
+function drawClientCard(doc, pageWidth, margin, yStart, client) {
+  const COLOR_PRIMARY = [90, 45, 130];
+  const COLOR_TEXT = [40, 40, 40];
+  const COLOR_MUTED = [110, 110, 110];
 
-          let y = yStart + 24;
-          doc.setFont("Helvetica","bold"); doc.setFontSize(12);
-          doc.setTextColor(...COLOR_PRIMARY);
-          doc.text("Client", margin + 14, y);
+  const cardW = pageWidth - margin * 2;
+  const cardH = 140;
 
-          doc.setFont("Helvetica","normal"); doc.setFontSize(11);
-          doc.setTextColor(...COLOR_TEXT);
-          y += 18;
+  // Carte (fond)
+  doc.setFillColor(245, 242, 252); // violet clair très doux
+  doc.setDrawColor(...COLOR_PRIMARY);
+  doc.setLineWidth(0.8);
+  doc.roundedRect(margin, yStart, cardW, cardH, 10, 10, "FD");
 
-          const lines = [];
-          if(client.societe)  lines.push(["Entreprise :", client.societe]);
-          if(client.contact)  lines.push(["Contact :",    client.contact]);
-          if(client.chantier) lines.push(["Chantier :",   client.chantier]);
-          if(d.remise_pct>0)  lines.push(["Remise :",     `${d.remise_pct} %`]);
+  let y = yStart + 22;
+  const xLeft = margin + 18;
 
-          const colGap = 260;
-          const leftX = margin + 14;
-          const rightX = leftX + colGap;
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(...COLOR_PRIMARY);
+  doc.text("Informations client", xLeft, y);
 
-          lines.forEach((row, idx)=>{
-            const isRight = (idx >= 3);
-            const x = isRight ? rightX : leftX;
-            const yy = y + (isRight ? (idx-3)*16 : idx*16);
-            doc.setTextColor(...COLOR_MUTED); doc.text(row[0], x, yy);
-            doc.setTextColor(...COLOR_TEXT);  doc.text(String(row[1]), x + 80, yy);
-          });
+  doc.setFont("Helvetica", "normal");
+  doc.setFontSize(11);
+  doc.setTextColor(...COLOR_TEXT);
+
+  y += 22;
+
+  const addLine = (emoji, label, value) => {
+    if (!value) return;
+    doc.setFont("Helvetica", "bold");
+    doc.text(`${emoji} ${label} :`, xLeft, y);
+    doc.setFont("Helvetica", "normal");
+    doc.text(String(value), xLeft + 90, y);
+    y += 18;
+  };
+
+  addLine("🏢", "Entreprise", client.societe);
+  addLine("👤", "Contact", client.contact);
+  addLine("📧", "Email", client.email || "");
+  addLine("📞", "Téléphone", client.phone || "");
+  addLine("📍", "Chantier", client.chantier);
+
+  return yStart + cardH + 16;
+}
+
 
           return yStart + cardH + 18;
         };
 
         // Pavé totaux (avec remise hors transport)
-        const drawTotalsBox = (yStart) => {
-          const boxW = 220, boxH = 102;
-          const x = pageWidth - margin - boxW;
-          const y = yStart;
-          doc.setFillColor(255,255,255);
-          doc.setDrawColor(...COLOR_PRIMARY);
-          doc.roundedRect(x, y, boxW, boxH, 8, 8, "S");
+       // Bloc totaux premium
+function drawTotalsBox(doc, pageWidth, margin, yStart, totals) {
+  const COLOR_PRIMARY = [90, 45, 130];
+  const COLOR_TEXT = [40, 40, 40];
 
-          doc.setFont("Helvetica","bold"); doc.setFontSize(12);
-          doc.setTextColor(...COLOR_PRIMARY);
-          doc.text("Récapitulatif", x + 12, y + 18);
+  const boxW = 240;
+  const boxH = 110;
+  const x = pageWidth - margin - boxW;
+  const y = yStart;
 
-          const row = (label, value, yy, bold=false) => {
-            doc.setFont("Helvetica", bold ? "bold":"normal"); doc.setFontSize(11); doc.setTextColor(...COLOR_TEXT);
-            doc.text(label, x + 12, yy);
-            doc.text(value, x + boxW - 12, yy, { align:"right" });
-          };
-          row("Total HT",  formatEuros(t.total_ht),  y + 40);
-          row("TVA 20 %",  formatEuros(t.tva),       y + 58);
-          row("Total TTC", formatEuros(t.total_ttc), y + 82, true);
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(...COLOR_PRIMARY);
+  doc.setLineWidth(0.8);
+  doc.roundedRect(x, y, boxW, boxH, 10, 10, "S");
 
-          return y + boxH;
-        };
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(...COLOR_PRIMARY);
+  doc.text("Récapitulatif", x + 12, y + 18);
+
+  const row = (label, value, yy, bold = false) => {
+    doc.setFont("Helvetica", bold ? "bold" : "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(...COLOR_TEXT);
+    doc.text(label, x + 12, yy);
+    doc.text(value, x + boxW - 12, yy, { align: "right" });
+  };
+
+  row("Total HT", totals.ht, y + 40);
+  row("TVA 20 %", totals.tva, y + 60);
+  row("Total TTC", totals.ttc, y + 82, true);
+
+  return y + boxH;
+}
+
 
         // Données tableau
         const rows = (d.lignes||[]).map(l => ([
@@ -702,26 +761,48 @@
         ]));
 
         // Première page
-        drawHeader();
-        let currentY = drawClientCard(margin + 90);
+        drawHeader(doc, pageWidth, margin, client);
+        let currentY = drawClientCard(doc, pageWidth, margin, margin + 100, client);
+
 
         // Tableau
-        doc.autoTable({
-          startY: currentY,
-          head: [["Désignation","Qté","PU HT","Total HT"]],
-          body: rows,
-          styles: { font:"helvetica", fontSize:10, halign:"left", cellPadding:6 },
-          headStyles: { fillColor: COLOR_PRIMARY, textColor:[255,255,255], fontStyle:"bold" },
-          alternateRowStyles: { fillColor: [250, 248, 255] },
-          columnStyles: {
-            1: { halign:"center", cellWidth: 40 },
-            2: { halign:"right",  cellWidth: 70 },
-            3: { halign:"right",  cellWidth: 80 }
-          },
-          theme:"grid",
-          margin:{ left: margin, right: margin },
-          didDrawPage: () => { drawHeader(); }
-        });
+doc.autoTable({
+  startY: currentY,
+  head: [["Désignation", "Qté", "PU HT", "Total HT"]],
+  body: rows,
+
+  styles: {
+    font: "helvetica",
+    fontSize: 10,
+    halign: "left",
+    cellPadding: 6,
+    textColor: [40, 40, 40]
+  },
+
+  headStyles: {
+    fillColor: [90, 45, 130],
+    textColor: [255, 255, 255],
+    fontStyle: "bold"
+  },
+
+  alternateRowStyles: {
+    fillColor: [245, 242, 252], // violet très léger
+  },
+
+  columnStyles: {
+    1: { halign: "center", cellWidth: 40 },
+    2: { halign: "right", cellWidth: 70 },
+    3: { halign: "right", cellWidth: 80 }
+  },
+
+  theme: "grid",
+  margin: { left: margin, right: margin },
+
+  didDrawPage: (data) => {
+    drawHeader(doc, pageWidth, margin, client);
+  }
+});
+
 
         // Totaux sous le tableau (dernière page)
         const afterTableY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 16 : (margin + 200);
