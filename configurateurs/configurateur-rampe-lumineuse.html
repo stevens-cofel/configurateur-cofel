@@ -207,6 +207,13 @@ function euro(n){return (isFinite(n)?n:0).toFixed(2).replace('.', ',');}
 function round3(n){return Math.round(n*1000)/1000;}
 
 function compute(){
+  // === Remise automatique client ===
+  let remiseClient = 1;
+  try {
+      const p = JSON.parse(localStorage.getItem('cofel_client_profile'));
+      if (p && typeof p.discountRate === 'number') remiseClient = 1 - p.discountRate;
+  } catch(e){}
+
   const Lmm = Math.max(0, Number(elL.value||0));
   const Lm = Lmm / 1000;
   const Q = Math.max(1, Number(elQ.value||1));
@@ -215,7 +222,7 @@ function compute(){
   const nbFix = Math.max(2, Math.ceil(Lm) + 1);
   const rampeHT = PRICE_RAMPE_ML * Lm;
   const fixHT = fixPrice * nbFix;
-  const unitHT = (rampeHT + fixHT) * UPLIFT_PUBLIC; // affichage public
+  const unitHT = (rampeHT + fixHT) * UPLIFT_PUBLIC * remiseClient; // affichage public
   const totalHT = unitHT * Q;
   const totalTTC = totalHT * (1 + TVA);
 
