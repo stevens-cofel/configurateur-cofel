@@ -270,6 +270,44 @@
     }
   </style>
 </head>
+  <!-- === MODAL CRÉATION CLIENT === -->
+<div id="modalNew" style="
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.55);
+  backdrop-filter:blur(3px); z-index:1000; align-items:center; justify-content:center;
+">
+  <div style="
+    background:#1c1530; padding:20px; border-radius:14px; width:320px;
+    border:1px solid rgba(255,255,255,.25);
+  ">
+    <h3 style="margin-top:0;">Créer un nouveau client</h3>
+
+    <label>Email</label>
+    <input id="newEmail" type="email" style="width:100%; margin-bottom:8px;">
+
+    <label>Société</label>
+    <input id="newCompany" type="text" style="width:100%; margin-bottom:8px;">
+
+    <label>Contact</label>
+    <input id="newContact" type="text" style="width:100%; margin-bottom:8px;">
+
+    <label>Remise (%)</label>
+    <input id="newDiscount" type="number" min="0" max="90" value="0" style="width:100%; margin-bottom:8px;">
+
+    <label>Statut</label>
+    <select id="newStatus" style="width:100%; margin-bottom:12px;">
+      <option value="active">Actif</option>
+      <option value="inactive">Inactif</option>
+    </select>
+
+    <div style="display:flex; justify-content:space-between;">
+      <button id="btnCreateClient" class="btn-row">Créer</button>
+      <button id="btnCloseModal" class="btn-row btn-row-secondary">Annuler</button>
+    </div>
+
+    <div id="modalMsg" style="margin-top:10px; font-size:13px;"></div>
+  </div>
+</div>
+
 <body>
   <div class="shell">
     <header>
@@ -283,6 +321,7 @@
         </div>
       </div>
       <div class="header-actions">
+        <button id="btnNewClient" class="btn">➕ Nouveau client</button>
         <button id="btnExport" class="btn">⬇ Export Excel (.xls)</button>
         <button id="btnBack" class="btn">⬅ Retour aux configurateurs</button>
       </div>
@@ -637,6 +676,64 @@
     });
 
     // Chargement initial
+    // ========== MODAL NOUVEAU CLIENT ==========
+
+const modal = document.getElementById('modalNew');
+const modalMsg = document.getElementById('modalMsg');
+
+document.getElementById('btnNewClient').addEventListener('click', () => {
+  modal.style.display = 'flex';
+  modalMsg.textContent = '';
+});
+
+document.getElementById('btnCloseModal').addEventListener('click', () => {
+  modal.style.display = 'none';
+});
+
+// Créer client
+document.getElementById('btnCreateClient').addEventListener('click', async () => {
+  const email = document.getElementById('newEmail').value.trim();
+  const company = document.getElementById('newCompany').value.trim();
+  const contact = document.getElementById('newContact').value.trim();
+  const discount = Number(document.getElementById('newDiscount').value);
+  const status = document.getElementById('newStatus').value;
+
+  modalMsg.style.color = "#ffe3e3";
+  modalMsg.textContent = "";
+
+  if (!email) {
+    modalMsg.textContent = "Email obligatoire.";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${WORKER_BASE}/client-create`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ email, company, contact, discount, status })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      modalMsg.textContent = "Erreur : " + (data || "inconnue");
+      return;
+    }
+
+    modalMsg.style.color = "#b7ffcf";
+    modalMsg.textContent = "Client créé. Mot de passe : " + data.password;
+
+    alert("Mot de passe pour " + email + " :\n\n" + data.password);
+
+    // recharge la table
+    await loadClients();
+
+  } catch (err) {
+    modalMsg.style.color = "#ffe3e3";
+    modalMsg.textContent = "Erreur de réseau.";
+  }
+});
+
     loadClients();
   </script>
 </body>
