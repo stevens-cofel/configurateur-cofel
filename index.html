@@ -216,10 +216,7 @@
           <label for="chantier">Nom du chantier</label>
           <input type="text" id="chantier" placeholder="Nom du chantier">
         </div>
-        <div>
-          <label for="remise-client">Remise client (%)</label>
-          <input type="number" id="remise-client" value="0" min="0" max="90" placeholder="0 à 90">
-        </div>
+        <div style="display:none;"><label for="remise-client">Remise client (%)</label><input type="number" id="remise-client" value="0"></div>
       </div>
 
       <div class="table-wrap">
@@ -317,7 +314,7 @@
     // 👉 Totaux avec remise EXCLUANT les lignes de type "transport"
     function totalsExcludingTransportDiscount(d){
       const lignes = d?.lignes || [];
-      const remise = Math.max(0, Math.min(90, Number(d?.remise_pct || 0)));
+      const remise = 0;
       let sumTransport = 0, sumNon = 0;
       for (const l of lignes){
         const q  = Number(l.quantite)||0;
@@ -378,7 +375,7 @@
             if (elRemise) {
               elRemise.value = pct;
             }
-            Devis.setRemise(pct);
+            Devis.setRemise(0);
           }
         }
       } catch(e){
@@ -429,10 +426,7 @@
     }
 
     // Remise (si l'utilisateur la modifie à la main)
-    elRemise?.addEventListener('input', ()=>{
-      const v = Math.max(0, Math.min(90, Number(elRemise.value||0)));
-      Devis.setRemise(v); elRemise.value = v; render();
-    });
+    
 
     // Actions lignes
     body.addEventListener('click',(e)=>{
