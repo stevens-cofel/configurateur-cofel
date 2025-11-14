@@ -381,12 +381,19 @@
     } else { elFinPre.disabled = false; elHelpFinition.textContent = ''; }
   }
   function compute(){
+  // === Remise automatique client ===
+  let remiseClient = 1;
+  try {
+      const p = JSON.parse(localStorage.getItem('cofel_client_profile'));
+      if (p && typeof p.discountRate === 'number') remiseClient = 1 - p.discountRate;
+  } catch(e){}
+
     syncFinitionUI();
     const row=findRow();
     const Q=Math.max(1,Number(elQ.value||1));
     if(!row){ elHT.textContent='0,00'; elTTC.textContent='0,00'; return; }
     let unit_interne = numFR(row[MAP.PRIX]); if(!isFinite(unit_interne)) unit_interne = 0;
-    const unit_public = unit_interne * UPLIFT_PUBLIC;
+    const unit_public = unit_interne * UPLIFT_PUBLIC * remiseClient;
     const totalHT = unit_public * Q;
     const totalTTC = totalHT * (1+TVA);
     elHT.textContent  = euro(totalHT);
