@@ -451,6 +451,13 @@ function currentSurface(){
 function currentPerimeter(){ return perimeterMeters(elL.value, elH.value); }
 
 function compute(){
+  // === Remise automatique client ===
+  let remiseClient = 1;
+  try {
+      const p = JSON.parse(localStorage.getItem('cofel_client_profile'));
+      if (p && typeof p.discountRate === 'number') remiseClient = 1 - p.discountRate;
+  } catch(e){}
+
   const Q = Math.max(1, Number(elQ.value||1));
   const A = currentSurface();      // m² tôle
   const P = currentPerimeter();    // m périmètre
@@ -501,7 +508,7 @@ function compute(){
   const unitHT_interne = base_interne + ajourage_interne + pmma_interne + led_interne + fix_interne;
 
   // ** Conversion → affichage public (x2) **
-  const unitHT_public = unitHT_interne * UPLIFT_PUBLIC;
+  const unitHT_public = unitHT_interne * UPLIFT_PUBLIC * remiseClient;
   const totalHT_public = unitHT_public * Q;
   const totalTTC_public = totalHT_public * (1+TVA);
 
