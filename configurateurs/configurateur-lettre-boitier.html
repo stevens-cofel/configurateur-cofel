@@ -451,6 +451,13 @@ function findRowForHeight(H){
 }
 
 function compute(){
+  // === Remise automatique client ===
+  let remiseClient = 1;
+  try {
+      const p = JSON.parse(localStorage.getItem('cofel_client_profile'));
+      if (p && typeof p.discountRate === 'number') remiseClient = 1 - p.discountRate;
+  } catch(e){}
+
   const H=Number(elH.value||0), Q=Math.max(1,Number(elQ.value||1));
 
   if (MAP?.variantKey && !elVar.value){
@@ -462,7 +469,7 @@ function compute(){
   }
   const row=findRowForHeight(H);
   const base_interne=row? numFR(row[MAP.baseKey]) : 0;
-  const unit_public=(base_interne||0)*UPLIFT_PUBLIC;
+  const unit_public=(base_interne||0)*UPLIFT_PUBLIC*remiseClient;
   const totalHT=unit_public*Q, totalTTC=totalHT*(1+TVA);
   elHT.textContent=euro(totalHT); elTTC.textContent=euro(totalTTC);
   updateDibondRule();
