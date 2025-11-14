@@ -1,20 +1,14 @@
 // /auth/lock.js
+// Protège les pages des configurateurs.
+// Accès autorisé si :
+//  - token "admin" valide (mot de passe global Cofel)
+//  - OU profil client présent (connexion via client-login.html)
+
 import { AUTH_SETTINGS } from "./config.js";
 
 const TOKEN_KEY = `auth_token_${AUTH_SETTINGS.siteId}`;
+const CLIENT_KEY = "cofel_client_profile";
 
-function getToken() {
-  try { return JSON.parse(localStorage.getItem(TOKEN_KEY) || "null"); }
-  catch { return null; }
-}
-function isTokenValid(tok) {
-  if (!tok || typeof tok !== "object") return false;
-  if (!tok.exp || Date.now() > tok.exp) return false;
-  if (tok.ua && tok.ua !== navigator.userAgent) return false;
-  return true;
-}
-
-// base du "project site" GitHub Pages -> "/<repo-name>/"
 function getProjectBase() {
   const parts = location.pathname.split("/").filter(Boolean);
   const project = parts.length ? parts[0] : "";
@@ -22,23 +16,41 @@ function getProjectBase() {
 }
 
 function redirectToLogin() {
-  const base = getProjectBase(); // ex: "/configurateur-cofel/"
-  const loginURL = new URL(base + "auth/login.html", location.origin);
-  loginURL.searchParams.set("return", location.href);
-  location.replace(loginURL.toString());
+  const base = getProjectBase();
+  const returnUrl = encodeURIComponent(location.href);
+  location.replace(`${base}auth/login.html?return=${returnUrl}`);
 }
 
-(function ensureAuth(){
-  // logout via ?logout=1
-  const url = new URL(location.href);
-  if (url.searchParams.get("logout") === "1") {
-    try { localStorage.removeItem(TOKEN_KEY); } catch {}
-    url.searchParams.delete("logout");
-    history.replaceState({}, "", url.toString());
-    redirectToLogin();
-    return;
+function hasValidAdminToken() {
+  try {
+    const raw = localStorage.getItem(TOKEN_KEY);
+    if (!raw) return false;
+    const token = JSON.parse(raw);
+    const now = Date.now();
+    if (!token.exp || token.exp < now) return false;
+    if (token.ua && token.ua !== navigator.userAgent) return false;
+    return true;
+  } catch (e) {
+    console.error("Erreur lecture token admin :", e);
+    return false;
   }
+}
 
-  const tok = getToken();
-  if (!isTokenValid(tok)) redirectToLogin();
-})();
+function hasClientProfile() {
+  try {
+    const raw = localStorage.getItem(CLIENT_KEY);
+    if (!raw) return false;
+    const profile = JSON.parse(raw);
+    // On vérifie juste qu'il y a un email
+    if (!profile || typeof profile.email !== "string") return false;
+    return true;
+  } catch (e) {
+    console.error("Erreur lecture profil client :", e);
+    return false;
+  }
+}
+
+// === Point d'entrée ===
+if (!hasValidAdminToken() && !hasClientProfile()) {
+  redirectToLogin();
+}
