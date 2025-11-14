@@ -449,7 +449,9 @@
               <div>${formatDate(c.last_login_at)}</div>
             </td>
             <td class="col-actions">
-              <button class="btn-row btn-row-edit" data-email="${c.email || ''}">✏ Remise</button>
+              <button class="btn-row btn-row-edit" data-email="${c.email || ''}">
+  ✏ Modifier
+</button>
               <button class="btn-row btn-row-secondary btn-row-toggle" data-email="${c.email || ''}">
                 ${actionLabel}
               </button>
@@ -548,6 +550,25 @@
 
     tbody.addEventListener('click', async (e) => {
       const editBtn = e.target.closest('.btn-row-edit');
+      if (editBtn) {
+  const email = editBtn.getAttribute('data-email');
+  const c = allClients.find(cl => cl.email === email);
+  if (!c) return;
+
+  // Pré-remplissage de la modale
+  document.getElementById('editEmail').value = c.email;
+  document.getElementById('editNewEmail').value = c.email;
+  document.getElementById('editCompany').value = c.company || "";
+  document.getElementById('editContact').value = c.contact_name || "";
+  document.getElementById('editDiscount').value =
+    Math.round((c.discount_rate || 0) * 100);
+  document.getElementById('editStatus').value = c.status || "active";
+
+  // Affiche la modale
+  document.getElementById('modalEdit').style.display = 'flex';
+  return;
+}
+
       const toggleBtn = e.target.closest('.btn-row-toggle');
       const resetBtn = e.target.closest('.btn-row-reset');
 
@@ -733,8 +754,90 @@ document.getElementById('btnCreateClient').addEventListener('click', async () =>
     modalMsg.textContent = "Erreur de réseau.";
   }
 });
+// Bouton Annuler de la modale
+document.getElementById('editCancel').addEventListener('click', () => {
+  document.getElementById('modalEdit').style.display = 'none';
+});
+// Bouton Enregistrer de la modale
+document.getElementById('editSave').addEventListener('click', async () => {
+  const email = document.getElementById('editEmail').value.trim().toLowerCase();
+  const newEmail = document.getElementById('editNewEmail').value.trim().toLowerCase();
+  const company = document.getElementById('editCompany').value.trim();
+  const contact = document.getElementById('editContact').value.trim();
+  const discount = Number(document.getElementById('editDiscount').value);
+  const status = document.getElementById('editStatus').value;
+
+  try {
+    const res = await fetch(`${WORKER_BASE}/client-edit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        newEmail,
+        company,
+        contact,
+        discount,
+        status
+      })
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    // Fermer la modale
+    document.getElementById('modalEdit').style.display = 'none';
+
+    alert("Client mis à jour avec succès !");
+    
+    // Recharge le tableau pour voir les modifications
+    loadClients();
+
+  } catch (err) {
+    alert("Erreur mise à jour client : " + err.message);
+  }
+});
 
     loadClients();
+    
   </script>
+  <!-- MODALE EDIT CLIENT -->
+<div id="modalEdit" style="
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  display:none; align-items:center; justify-content:center; z-index:9999;
+">
+  <div style="
+    background:#fff; color:#111; padding:20px; border-radius:14px;
+    width:90%; max-width:420px; box-shadow:0 10px 30px rgba(0,0,0,.4);
+  ">
+    <h2 style="margin-top:0; font-size:20px;">Modifier le client</h2>
+
+    <label>Email</label>
+    <input id="editEmail" type="text" style="width:100%; padding:8px; margin-bottom:10px;">
+
+    <label>Nouvel email</label>
+    <input id="editNewEmail" type="text" style="width:100%; padding:8px; margin-bottom:10px;">
+
+    <label>Société</label>
+    <input id="editCompany" type="text" style="width:100%; padding:8px; margin-bottom:10px;">
+
+    <label>Nom du contact</label>
+    <input id="editContact" type="text" style="width:100%; padding:8px; margin-bottom:10px;">
+
+    <label>Remise (%)</label>
+    <input id="editDiscount" type="number" min="0" max="90" style="width:100%; padding:8px; margin-bottom:10px;">
+
+    <label>Statut</label>
+    <select id="editStatus" style="width:100%; padding:8px; margin-bottom:15px;">
+      <option value="active">Actif</option>
+      <option value="inactive">Inactif</option>
+    </select>
+
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button id="editCancel" style="padding:8px 14px;">Annuler</button>
+      <button id="editSave" style="padding:8px 14px; background:#5a2d82; color:#fff; border-radius:8px;">
+        Enregistrer
+      </button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
