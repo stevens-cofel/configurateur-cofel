@@ -585,12 +585,38 @@
           rightLines.forEach((t,i)=> doc.text(t, pageWidth - margin, yTop + 26 + i*14, { align:"right" }));
 
           // Sous-titre moderne avec le nom du client
-          if (client && (client.societe || client.contact)) {
-            doc.setFont("Helvetica","bold"); doc.setFontSize(11);
-            doc.setTextColor(...COLOR_TEXT);
-            const line = [client.societe || "", client.chantier || ""].filter(Boolean).join(" — ");
-            if (line) doc.text(line, margin, yTop + 72);
-          }
+const drawHeader = () => {
+  const yTop = margin;
+
+  if (logoData){
+    const LOGO_W_PT = 180;
+    const LOGO_H_PT = Math.round(LOGO_W_PT * 0.28);
+    doc.addImage(logoData, "JPEG", margin, yTop, LOGO_W_PT, LOGO_H_PT);
+  }
+
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(18);
+  doc.setTextColor(...COLOR_PRIMARY);
+  doc.text("DEVIS", pageWidth - margin, yTop + 6, { align:"right" });
+
+  doc.setFont("Helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(...COLOR_TEXT);
+
+  const rightLines = [
+    "COFEL72 — ZA du Perquoi, 72560 Changé",
+    "SIRET 927 659 458 00024 — TVA FR80927659458",
+    "Date : " + new Date().toLocaleDateString("fr-FR")
+  ];
+  rightLines.forEach((t,i)=> 
+    doc.text(t, pageWidth - margin, yTop + 26 + i*14, { align:"right" })
+  );
+
+  doc.setDrawColor(...COLOR_PRIMARY);
+  doc.setLineWidth(1);
+  doc.line(margin, yTop + 54, pageWidth - margin, yTop + 54);
+};
+
 
           doc.setDrawColor(...COLOR_PRIMARY);
           doc.setLineWidth(1);
