@@ -74,97 +74,6 @@
       white-space:nowrap;
     }
 
-    .btn-row{
-      appearance:none;
-      padding:4px 8px;
-      font-size:11px;
-      box-shadow:none;
-      border-radius:999px;
-      white-space:nowrap;
-      border:1px solid rgba(0,0,0,.2);
-      cursor:pointer;
-      background:#fff;
-      color:#111;
-    }
-    .btn-row-secondary{
-      background:transparent;
-      color:var(--txt);
-      border:1px solid rgba(255,255,255,.4);
-    }
-    .btn-row-reset{
-      background:transparent;
-      color:#ffe9b5;
-      border:1px solid rgba(255, 202, 116, .7);
-    }
-
-    .card{
-      background: linear-gradient(180deg, var(--glass), var(--glass-soft));
-      border-radius:var(--radius);
-      border:1px solid rgba(255,255,255,.22);
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(var(--blur));
-      padding:16px 16px 10px;
-    }
-
-    .toolbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-bottom:10px;
-    }
-    .toolbar-left{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      font-size:13px;
-      color:var(--txt-dim);
-    }
-    .filter-row{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-    .filter-row input{
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.25);
-      background:rgba(0,0,0,.15);
-      color:var(--txt);
-      font-size:13px;
-      min-width:180px;
-    }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      padding:3px 8px;
-      border-radius:999px;
-      font-size:11px;
-      border:1px solid rgba(255,255,255,.22);
-      background:rgba(0,0,0,.2);
-    }
-
-    .status-pill{
-      display:inline-flex;
-      padding:3px 8px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:600;
-    }
-    .status-active{
-      background:rgba(46, 213, 115, .18);
-      color:#b9ffd4;
-      border:1px solid rgba(46, 213, 115, .4);
-    }
-    .status-inactive{
-      background:rgba(255, 118, 117, .18);
-      color:#ffd6d5;
-      border:1px solid rgba(255, 118, 117, .4);
-    }
-
     .table-wrap{
       margin-top:6px;
       border-radius:14px;
@@ -198,59 +107,32 @@
       z-index:1;
       white-space:nowrap;
     }
-    tbody tr:nth-child(even){
-      background:rgba(0,0,0,.12);
-    }
-    tbody tr:hover{
-      background:rgba(255,255,255,.05);
-    }
-    td{
-      border-bottom:1px solid rgba(255,255,255,.08);
-      vertical-align:middle;
-    }
 
-    .col-discount{text-align:right;}
-    .col-date{white-space:nowrap;}
-    .col-actions{text-align:right;}
+    /* ONGLET NAVIGATION */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .tab-btn {
+      padding: 8px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,.35);
+      background: rgba(0,0,0,.25);
+      color: #f5f7ff;
+      font-weight: 600;
+      font-size: 13px;
+      transition: 0.2s;
+    }
+    .tab-btn.active {
+      background: #fff;
+      color: #1a102b;
+    }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
 
-    @media (max-width: 900px){
-      .col-email,
-      .col-company,
-      .col-contact{
-        max-width:180px;
-        word-wrap:break-word;
-        white-space:normal;
-      }
-      .col-actions{
-        white-space:normal;
-      }
-    }
-
-    .empty{
-      text-align:center;
-      padding:18px 10px;
-      color:var(--txt-dim);
-      font-size:13px;
-    }
-
-    .pill-discount{
-      display:inline-flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap:4px;
-      min-width:60px;
-    }
-
-    .muted{
-      color:var(--txt-dim);
-      font-size:11px;
-    }
-    .err{
-      color:#ffe3e3;
-      font-size:13px;
-      margin-top:8px;
-      min-height:18px;
-    }
+    /* LOADER */
     .loader{
       font-size:13px;
       color:var(--txt-dim);
@@ -268,118 +150,134 @@
       from{ transform:translateY(0); opacity:.6;}
       to  { transform:translateY(-4px); opacity:1;}
     }
-
-    /* Pagination */
-    .pagination{
-      margin-top:8px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      font-size:12px;
-      color:var(--txt-dim);
-      flex-wrap:wrap;
-    }
-    .pagination-buttons{
-      display:flex;
-      gap:4px;
-      flex-wrap:wrap;
-    }
-    .pagination button{
-      appearance:none;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.45);
-      background:rgba(0,0,0,.2);
-      color:var(--txt);
-      font-size:11px;
-      padding:4px 8px;
-      cursor:pointer;
-    }
-    .pagination button:disabled{
-      opacity:.4;
-      cursor:not-allowed;
-    }
-
-    /* Modales */
-    #modalNew, #modalEdit{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.55);
-      backdrop-filter:blur(3px);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:1000;
-    }
-    .modal-card{
-      background:#1c1530;
-      color:#f5f7ff;
-      padding:20px 22px;
-      border-radius:16px;
-      width:90%;
-      max-width:440px;
-      border:1px solid rgba(255,255,255,.25);
-      box-shadow:0 10px 30px rgba(0,0,0,.45);
-    }
-    .modal-card h2,
-    .modal-card h3{
-      margin:0 0 14px;
-      font-size:20px;
-    }
-    .modal-field{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      margin-bottom:10px;
-      font-size:13px;
-    }
-    .modal-field label{
-      font-weight:600;
-      color:#e0dafc;
-    }
-    .modal-field input,
-    .modal-field select{
-      width:100%;
-      padding:8px 10px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,.3);
-      background:rgba(0,0,0,.35);
-      color:#fff;
-      font-size:13px;
-    }
-    .modal-actions{
-      display:flex;
-      justify-content:flex-end;
-      gap:8px;
-      margin-top:6px;
-    }
-    .btn-modal{
-      padding:8px 14px;
-      border-radius:999px;
-      border:none;
-      cursor:pointer;
-      font-size:13px;
-    }
-    .btn-modal-primary{
-      background:#5a2d82;
-      color:#fff;
-    }
-    .btn-modal-secondary{
-      background:transparent;
-      color:#f5f7ff;
-      border:1px solid rgba(255,255,255,.4);
-    }
-    #modalMsg, #editMsg{
-      margin-top:6px;
-      font-size:12px;
-      min-height:16px;
-    }
   </style>
 </head>
 <body>
 
-  <!-- MODALE NOUVEAU CLIENT -->
-  <div id="modalNew">
+<div class="shell">
+
+  <header>
+    <div class="brand">
+      <img src="../assets/logo cofel.jpg" alt="Cofel">
+      <div>
+        <h1>Administration des comptes clients</h1>
+        <p class="tagline">Visualisez les comptes, remises, statuts, créez des clients et gérez les demandes d’accès.</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button id="btnNewClient" class="btn">➕ Nouveau client</button>
+      <button id="btnExport" class="btn">⬇ Export Excel (.xls)</button>
+      <button id="btnBack" class="btn">⬅ Retour aux configurateurs</button>
+    </div>
+  </header>
+
+  <!-- ONGLET NAVIGATION -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab-clients">Clients</button>
+    <button class="tab-btn" data-tab="tab-requests">Demandes d’accès</button>
+  </div>
+
+  <!-- ONGLET : CLIENTS -->
+  <div id="tab-clients" class="tab-panel active">
+    <!-- ======= SECTION CLIENTS (suite) ======= -->
+
+    <section class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="filter-row">
+            <span>Recherche :</span>
+            <input id="searchInput" type="text" placeholder="Filtrer par email, société ou contact…">
+          </div>
+          <div>
+            <span id="infoCount" class="badge">Chargement…</span>
+          </div>
+        </div>
+        <div class="loader" id="loader">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span>Récupération des clients…</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Société</th>
+              <th>Contact</th>
+              <th>Remise</th>
+              <th>Statut</th>
+              <th>Créé le</th>
+              <th>Dernière connexion</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyClients">
+            <tr><td colspan="8" class="empty">En attente des données…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <div id="paginationInfo">Page 1 / 1</div>
+        <div class="pagination-buttons">
+          <button id="btnPrevPage">◀ Précédent</button>
+          <button id="btnNextPage">Suivant ▶</button>
+        </div>
+      </div>
+
+      <div id="err" class="err"></div>
+    </section>
+
+  </div> <!-- FIN ONGLET CLIENTS -->
+
+
+  <!-- ========================================================= -->
+  <!-- =================  ONGLET : DEMANDES  ==================== -->
+  <!-- ========================================================= -->
+
+  <div id="tab-requests" class="tab-panel">
+
+    <section class="card">
+      <h2 style="margin-top:0; font-size:18px;">Demandes d’accès en attente</h2>
+
+      <div id="reqLoader" class="loader" style="display:flex; margin-bottom:10px;">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span>Chargement des demandes…</span>
+      </div>
+
+      <div id="reqError" class="err"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Société</th>
+              <th>Contact</th>
+              <th>Email</th>
+              <th>Téléphone</th>
+              <th>Message</th>
+              <th>Créé le</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="reqTbody">
+            <tr><td colspan="7" class="empty">Chargement…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div> <!-- FIN ONGLET DEMANDES -->
+
+
+  <!-- ========================================================= -->
+  <!-- =================  MODALE : NOUVEAU CLIENT  ============= -->
+  <!-- ========================================================= -->
+
+  <div id="modalNew" style="display:none;">
     <div class="modal-card">
       <h3>Créer un nouveau client</h3>
 
@@ -420,8 +318,12 @@
     </div>
   </div>
 
-  <!-- MODALE EDIT CLIENT -->
-  <div id="modalEdit">
+
+  <!-- ========================================================= -->
+  <!-- =================  MODALE : EDIT CLIENT   =============== -->
+  <!-- ========================================================= -->
+
+  <div id="modalEdit" style="display:none;">
     <div class="modal-card">
       <h3>Modifier client</h3>
 
@@ -466,88 +368,45 @@
       <div id="editMsg"></div>
     </div>
   </div>
-
-  <div class="shell">
-    <header>
-      <div>
-        <div class="brand">
-          <img src="../assets/logo cofel.jpg" alt="Cofel">
-          <div>
-            <h1>Administration des comptes clients</h1>
-            <p class="tagline">Visualisez les comptes, remises, statuts, créez des clients et réinitialisez les mots de passe.</p>
-          </div>
-        </div>
-      </div>
-      <div class="header-actions">
-        <button id="btnNewClient" class="btn">➕ Nouveau client</button>
-        <button id="btnExport" class="btn">⬇ Export Excel (.xls)</button>
-        <button id="btnBack" class="btn">⬅ Retour aux configurateurs</button>
-      </div>
-    </header>
-
-    <section class="card">
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <div class="filter-row">
-            <span>Recherche :</span>
-            <input id="searchInput" type="text" placeholder="Filtrer par email, société ou contact…">
-          </div>
-          <div>
-            <span id="infoCount" class="badge">Chargement…</span>
-          </div>
-        </div>
-        <div class="loader" id="loader">
-          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-          <span>Récupération des clients…</span>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th class="col-email">Email</th>
-              <th class="col-company">Société</th>
-              <th class="col-contact">Contact</th>
-              <th class="col-discount">Remise</th>
-              <th class="col-status">Statut</th>
-              <th class="col-date">Créé le</th>
-              <th class="col-date">Dernière connexion</th>
-              <th class="col-actions">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyClients">
-            <tr><td colspan="8" class="empty">En attente des données…</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="pagination">
-        <div id="paginationInfo">Page 1 / 1</div>
-        <div class="pagination-buttons">
-          <button id="btnPrevPage">◀ Précédent</button>
-          <button id="btnNextPage">Suivant ▶</button>
-        </div>
-      </div>
-
-      <div id="err" class="err"></div>
-    </section>
-  </div>
+  <!-- ========================================================= -->
+  <!-- ======================= SCRIPTS ========================== -->
+  <!-- ========================================================= -->
 
   <script>
-    const WORKER_BASE = 'https://cofel-auth.sonveven.workers.dev';
+    const WORKER_BASE = "https://cofel-auth.sonveven.workers.dev";
 
-    const tbody = document.getElementById('tbodyClients');
-    const loader = document.getElementById('loader');
-    const errBox = document.getElementById('err');
-    const infoCount = document.getElementById('infoCount');
-    const searchInput = document.getElementById('searchInput');
-    const btnBack = document.getElementById('btnBack');
-    const btnExport = document.getElementById('btnExport');
+    /* ===========================================================
+       ONGLET NAVIGATION
+    ============================================================ */
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const tabPanels  = document.querySelectorAll(".tab-panel");
 
-    const btnPrevPage = document.getElementById('btnPrevPage');
-    const btnNextPage = document.getElementById('btnNextPage');
-    const paginationInfo = document.getElementById('paginationInfo');
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        tabButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const target = btn.getAttribute("data-tab");
+
+        tabPanels.forEach(p => {
+          if (p.id === target) p.classList.add("active");
+          else p.classList.remove("active");
+        });
+      });
+    });
+
+    /* ===========================================================
+       TABLEAU CLIENTS
+    ============================================================ */
+
+    const tbody = document.getElementById("tbodyClients");
+    const loader = document.getElementById("loader");
+    const errBox = document.getElementById("err");
+    const infoCount = document.getElementById("infoCount");
+    const searchInput = document.getElementById("searchInput");
+    const btnPrevPage = document.getElementById("btnPrevPage");
+    const btnNextPage = document.getElementById("btnNextPage");
+    const paginationInfo = document.getElementById("paginationInfo");
 
     const PAGE_SIZE = 25;
     let allClients = [];
@@ -555,31 +414,28 @@
     let currentPage = 1;
 
     function formatDate(iso){
-      if(!iso) return '—';
+      if(!iso) return "—";
       const d = new Date(iso);
-      if (isNaN(d.getTime())) return '—';
-      return d.toLocaleDateString('fr-FR') + ' ' +
-             d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+      if (isNaN(d.getTime())) return "—";
+      return d.toLocaleDateString("fr-FR") + " " +
+             d.toLocaleTimeString("fr-FR",{ hour:"2-digit", minute:"2-digit" });
     }
 
     function formatDiscount(rate){
-      const r = Number(rate || 0);
-      const pct = Math.round(r * 1000) / 10;
-      return pct.toLocaleString('fr-FR', {maximumFractionDigits:1}) + ' %';
+      const pct = Math.round((rate || 0) * 1000) / 10;
+      return pct.toLocaleString("fr-FR",{maximumFractionDigits:1}) + " %";
     }
 
     function applyFilter(text){
-      const q = (text || '').toLowerCase().trim();
+      const q = (text || "").toLowerCase().trim();
       if (!q){
         filteredClients = [...allClients];
       } else {
-        filteredClients = allClients.filter(c => {
-          return (
-            (c.email || '').toLowerCase().includes(q) ||
-            (c.company || '').toLowerCase().includes(q) ||
-            (c.contact_name || '').toLowerCase().includes(q)
-          );
-        });
+        filteredClients = allClients.filter(c =>
+          (c.email || "").toLowerCase().includes(q) ||
+          (c.company || "").toLowerCase().includes(q) ||
+          (c.contact_name || "").toLowerCase().includes(q)
+        );
       }
       currentPage = 1;
       renderTable();
@@ -597,370 +453,312 @@
         ? `${rows.length} client(s) affiché(s) sur ${total} — page ${currentPage}/${totalPages}`
         : `Aucun client ne correspond au filtre`;
 
-      paginationInfo.textContent = `Page ${currentPage} / ${totalPages}`;
+      paginationInfo.textContent = `Page ${currentPage}/${totalPages}`;
       btnPrevPage.disabled = currentPage <= 1;
       btnNextPage.disabled = currentPage >= totalPages;
 
       if (!rows.length){
-        tbody.innerHTML = '<tr><td colspan="8" class="empty">Aucun client à afficher.</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="8" class="empty">Aucun client à afficher.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = rows.map(c => {
-        const status = (c.status || '').toLowerCase();
-        const statusClass = status === 'active' ? 'status-active' : 'status-inactive';
-        const statusLabel = status === 'active' ? 'Actif' : 'Inactif';
-        const actionLabel = status === 'active' ? '🔒 Bloquer' : '🔓 Réactiver';
+        const status = (c.status || "").toLowerCase();
+        const classStatus = status === "active" ? "status-active" : "status-inactive";
+        const labelStatus = status === "active" ? "Actif" : "Inactif";
+        const actionLabel = status === "active" ? "🔒 Bloquer" : "🔓 Réactiver";
 
         return `
-          <tr data-email="${c.email || ''}">
-            <td class="col-email">
-              <div>${c.email || '—'}</div>
-            </td>
-            <td class="col-company">
-              ${c.company || '—'}
-            </td>
-            <td class="col-contact">
-              ${c.contact_name || '—'}
-            </td>
-            <td class="col-discount">
-              <span class="pill-discount">
-                <span>${formatDiscount(c.discount_rate)}</span>
-              </span>
-            </td>
-            <td class="col-status">
-              <span class="status-pill ${statusClass}">${statusLabel}</span>
-            </td>
-            <td class="col-date">
-              <div>${formatDate(c.created_at)}</div>
-            </td>
-            <td class="col-date">
-              <div>${formatDate(c.last_login_at)}</div>
-            </td>
-            <td class="col-actions">
-              <button class="btn-row btn-row-edit" data-email="${c.email || ''}">✏ Modifier</button>
-              <button class="btn-row btn-row-secondary btn-row-toggle" data-email="${c.email || ''}">
+          <tr data-email="${c.email}">
+            <td>${c.email}</td>
+            <td>${c.company || "—"}</td>
+            <td>${c.contact_name || "—"}</td>
+            <td>${formatDiscount(c.discount_rate)}</td>
+            <td><span class="status-pill ${classStatus}">${labelStatus}</span></td>
+            <td>${formatDate(c.created_at)}</td>
+            <td>${formatDate(c.last_login_at)}</td>
+            <td>
+              <button class="btn-row btn-row-edit" data-email="${c.email}">✏ Modifier</button>
+              <button class="btn-row btn-row-secondary btn-row-toggle" data-email="${c.email}">
                 ${actionLabel}
               </button>
-              <button class="btn-row btn-row-reset" data-email="${c.email || ''}">
-                🔁 Reset MDP
-              </button>
+              <button class="btn-row btn-row-reset" data-email="${c.email}">🔁 Reset MDP</button>
             </td>
           </tr>
         `;
-      }).join('');
+      }).join("");
     }
 
     async function loadClients(){
-      loader.style.display = 'flex';
-      errBox.textContent = '';
-      errBox.style.color = '#ffe3e3';
+      loader.style.display = "flex";
       try{
-        const res = await fetch(`${WORKER_BASE}/clients`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        if (!res.ok){
-          throw new Error('HTTP ' + res.status);
-        }
+        const res = await fetch(`${WORKER_BASE}/clients`);
         const data = await res.json();
-        if (!data.ok){
-          throw new Error('Réponse invalide du Worker');
-        }
-
         allClients = data.clients || [];
         filteredClients = [...allClients];
-        loader.style.display = 'none';
+        loader.style.display = "none";
         renderTable();
-      }catch(e){
-        console.error('Erreur chargement clients :', e);
-        loader.style.display = 'none';
-        errBox.style.color = '#ffe3e3';
-        errBox.textContent = "Impossible de récupérer la liste des clients. Vérifiez le Worker ou réessayez plus tard.";
+      } catch(err){
+        loader.style.display = "none";
+        errBox.textContent =
+          "Impossible de récupérer la liste des clients.";
       }
     }
 
-    async function updateClient(email, payload){
-      const res = await fetch(`${WORKER_BASE}/client-update`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, ...payload })
-      });
-      if (!res.ok){
-        throw new Error('HTTP ' + res.status);
+    /* ===========================================================
+       TABLEAU DES DEMANDES D'ACCÈS
+    ============================================================ */
+
+    const reqLoader = document.getElementById("reqLoader");
+    const reqError  = document.getElementById("reqError");
+    const reqTbody  = document.getElementById("reqTbody");
+
+    async function loadRequests(){
+      reqLoader.style.display = "flex";
+      reqError.textContent = "";
+      try{
+        const res = await fetch(`${WORKER_BASE}/pending-requests`);
+        const data = await res.json();
+
+        reqLoader.style.display = "none";
+
+        const rows = data.requests || [];
+        if (!rows.length){
+          reqTbody.innerHTML =
+            `<tr><td colspan="7" class="empty">Aucune demande en attente.</td></tr>`;
+          return;
+        }
+
+        reqTbody.innerHTML = rows.map(r => `
+          <tr data-id="${r.id}">
+            <td>${r.company || "—"}</td>
+            <td>${r.name || "—"}</td>
+            <td>${r.email}</td>
+            <td>${r.phone || "—"}</td>
+            <td>${r.message || "—"}</td>
+            <td>${formatDate(r.created_at)}</td>
+            <td>
+              <button class="btn-row btn-approve" data-id="${r.id}">✔ Approuver</button>
+              <button class="btn-row btn-row-secondary btn-reject" data-id="${r.id}">❌ Refuser</button>
+            </td>
+          </tr>
+        `).join("");
+
+      }catch(err){
+        reqLoader.style.display = "none";
+        reqError.textContent =
+          "Erreur lors du chargement des demandes.";
       }
-      const data = await res.json();
-      if (!data.ok){
-        throw new Error('Réponse Worker non ok');
-      }
-      return data;
     }
 
+    /* ===========================================================
+       ACTION : APPROUVER
+    ============================================================ */
+    async function approveRequest(id){
+      try{
+        const res = await fetch(`${WORKER_BASE}/admin-approve`, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({
+            requestId:id,
+            discount:0,
+            configs:["tôle-tablette"]
+          })
+        });
+
+        const data = await res.json();
+        if (data.ok){
+          alert("Demande approuvée.");
+          loadRequests();
+          loadClients();
+        }
+
+      }catch(err){
+        alert("Erreur lors de l'approbation.");
+      }
+    }
+
+    /* ===========================================================
+       ACTION : REFUSER
+    ============================================================ */
+    async function rejectRequest(id){
+      try{
+        const res = await fetch(`${WORKER_BASE}/access-request-reject`, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ id })
+        });
+
+        const data = await res.json();
+        if (data.ok){
+          alert("Demande refusée.");
+          loadRequests();
+        }
+      }catch(err){
+        alert("Erreur lors du refus.");
+      }
+    }
+
+    /* ===========================================================
+       ÉCOUTEURS — TABLE DES DEMANDES
+    ============================================================ */
+    reqTbody.addEventListener("click", e => {
+      const approve = e.target.closest(".btn-approve");
+      const reject  = e.target.closest(".btn-reject");
+
+      if (approve){
+        const id = approve.getAttribute("data-id");
+        if (confirm("Approuver cette demande ?")){
+          approveRequest(id);
+        }
+      }
+
+      if (reject){
+        const id = reject.getAttribute("data-id");
+        if (confirm("Refuser cette demande ?")){
+          rejectRequest(id);
+        }
+      }
+    });
+
+    /* ===========================================================
+       ÉCOUTEURS TABLEAU CLIENTS (reset, edit, toggle)
+    ============================================================ */
+
+    // RESET MDP
     async function resetClientPassword(email){
       const res = await fetch(`${WORKER_BASE}/client-reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ email })
       });
-      if (!res.ok){
-        throw new Error('HTTP ' + res.status);
-      }
-      const data = await res.json();
-      if (!data.ok){
-        throw new Error('Réponse Worker non ok');
-      }
-      return data;
+      return res.json();
     }
 
-    async function editClient(payload){
+    // EDIT CLIENT
+    async function updateClient(payload){
       const res = await fetch(`${WORKER_BASE}/client-edit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify(payload)
       });
-      if (!res.ok){
-        throw new Error('HTTP ' + res.status);
-      }
-      const data = await res.json();
-      if (!data.ok){
-        throw new Error('Réponse Worker non ok');
-      }
-      return data;
+      return res.json();
     }
 
-    // ===== Navigation =====
-    searchInput.addEventListener('input', () => {
-      applyFilter(searchInput.value);
+    tbody.addEventListener("click", async e => {
+      const edit   = e.target.closest(".btn-row-edit");
+      const toggle = e.target.closest(".btn-row-toggle");
+      const reset  = e.target.closest(".btn-row-reset");
+
+      /* ----- EDIT ----- */
+      if (edit){
+        const email = edit.getAttribute("data-email");
+        const c = allClients.find(c => c.email === email);
+        if (!c) return;
+
+        document.getElementById("editEmailCurrent").value = c.email;
+        document.getElementById("editNewEmail").value = c.email;
+        document.getElementById("editCompany").value = c.company;
+        document.getElementById("editContact").value = c.contact_name;
+        document.getElementById("editDiscount").value = Math.round(c.discount_rate * 100);
+        document.getElementById("editStatus").value = c.status;
+
+        modalEdit.style.display = "flex";
+      }
+
+      /* ----- BLOQUER / DÉBLOQUER ----- */
+      if (toggle){
+        const email = toggle.getAttribute("data-email");
+        const c = allClients.find(x => x.email === email);
+        if (!c) return;
+
+        const next = c.status === "active" ? "inactive" : "active";
+        if (!confirm(`Confirmer changement de statut (${next}) ?`)) return;
+
+        await fetch(`${WORKER_BASE}/client-update`, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify({ email, status:next })
+        });
+
+        loadClients();
+      }
+
+      /* ----- RESET MDP ----- */
+      if (reset){
+        const email = reset.getAttribute("data-email");
+        if (!confirm("Réinitialiser le mot de passe ?")) return;
+
+        const result = await resetClientPassword(email);
+        alert(`Nouveau mot de passe : ${result.password}`);
+      }
     });
 
-    btnBack.addEventListener('click', () => {
-      const parts = location.pathname.split('/').filter(Boolean);
-      const project = parts.length ? parts[0] : '';
-      location.href = `/${project}/index.html`;
-    });
+    /* ===========================================================
+       MODALE NOUVEAU CLIENT
+    ============================================================ */
+    const modalNew = document.getElementById("modalNew");
+    document.getElementById("btnNewClient").onclick = () => {
+      document.getElementById("modalMsg").textContent = "";
+      modalNew.style.display = "flex";
+    };
+    document.getElementById("btnCloseModal").onclick = () =>
+      modalNew.style.display = "none";
 
-    btnExport.addEventListener('click', () => {
-      window.open(`${WORKER_BASE}/clients-export-xls`, '_blank');
-    });
+    document.getElementById("btnCreateClient").onclick = async () => {
+      const email = document.getElementById("newEmail").value.trim();
+      const company = document.getElementById("newCompany").value.trim();
+      const contact = document.getElementById("newContact").value.trim();
+      const discount = Number(document.getElementById("newDiscount").value);
+      const status = document.getElementById("newStatus").value;
 
-    btnPrevPage.addEventListener('click', () => {
-      currentPage--;
-      renderTable();
-    });
-    btnNextPage.addEventListener('click', () => {
-      currentPage++;
-      renderTable();
-    });
-
-    // ===== Modale NOUVEAU CLIENT =====
-    const modalNew = document.getElementById('modalNew');
-    const modalMsg = document.getElementById('modalMsg');
-    const btnNewClient = document.getElementById('btnNewClient');
-    const btnCloseModal = document.getElementById('btnCloseModal');
-    const btnCreateClient = document.getElementById('btnCreateClient');
-
-    btnNewClient.addEventListener('click', () => {
-      modalMsg.textContent = '';
-      modalMsg.style.color = '#ffe3e3';
-      document.getElementById('newEmail').value = '';
-      document.getElementById('newCompany').value = '';
-      document.getElementById('newContact').value = '';
-      document.getElementById('newDiscount').value = '0';
-      document.getElementById('newStatus').value = 'active';
-      modalNew.style.display = 'flex';
-    });
-
-    btnCloseModal.addEventListener('click', () => {
-      modalNew.style.display = 'none';
-    });
-
-    btnCreateClient.addEventListener('click', async () => {
-      const email = document.getElementById('newEmail').value.trim().toLowerCase();
-      const company = document.getElementById('newCompany').value.trim();
-      const contact = document.getElementById('newContact').value.trim();
-      const discount = Number(document.getElementById('newDiscount').value);
-      const status = document.getElementById('newStatus').value;
-
-      modalMsg.textContent = '';
-      modalMsg.style.color = '#ffe3e3';
+      const msg = document.getElementById("modalMsg");
 
       if (!email){
-        modalMsg.textContent = "Email obligatoire.";
+        msg.textContent = "Email obligatoire.";
         return;
       }
 
       try{
         const res = await fetch(`${WORKER_BASE}/client-create`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, company, contact, discount, status })
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify({ email, company, contact, discount, status })
         });
+
         const data = await res.json();
 
-        if (!res.ok || !data.ok){
-          modalMsg.textContent = "Erreur : " + (data.message || "création impossible");
-          return;
-        }
+        msg.style.color = "#b7ffcf";
+        msg.textContent = "Client créé. Mot de passe : " + data.password;
+        alert("Mot de passe : " + data.password);
 
-        modalMsg.style.color = '#b7ffcf';
-        modalMsg.textContent = "Client créé. Mot de passe : " + data.password;
-        alert("Mot de passe pour " + email + " :\n\n" + data.password);
+        loadClients();
 
-        await loadClients();
       }catch(err){
-        console.error(err);
-        modalMsg.style.color = '#ffe3e3';
-        modalMsg.textContent = "Erreur réseau.";
+        msg.style.color = "#ffe3e3";
+        msg.textContent = "Erreur lors de la création.";
       }
-    });
+    };
 
-    // ===== Modale EDIT CLIENT =====
-    const modalEdit = document.getElementById('modalEdit');
-    const editMsg = document.getElementById('editMsg');
-    const editEmailCurrent = document.getElementById('editEmailCurrent');
-    const editNewEmail = document.getElementById('editNewEmail');
-    const editCompany = document.getElementById('editCompany');
-    const editContact = document.getElementById('editContact');
-    const editDiscount = document.getElementById('editDiscount');
-    const editStatus = document.getElementById('editStatus');
-    const editCancel = document.getElementById('editCancel');
-    const editSave = document.getElementById('editSave');
+    /* ===========================================================
+       MODALE EDIT CLIENT
+    ============================================================ */
+    const modalEdit = document.getElementById("modalEdit");
+    document.getElementById("editCancel").onclick = () =>
+      modalEdit.style.display = "none";
 
-    tbody.addEventListener('click', async (e) => {
-      const editBtn = e.target.closest('.btn-row-edit');
-      const toggleBtn = e.target.closest('.btn-row-toggle');
-      const resetBtn = e.target.closest('.btn-row-reset');
+    document.getElementById("editSave").onclick = async () => {
+      const email = document.getElementById("editEmailCurrent").value;
+      let newEmail = document.getElementById("editNewEmail").value;
+      const company = document.getElementById("editCompany").value.trim();
+      const contact = document.getElementById("editContact").value.trim();
+      const discount = Number(document.getElementById("editDiscount").value);
+      const status = document.getElementById("editStatus").value;
 
-      // ✏ Ouvrir la modale d'édition
-      if (editBtn){
-        const email = editBtn.getAttribute('data-email');
-        if (!email) return;
-        const c = allClients.find(cl => cl.email === email);
-        if (!c) return;
-
-        editMsg.textContent = '';
-        editMsg.style.color = '#ffe3e3';
-
-        editEmailCurrent.value = c.email;
-        editNewEmail.value = c.email; // tu peux mettre "" si tu préfères
-        editCompany.value = c.company || "";
-        editContact.value = c.contact_name || "";
-        editDiscount.value = Math.round((c.discount_rate || 0) * 100);
-        editStatus.value = c.status || "active";
-
-        modalEdit.style.display = 'flex';
-        return;
-      }
-
-      // 🔒 Bloquer / 🔓 Réactiver
-      if (toggleBtn) {
-        const email = toggleBtn.getAttribute('data-email');
-        if (!email) return;
-
-        const client = allClients.find(c => c.email === email);
-        if (!client) return;
-
-        const currentStatus = (client.status || 'active').toLowerCase();
-        const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
-
-        const message = nextStatus === 'inactive'
-          ? `Voulez-vous vraiment bloquer l'accès pour ${client.company || client.email} ?`
-          : `Voulez-vous réactiver l'accès pour ${client.company || client.email} ?`;
-
-        if (!confirm(message)) return;
-
-        try{
-          errBox.textContent = '';
-          errBox.style.color = '#ffe3e3';
-
-          const result = await updateClient(email, { status: nextStatus });
-
-          client.status = result.status || nextStatus;
-          if (typeof result.discountRate === 'number') {
-            client.discount_rate = result.discountRate;
-          }
-
-          renderTable();
-
-          errBox.style.color = '#b7ffcf';
-          errBox.textContent = nextStatus === 'inactive'
-            ? "Client bloqué avec succès."
-            : "Client réactivé avec succès.";
-        }catch(err){
-          console.error('Erreur update statut :', err);
-          errBox.style.color = '#ffe3e3';
-          errBox.textContent = "Erreur lors de la mise à jour du statut.";
-        }
-
-        return;
-      }
-
-      // 🔁 Reset MDP
-      if (resetBtn) {
-        const email = resetBtn.getAttribute('data-email');
-        if (!email) return;
-
-        const client = allClients.find(c => c.email === email);
-        if (!client) return;
-
-        const ok = confirm(
-          `Réinitialiser le mot de passe pour ${client.company || client.email} ?\n\n` +
-          `Un nouveau mot de passe sera généré et remplacera l'ancien.`
-        );
-        if (!ok) return;
-
-        try {
-          errBox.textContent = '';
-          errBox.style.color = '#ffe3e3';
-
-          const { password } = await resetClientPassword(email);
-
-          errBox.style.color = '#b7ffcf';
-          errBox.textContent =
-            `Nouveau mot de passe pour ${email} : ${password} (copiez-le tout de suite, il ne sera plus affiché).`;
-
-          alert(
-            `Nouveau mot de passe pour ${email} :\n\n` +
-            `${password}\n\n` +
-            `Copiez-le maintenant, il ne sera plus visible ensuite.`
-          );
-        } catch (err) {
-          console.error('Erreur reset MDP :', err);
-          errBox.style.color = '#ffe3e3';
-          errBox.textContent = "Erreur lors de la réinitialisation du mot de passe.";
-        }
-      }
-    });
-
-    editCancel.addEventListener('click', () => {
-      modalEdit.style.display = 'none';
-    });
-
-    editSave.addEventListener('click', async () => {
-      const email = editEmailCurrent.value.trim().toLowerCase();
-      let newEmail = editNewEmail.value.trim().toLowerCase();
-      const company = editCompany.value.trim();
-      const contact = editContact.value.trim();
-      const discount = Number(editDiscount.value);
-      const status = editStatus.value;
-
-      if (!email){
-        editMsg.style.color = '#ffe3e3';
-        editMsg.textContent = "Email actuel manquant.";
-        return;
-      }
       if (!newEmail) newEmail = email;
-      if (isNaN(discount) || discount < 0 || discount > 90){
-        editMsg.style.color = '#ffe3e3';
-        editMsg.textContent = "Remise entre 0 et 90 %.";
-        return;
-      }
 
       try{
-        editMsg.textContent = '';
-        editMsg.style.color = '#ffe3e3';
-
-        await editClient({
+        await updateClient({
           email,
           newEmail,
           company,
@@ -968,19 +766,41 @@
           discount,
           status
         });
+        alert("Modifié !");
+        modalEdit.style.display = "none";
+        loadClients();
 
-        modalEdit.style.display = 'none';
-        alert("Client mis à jour avec succès.");
-        await loadClients();
       }catch(err){
-        console.error(err);
-        editMsg.style.color = '#ffe3e3';
-        editMsg.textContent = "Erreur lors de la mise à jour du client.";
+        document.getElementById("editMsg").textContent =
+          "Erreur lors de la mise à jour.";
       }
-    });
+    };
 
-    // Chargement initial
+    /* ===========================================================
+       NAV / EXPORT
+    ============================================================ */
+    document.getElementById("btnBack").onclick = () => {
+      location.href = "../index.html";
+    };
+
+    document.getElementById("btnExport").onclick = () => {
+      window.open(`${WORKER_BASE}/clients-export-xls`, "_blank");
+    };
+
+    searchInput.addEventListener("input", () =>
+      applyFilter(searchInput.value));
+
+    btnPrevPage.onclick = () => { currentPage--; renderTable(); };
+    btnNextPage.onclick = () => { currentPage++; renderTable(); };
+
+    /* ===========================================================
+       CHARGEMENT INITIAL
+    ============================================================ */
     loadClients();
+    loadRequests();
+
   </script>
+
+</div>
 </body>
 </html>
