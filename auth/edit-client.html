@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modifier client — Cofel</title>
+
+  <style>
+    :root{
+      --violet:#5a2d82;
+      --violet-2:#7838a7;
+      --glass: rgba(255,255,255,.12);
+      --txt:#f5f7ff;
+      --txt-dim:#dcd6ff;
+      --accent:#c9b7ff;
+    }
+    body{
+      margin:0; padding:20px;
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:linear-gradient(135deg, var(--violet), var(--violet-2));
+      color:var(--txt);
+    }
+    h1{
+      margin-top:0; font-size:20px;
+    }
+    .card{
+      background:rgba(0,0,0,.25);
+      padding:20px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.2);
+      max-width:420px;
+      margin:auto;
+    }
+    label{
+      font-size:13px; display:block; margin-top:12px;
+      color:var(--txt-dim);
+    }
+    input, select{
+      width:100%; padding:8px 10px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.25);
+      background:rgba(255,255,255,.08);
+      color:var(--txt);
+      margin-top:4px;
+    }
+    button{
+      margin-top:20px; padding:10px 14px;
+      width:100%;
+      border:none; border-radius:999px;
+      background:#fff; color:#1a102b;
+      font-weight:700; cursor:pointer;
+    }
+    .msg{
+      margin-top:12px; font-size:13px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>✏ Modifier un client</h1>
+
+  <div class="card">
+    <label>Email actuel (lecture seule)</label>
+    <input id="emailCurrent" type="email" disabled>
+
+    <label>Nouvel email</label>
+    <input id="emailNew" type="email" placeholder="Laisser vide pour garder l'email actuel">
+
+    <label>Société</label>
+    <input id="company" type="text">
+
+    <label>Nom du contact</label>
+    <input id="contact" type="text">
+
+    <label>Remise (%)</label>
+    <input id="discount" type="number" min="0" max="90">
+
+    <label>Statut</label>
+    <select id="status">
+      <option value="active">Actif</option>
+      <option value="inactive">Inactif</option>
+    </select>
+
+    <button id="btnSave">Enregistrer les modifications</button>
+
+    <div id="msg" class="msg"></div>
+  </div>
+
+<script>
+const WORKER = "https://cofel-auth.sonveven.workers.dev";
+
+function getParam(name){
+  return new URLSearchParams(location.search).get(name);
+}
+
+const email = getParam("email");
+document.getElementById("emailCurrent").value = email;
+
+async function loadClient(){
+  const res = await fetch(`${WORKER}/clients`);
+  const data = await res.json();
+  const client = data.clients.find(c => c.email === email);
+
+  if (!client){
+    document.getElementById("msg").textContent =
+      "Client introuvable.";
+    return;
+  }
+
+  document.getElementById("company").value = client.company || "";
+  document.getElementById("contact").value = client.contact_name || "";
+  document.getElementById("discount").value = Math.round((client.discount_rate||0)*100);
+  document.getElementById("status").value = client.status || "active";
+}
+
+loadClient();
+
+document.getElementById("btnSave").onclick = async () => {
+  const company = document.getElementById("company").value.trim();
+  const contact = document.getElementById("contact").value.trim();
+  const discount = Number(document.getElementById("discount").value);
+  const status = document.getElementById("status").value;
+  let newEmail = document.getElementById("emailNew").value.trim();
+
+  if (!newEmail) newEmail = email;
+
+  const msg = document.getElementById("msg");
+
+  try{
+    const res = await fetch(`${WORKER}/client-edit`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        email,
+        newEmail,
+        company,
+        contact,
+        discount,
+        status
+      })
+    });
+
+    const out = await res.json();
+
+    if (out.ok){
+      msg.style.color = "#b7ffcf";
+      msg.textContent = "Modifications enregistrées.";
+      alert("Client modifié !");
+    } else {
+      msg.style.color = "#ffb3b3";
+      msg.textContent = out.error || "Erreur.";
+    }
+
+  }catch(err){
+    msg.style.color = "#ffb3b3";
+    msg.textContent = "Erreur réseau.";
+  }
+};
+</script>
+
+</body>
+</html>
