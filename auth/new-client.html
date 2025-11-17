@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nouveau client — Cofel</title>
+
+  <style>
+    :root{
+      --violet:#5a2d82;
+      --violet-2:#7838a7;
+      --glass: rgba(255,255,255,.12);
+      --txt:#f5f7ff;
+      --txt-dim:#dcd6ff;
+      --accent:#c9b7ff;
+    }
+    body{
+      margin:0; padding:20px;
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:linear-gradient(135deg, var(--violet), var(--violet-2));
+      color:var(--txt);
+    }
+    h1{
+      margin-top:0; font-size:20px;
+    }
+    .card{
+      background:rgba(0,0,0,.25);
+      padding:20px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.2);
+      max-width:420px;
+      margin:auto;
+    }
+    label{
+      font-size:13px; display:block; margin-top:12px;
+      color:var(--txt-dim);
+    }
+    input, select{
+      width:100%; padding:8px 10px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.25);
+      background:rgba(255,255,255,.08);
+      color:var(--txt);
+      margin-top:4px;
+    }
+    button{
+      margin-top:20px; padding:10px 14px;
+      width:100%;
+      border:none; border-radius:999px;
+      background:#fff; color:#1a102b;
+      font-weight:700; cursor:pointer;
+    }
+    .msg{
+      margin-top:12px; font-size:13px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>➕ Création d’un nouveau client</h1>
+
+  <div class="card">
+    <label>Email (identifiant)</label>
+    <input id="email" type="email" placeholder="client@example.com">
+
+    <label>Société</label>
+    <input id="company" type="text" placeholder="Nom de la société">
+
+    <label>Nom du contact</label>
+    <input id="contact" type="text" placeholder="Nom Prénom">
+
+    <label>Remise (%)</label>
+    <input id="discount" type="number" min="0" max="90" value="0">
+
+    <label>Statut</label>
+    <select id="status">
+      <option value="active">Actif</option>
+      <option value="inactive">Inactif</option>
+    </select>
+
+    <button id="btnCreate">Créer le client</button>
+
+    <div id="msg" class="msg"></div>
+  </div>
+
+<script>
+const WORKER = "https://cofel-auth.sonveven.workers.dev";
+
+document.getElementById("btnCreate").onclick = async () => {
+  const email = email = document.getElementById("email").value.trim();
+  const company = document.getElementById("company").value.trim();
+  const contact = document.getElementById("contact").value.trim();
+  const discount = Number(document.getElementById("discount").value);
+  const status = document.getElementById("status").value;
+  const msg = document.getElementById("msg");
+
+  if (!email){
+    msg.style.color = "#ffb3b3";
+    msg.textContent = "Email obligatoire.";
+    return;
+  }
+
+  try{
+    const res = await fetch(`${WORKER}/client-create`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ email, company, contact, discount, status })
+    });
+
+    const data = await res.json();
+
+    if (data.ok){
+      msg.style.color = "#b7ffcf";
+      msg.textContent = "Client créé ! Mot de passe : " + data.password;
+      alert("Mot de passe : " + data.password);
+    } else {
+      msg.style.color = "#ffb3b3";
+      msg.textContent = data.error || "Erreur inconnue.";
+    }
+
+  }catch(err){
+    msg.style.color = "#ffb3b3";
+    msg.textContent = "Erreur réseau.";
+  }
+};
+</script>
+
+</body>
+</html>
