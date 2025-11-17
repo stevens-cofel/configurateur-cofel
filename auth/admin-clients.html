@@ -1,986 +1,321 @@
-<!-- /auth/admin-clients.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Administration clients — Cofel</title>
+  <meta charset="UTF-8">
+  <title>Administration — Clients Cofel</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 
-  <!-- 🔒 Protection par le même mot de passe que le portail interne -->
-  <script src="./lock.js" type="module"></script>
-
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
-    :root{
-      --cofel:#5a2d82; --cofel-2:#7838a7;
-      --glass: rgba(255,255,255,.12);
-      --glass-soft: rgba(255,255,255,.06);
-      --txt:#f5f7ff; --txt-dim:#dcd6ff; --accent:#c9b7ff;
-      --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box;}
-    html,body{height:100%;}
     body{
-      margin:0; color:var(--txt);
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif;
-      background:
-        radial-gradient(800px 500px at 20% -10%, rgba(255,255,255,.10), transparent 60%),
-        radial-gradient(800px 500px at 110% 10%, rgba(255,255,255,.08), transparent 60%),
-        linear-gradient(135deg, var(--cofel), var(--cofel-2));
-      padding:20px;
-    }
-
-    .shell{
-      max-width:1200px;
-      margin:0 auto;
-    }
-
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:18px;
-      flex-wrap:wrap;
-    }
-    .brand{
-      display:flex; align-items:center; gap:12px;
-    }
-    .brand img{
-      height:40px; width:auto; border-radius:10px; object-fit:contain;
-    }
-    h1{
       margin:0;
-      font-size:clamp(18px,2.4vw,22px);
+      background:#120d1f;
+      color:#f5f5ff;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
     }
-    .tagline{
-      margin:4px 0 0;
-      font-size:13px;
-      color:var(--txt-dim);
+    header{
+      padding:16px;
+      background:#1e1533;
+      border-bottom:1px solid rgba(255,255,255,.15);
     }
-
-    .header-actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
+    header h1{
+      margin:0;
+      font-size:22px;
+      font-weight:700;
+      letter-spacing:.3px;
     }
-
-    .btn{
-      appearance:none; border:none; cursor:pointer; font-weight:700;
-      color:#0b0b0b; background:#fff; border-radius:999px; padding:8px 14px;
-      box-shadow:0 10px 24px rgba(0,0,0,.25);
-      font-size:13px;
-      white-space:nowrap;
+    .wrap{
+      max-width:1200px;
+      margin:20px auto;
+      padding:0 16px 60px;
     }
-
-    .btn-row{
-      appearance:none;
-      padding:4px 8px;
-      font-size:11px;
-      box-shadow:none;
-      border-radius:999px;
-      white-space:nowrap;
-      border:1px solid rgba(0,0,0,.2);
-      cursor:pointer;
-      background:#fff;
-      color:#111;
-    }
-    .btn-row-secondary{
-      background:transparent;
-      color:var(--txt);
-      border:1px solid rgba(255,255,255,.4);
-    }
-    .btn-row-reset{
-      background:transparent;
-      color:#ffe9b5;
-      border:1px solid rgba(255, 202, 116, .7);
-    }
-
     .card{
-      background: linear-gradient(180deg, var(--glass), var(--glass-soft));
-      border-radius:var(--radius);
-      border:1px solid rgba(255,255,255,.22);
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(var(--blur));
-      padding:16px 16px 10px;
-    }
-
-    .toolbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-bottom:10px;
-    }
-    .toolbar-left{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      font-size:13px;
-      color:var(--txt-dim);
-    }
-    .filter-row{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-    .filter-row input{
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.25);
-      background:rgba(0,0,0,.15);
-      color:var(--txt);
-      font-size:13px;
-      min-width:180px;
-    }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      padding:3px 8px;
-      border-radius:999px;
-      font-size:11px;
-      border:1px solid rgba(255,255,255,.22);
-      background:rgba(0,0,0,.2);
-    }
-
-    .status-pill{
-      display:inline-flex;
-      padding:3px 8px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:600;
-    }
-    .status-active{
-      background:rgba(46, 213, 115, .18);
-      color:#b9ffd4;
-      border:1px solid rgba(46, 213, 115, .4);
-    }
-    .status-inactive{
-      background:rgba(255, 118, 117, .18);
-      color:#ffd6d5;
-      border:1px solid rgba(255, 118, 117, .4);
-    }
-
-    .table-wrap{
-      margin-top:6px;
-      border-radius:14px;
+      background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.18);
-      overflow:auto;
-      max-width:100%;
+      border-radius:16px;
+      padding:18px;
+      margin-bottom:26px;
+      backdrop-filter:blur(14px);
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    h2{
+      margin:0 0 14px;
+      font-size:20px;
+      font-weight:700;
     }
     table{
       width:100%;
       border-collapse:collapse;
-      font-size:13px;
-      table-layout:auto;
-    }
-    thead{
-      background:rgba(0,0,0,.25);
+      margin-top:12px;
     }
     th, td{
-      padding:8px 10px;
-      text-align:left;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      font-size:14px;
     }
     th{
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-      color:var(--accent);
-      border-bottom:1px solid rgba(255,255,255,.22);
-      position:sticky;
-      top:0;
-      backdrop-filter: blur(10px);
-      background:rgba(10,5,30,.95);
-      z-index:1;
-      white-space:nowrap;
-    }
-    tbody tr:nth-child(even){
-      background:rgba(0,0,0,.12);
-    }
-    tbody tr:hover{
-      background:rgba(255,255,255,.05);
-    }
-    td{
-      border-bottom:1px solid rgba(255,255,255,.08);
-      vertical-align:middle;
-    }
-
-    .col-discount{text-align:right;}
-    .col-date{white-space:nowrap;}
-    .col-actions{text-align:right;}
-
-    @media (max-width: 900px){
-      .col-email,
-      .col-company,
-      .col-contact{
-        max-width:180px;
-        word-wrap:break-word;
-        white-space:normal;
-      }
-      .col-actions{
-        white-space:normal;
-      }
-    }
-
-    .empty{
-      text-align:center;
-      padding:18px 10px;
-      color:var(--txt-dim);
+      text-align:left;
+      color:#c9b7ff;
       font-size:13px;
+      letter-spacing:.3px;
     }
-
-    .pill-discount{
-      display:inline-flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap:4px;
-      min-width:60px;
+    tr:hover td{
+      background:rgba(255,255,255,.06);
     }
-
-    .muted{
-      color:var(--txt-dim);
-      font-size:11px;
-    }
-    .err{
-      color:#ffe3e3;
-      font-size:13px;
-      margin-top:8px;
-      min-height:18px;
-    }
-    .loader{
-      font-size:13px;
-      color:var(--txt-dim);
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-    .dot{
-      width:6px; height:6px; border-radius:50%; background:var(--accent);
-      animation:bounce 1s infinite alternate;
-    }
-    .dot:nth-child(2){animation-delay:.15s;}
-    .dot:nth-child(3){animation-delay:.3s;}
-    @keyframes bounce{
-      from{ transform:translateY(0); opacity:.6;}
-      to  { transform:translateY(-4px); opacity:1;}
-    }
-
-    /* Pagination */
-    .pagination{
-      margin-top:8px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      font-size:12px;
-      color:var(--txt-dim);
-      flex-wrap:wrap;
-    }
-    .pagination-buttons{
-      display:flex;
-      gap:4px;
-      flex-wrap:wrap;
-    }
-    .pagination button{
-      appearance:none;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.45);
-      background:rgba(0,0,0,.2);
-      color:var(--txt);
-      font-size:11px;
-      padding:4px 8px;
+    button{
       cursor:pointer;
-    }
-    .pagination button:disabled{
-      opacity:.4;
-      cursor:not-allowed;
-    }
-
-    /* Modales */
-    #modalNew, #modalEdit{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.55);
-      backdrop-filter:blur(3px);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:1000;
-    }
-    .modal-card{
-      background:#1c1530;
-      color:#f5f7ff;
-      padding:20px 22px;
-      border-radius:16px;
-      width:90%;
-      max-width:440px;
-      border:1px solid rgba(255,255,255,.25);
-      box-shadow:0 10px 30px rgba(0,0,0,.45);
-    }
-    .modal-card h2,
-    .modal-card h3{
-      margin:0 0 14px;
-      font-size:20px;
-    }
-    .modal-field{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      margin-bottom:10px;
-      font-size:13px;
-    }
-    .modal-field label{
-      font-weight:600;
-      color:#e0dafc;
-    }
-    .modal-field input,
-    .modal-field select{
-      width:100%;
-      padding:8px 10px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,.3);
-      background:rgba(0,0,0,.35);
-      color:#fff;
-      font-size:13px;
-    }
-    .modal-actions{
-      display:flex;
-      justify-content:flex-end;
-      gap:8px;
-      margin-top:6px;
-    }
-    .btn-modal{
-      padding:8px 14px;
-      border-radius:999px;
       border:none;
-      cursor:pointer;
-      font-size:13px;
+      padding:8px 14px;
+      border-radius:10px;
+      font-weight:600;
     }
-    .btn-modal-primary{
-      background:#5a2d82;
-      color:#fff;
+    .btn-valider{
+      background:#8cf59b;
+      color:#0e2913;
     }
-    .btn-modal-secondary{
-      background:transparent;
-      color:#f5f7ff;
-      border:1px solid rgba(255,255,255,.4);
+    .btn-refuser{
+      background:#f58989;
+      color:#2a0b0b;
     }
-    #modalMsg, #editMsg{
-      margin-top:6px;
-      font-size:12px;
-      min-height:16px;
+    .btn-edit{
+      background:#ffffff;
+      color:#1a1a1a;
     }
   </style>
 </head>
+
 <body>
+<header>
+  <h1>Portail Administrateur — Cofel</h1>
+</header>
 
-  <!-- MODALE NOUVEAU CLIENT -->
-  <div id="modalNew">
-    <div class="modal-card">
-      <h3>Créer un nouveau client</h3>
+<main class="wrap">
 
-      <div class="modal-field">
-        <label for="newEmail">Email (identifiant)</label>
-        <input id="newEmail" type="email" placeholder="client@exemple.com">
+  <!-- ============================================
+       DEMANDES D’ACCÈS EN ATTENTE
+       ============================================ -->
+  <section class="card" id="pendingRequestsCard" style="display:none;">
+    <h2>🔔 Demandes d’accès en attente</h2>
+    <p style="color:#ccc; font-size:14px; margin-top:-8px;">
+      Validez ou refusez directement depuis cet écran.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Société</th>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Message</th>
+          <th>Reçue le</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="pendingRequestsBody">
+        <tr>
+          <td colspan="7" style="padding:12px; text-align:center; color:#bbb;">
+            Aucune demande en attente.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================================
+       LISTE DES CLIENTS
+       ============================================ -->
+  <section class="card" id="clientList">
+    <h2>👥 Clients enregistrés</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Société</th>
+          <th>Contact</th>
+          <th>Statut</th>
+          <th>Remise (%)</th>
+          <th>Créé</th>
+          <th>Dernière connexion</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="clientListBody">
+        <tr>
+          <td colspan="8" style="padding:12px; text-align:center; color:#bbb;">
+            Chargement…
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+  <!-- ============================================
+       MODALE — VALIDER DEMANDE
+       ============================================ -->
+  <div id="modalApprove" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+    <div style="background:#201833; padding:20px; border-radius:14px; width:360px;">
+      <h3>Valider l'accès</h3>
+      <input type="hidden" id="approveRequestId">
+
+      <label style="display:block; margin-top:10px;">Remise (%)</label>
+      <input type="number" id="approveDiscount" min="0" max="90" value="0"
+             style="width:100%; padding:8px; border-radius:8px; border:none;">
+
+      <label style="display:block; margin-top:12px;">Configurateurs autorisés</label>
+      <div id="approveConfigs" style="display:grid; gap:6px; margin-top:6px; font-size:14px;">
+        <label><input type="checkbox" value="enseigne-drapeau"> Enseigne drapeau</label>
+        <label><input type="checkbox" value="lettre-alu-alupvc"> Lettres Alu / Alu-PVC</label>
+        <label><input type="checkbox" value="lettre-boitier"> Lettres boîtiers</label>
+        <label><input type="checkbox" value="lettres-pvc"> Lettres PVC</label>
+        <label><input type="checkbox" value="pll"> Rampe lumineuse (PLL)</label>
+        <label><input type="checkbox" value="tole-tablette" checked> Tôle Tablette</label>
+        <label><input type="checkbox" value="tolerie-dibond"> Tôlerie Dibond</label>
+        <label><input type="checkbox" value="totems"> Totems</label>
       </div>
 
-      <div class="modal-field">
-        <label for="newCompany">Société</label>
-        <input id="newCompany" type="text" placeholder="Nom de la société">
+      <div style="display:flex; gap:8px; margin-top:20px;">
+        <button id="btnApproveConfirm" class="btn-valider" style="flex:1;">Valider</button>
+        <button onclick="closeModal('modalApprove')" class="btn-refuser" style="flex:1;">Annuler</button>
       </div>
-
-      <div class="modal-field">
-        <label for="newContact">Nom du contact</label>
-        <input id="newContact" type="text" placeholder="Nom Prénom">
-      </div>
-
-      <div class="modal-field">
-        <label for="newDiscount">Remise (%)</label>
-        <input id="newDiscount" type="number" min="0" max="90" value="0">
-      </div>
-
-      <div class="modal-field">
-        <label for="newStatus">Statut</label>
-        <select id="newStatus">
-          <option value="active">Actif</option>
-          <option value="inactive">Inactif</option>
-        </select>
-      </div>
-
-      <div class="modal-actions">
-        <button id="btnCloseModal" class="btn-modal btn-modal-secondary">Annuler</button>
-        <button id="btnCreateClient" class="btn-modal btn-modal-primary">Créer</button>
-      </div>
-
-      <div id="modalMsg"></div>
     </div>
   </div>
 
-  <!-- MODALE EDIT CLIENT -->
-  <div id="modalEdit">
-    <div class="modal-card">
-      <h3>Modifier client</h3>
+  <!-- ============================================
+       MODALE — REFUSER DEMANDE
+       ============================================ -->
+  <div id="modalReject" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+    <div style="background:#201833; padding:20px; border-radius:14px; width:330px;">
+      <h3>Refuser la demande</h3>
+      <input type="hidden" id="rejectRequestId">
 
-      <div class="modal-field">
-        <label for="editEmailCurrent">Email actuel (lecture seule)</label>
-        <input id="editEmailCurrent" type="email" disabled>
+      <p style="font-size:14px; color:#ccc;">Êtes-vous sûr de vouloir refuser cette demande d'accès ?</p>
+
+      <div style="display:flex; gap:8px; margin-top:20px;">
+        <button id="btnRejectConfirm" class="btn-refuser" style="flex:1;">Refuser</button>
+        <button onclick="closeModal('modalReject')" class="btn-edit" style="flex:1;">Annuler</button>
       </div>
-
-      <div class="modal-field">
-        <label for="editNewEmail">Nouvel email (optionnel)</label>
-        <input id="editNewEmail" type="email" placeholder="Laisser vide pour conserver l'email actuel">
-      </div>
-
-      <div class="modal-field">
-        <label for="editCompany">Société</label>
-        <input id="editCompany" type="text">
-      </div>
-
-      <div class="modal-field">
-        <label for="editContact">Nom du contact</label>
-        <input id="editContact" type="text">
-      </div>
-
-      <div class="modal-field">
-        <label for="editDiscount">Remise (%)</label>
-        <input id="editDiscount" type="number" min="0" max="90">
-      </div>
-
-      <div class="modal-field">
-        <label for="editStatus">Statut</label>
-        <select id="editStatus">
-          <option value="active">Actif</option>
-          <option value="inactive">Inactif</option>
-        </select>
-      </div>
-
-      <div class="modal-actions">
-        <button id="editCancel" class="btn-modal btn-modal-secondary">Annuler</button>
-        <button id="editSave" class="btn-modal btn-modal-primary">Enregistrer</button>
-      </div>
-
-      <div id="editMsg"></div>
     </div>
   </div>
 
-  <div class="shell">
-    <header>
-      <div>
-        <div class="brand">
-          <img src="../assets/logo cofel.jpg" alt="Cofel">
-          <div>
-            <h1>Administration des comptes clients</h1>
-            <p class="tagline">Visualisez les comptes, remises, statuts, créez des clients et réinitialisez les mots de passe.</p>
-          </div>
-        </div>
-      </div>
-      <div class="header-actions">
-        <button id="btnNewClient" class="btn">➕ Nouveau client</button>
-        <button id="btnExport" class="btn">⬇ Export Excel (.xls)</button>
-        <button id="btnBack" class="btn">⬅ Retour aux configurateurs</button>
-      </div>
-    </header>
+</main>
 
-    <section class="card">
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <div class="filter-row">
-            <span>Recherche :</span>
-            <input id="searchInput" type="text" placeholder="Filtrer par email, société ou contact…">
-          </div>
-          <div>
-            <span id="infoCount" class="badge">Chargement…</span>
-          </div>
-        </div>
-        <div class="loader" id="loader">
-          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-          <span>Récupération des clients…</span>
-        </div>
-      </div>
+<!-- ============================
+     JAVASCRIPT PRINCIPAL
+     ============================ -->
+<script>
+const API = "https://cofel-auth.stevens.workers.dev";  // Ton worker
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th class="col-email">Email</th>
-              <th class="col-company">Société</th>
-              <th class="col-contact">Contact</th>
-              <th class="col-discount">Remise</th>
-              <th class="col-status">Statut</th>
-              <th class="col-date">Créé le</th>
-              <th class="col-date">Dernière connexion</th>
-              <th class="col-actions">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyClients">
-            <tr><td colspan="8" class="empty">En attente des données…</td></tr>
-          </tbody>
-        </table>
-      </div>
+/* ---------- Utils modales ----------- */
+function openModal(id){ document.getElementById(id).style.display="flex"; }
+function closeModal(id){ document.getElementById(id).style.display="none"; }
 
-      <div class="pagination">
-        <div id="paginationInfo">Page 1 / 1</div>
-        <div class="pagination-buttons">
-          <button id="btnPrevPage">◀ Précédent</button>
-          <button id="btnNextPage">Suivant ▶</button>
-        </div>
-      </div>
+/* ---------- Chargement tableaux ----------- */
+async function loadPendingRequests(){
+  try{
+    const r = await fetch(API + "/pending-requests");
+    const data = await r.json();
 
-      <div id="err" class="err"></div>
-    </section>
-  </div>
+    const card = document.getElementById("pendingRequestsCard");
+    const body = document.getElementById("pendingRequestsBody");
 
-  <script>
-    const WORKER_BASE = 'https://cofel-auth.sonveven.workers.dev';
-
-    const tbody = document.getElementById('tbodyClients');
-    const loader = document.getElementById('loader');
-    const errBox = document.getElementById('err');
-    const infoCount = document.getElementById('infoCount');
-    const searchInput = document.getElementById('searchInput');
-    const btnBack = document.getElementById('btnBack');
-    const btnExport = document.getElementById('btnExport');
-
-    const btnPrevPage = document.getElementById('btnPrevPage');
-    const btnNextPage = document.getElementById('btnNextPage');
-    const paginationInfo = document.getElementById('paginationInfo');
-
-    const PAGE_SIZE = 25;
-    let allClients = [];
-    let filteredClients = [];
-    let currentPage = 1;
-
-    function formatDate(iso){
-      if(!iso) return '—';
-      const d = new Date(iso);
-      if (isNaN(d.getTime())) return '—';
-      return d.toLocaleDateString('fr-FR') + ' ' +
-             d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    if(!data.requests || data.requests.length === 0){
+      card.style.display = "none";
+      body.innerHTML = `
+        <tr><td colspan="7" style="text-align:center; padding:12px; color:#888;">Aucune demande en attente.</td></tr>
+      `;
+      return;
     }
 
-    function formatDiscount(rate){
-      const r = Number(rate || 0);
-      const pct = Math.round(r * 1000) / 10;
-      return pct.toLocaleString('fr-FR', {maximumFractionDigits:1}) + ' %';
-    }
+    card.style.display = "block";
+    body.innerHTML = data.requests.map(req => `
+      <tr>
+        <td>${req.company}</td>
+        <td>${req.name}</td>
+        <td>${req.email}</td>
+        <td>${req.phone || "-"}</td>
+        <td>${req.message || "-"}</td>
+        <td>${new Date(req.created_at).toLocaleDateString("fr-FR")}</td>
+        <td>
+          <button class="btn-valider" onclick="openApprove('${req.id}')">Valider</button>
+          <button class="btn-refuser" onclick="openReject('${req.id}')">Refuser</button>
+        </td>
+      </tr>
+    `).join("");
+  }catch(e){
+    console.error("Erreur pending:", e);
+  }
+}
 
-    function applyFilter(text){
-      const q = (text || '').toLowerCase().trim();
-      if (!q){
-        filteredClients = [...allClients];
-      } else {
-        filteredClients = allClients.filter(c => {
-          return (
-            (c.email || '').toLowerCase().includes(q) ||
-            (c.company || '').toLowerCase().includes(q) ||
-            (c.contact_name || '').toLowerCase().includes(q)
-          );
-        });
-      }
-      currentPage = 1;
-      renderTable();
-    }
+async function loadClients(){
+  try{
+    const r = await fetch(API + "/clients");
+    const data = await r.json();
 
-    function renderTable(){
-      const total = filteredClients.length;
-      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-      currentPage = Math.min(Math.max(1, currentPage), totalPages);
+    const body = document.getElementById("clientListBody");
 
-      const start = (currentPage - 1) * PAGE_SIZE;
-      const rows = filteredClients.slice(start, start + PAGE_SIZE);
+    body.innerHTML = (data.clients || []).map(c => `
+      <tr>
+        <td>${c.email}</td>
+        <td>${c.company}</td>
+        <td>${c.contact_name}</td>
+        <td>${c.status}</td>
+        <td>${((c.discount_rate||0)*100).toFixed(0)}%</td>
+        <td>${c.created_at ? new Date(c.created_at).toLocaleDateString("fr-FR") : "-"}</td>
+        <td>${c.last_login_at ? new Date(c.last_login_at).toLocaleDateString("fr-FR") : "-"}</td>
+        <td><button class="btn-edit" onclick="alert('Edition client à venir')">Modifier</button></td>
+      </tr>
+    `).join("");
+  }catch(e){
+    console.error("Erreur clients:", e);
+  }
+}
 
-      infoCount.textContent = total
-        ? `${rows.length} client(s) affiché(s) sur ${total} — page ${currentPage}/${totalPages}`
-        : `Aucun client ne correspond au filtre`;
+/* ---------- Actions demandes ----------- */
+function openApprove(id){
+  document.getElementById("approveRequestId").value = id;
+  openModal("modalApprove");
+}
 
-      paginationInfo.textContent = `Page ${currentPage} / ${totalPages}`;
-      btnPrevPage.disabled = currentPage <= 1;
-      btnNextPage.disabled = currentPage >= totalPages;
+function openReject(id){
+  document.getElementById("rejectRequestId").value = id;
+  openModal("modalReject");
+}
 
-      if (!rows.length){
-        tbody.innerHTML = '<tr><td colspan="8" class="empty">Aucun client à afficher.</td></tr>';
-        return;
-      }
+document.getElementById("btnApproveConfirm").addEventListener("click", async ()=>{
+  const id = document.getElementById("approveRequestId").value;
+  const discount = Number(document.getElementById("approveDiscount").value);
+  const cfg = [...document.querySelectorAll("#approveConfigs input:checked")].map(i => i.value);
 
-      tbody.innerHTML = rows.map(c => {
-        const status = (c.status || '').toLowerCase();
-        const statusClass = status === 'active' ? 'status-active' : 'status-inactive';
-        const statusLabel = status === 'active' ? 'Actif' : 'Inactif';
-        const actionLabel = status === 'active' ? '🔒 Bloquer' : '🔓 Réactiver';
+  const r = await fetch(API + "/admin-approve", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ requestId:id, discount, configs:cfg })
+  });
 
-        return `
-          <tr data-email="${c.email || ''}">
-            <td class="col-email">
-              <div>${c.email || '—'}</div>
-            </td>
-            <td class="col-company">
-              ${c.company || '—'}
-            </td>
-            <td class="col-contact">
-              ${c.contact_name || '—'}
-            </td>
-            <td class="col-discount">
-              <span class="pill-discount">
-                <span>${formatDiscount(c.discount_rate)}</span>
-              </span>
-            </td>
-            <td class="col-status">
-              <span class="status-pill ${statusClass}">${statusLabel}</span>
-            </td>
-            <td class="col-date">
-              <div>${formatDate(c.created_at)}</div>
-            </td>
-            <td class="col-date">
-              <div>${formatDate(c.last_login_at)}</div>
-            </td>
-            <td class="col-actions">
-              <button class="btn-row btn-row-edit" data-email="${c.email || ''}">✏ Modifier</button>
-              <button class="btn-row btn-row-secondary btn-row-toggle" data-email="${c.email || ''}">
-                ${actionLabel}
-              </button>
-              <button class="btn-row btn-row-reset" data-email="${c.email || ''}">
-                🔁 Reset MDP
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
+  closeModal("modalApprove");
+  await loadPendingRequests();
+  await loadClients();
+});
 
-    async function loadClients(){
-      loader.style.display = 'flex';
-      errBox.textContent = '';
-      errBox.style.color = '#ffe3e3';
-      try{
-        const res = await fetch(`${WORKER_BASE}/clients`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        if (!res.ok){
-          throw new Error('HTTP ' + res.status);
-        }
-        const data = await res.json();
-        if (!data.ok){
-          throw new Error('Réponse invalide du Worker');
-        }
+document.getElementById("btnRejectConfirm").addEventListener("click", async ()=>{
+  const id = document.getElementById("rejectRequestId").value;
 
-        allClients = data.clients || [];
-        filteredClients = [...allClients];
-        loader.style.display = 'none';
-        renderTable();
-      }catch(e){
-        console.error('Erreur chargement clients :', e);
-        loader.style.display = 'none';
-        errBox.style.color = '#ffe3e3';
-        errBox.textContent = "Impossible de récupérer la liste des clients. Vérifiez le Worker ou réessayez plus tard.";
-      }
-    }
+  const r = await fetch(API + "/admin-reject", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ requestId:id })
+  });
 
-    async function updateClient(email, payload){
-      const res = await fetch(`${WORKER_BASE}/client-update`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, ...payload })
-      });
-      if (!res.ok){
-        throw new Error('HTTP ' + res.status);
-      }
-      const data = await res.json();
-      if (!data.ok){
-        throw new Error('Réponse Worker non ok');
-      }
-      return data;
-    }
+  closeModal("modalReject");
+  await loadPendingRequests();
+});
 
-    async function resetClientPassword(email){
-      const res = await fetch(`${WORKER_BASE}/client-reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      if (!res.ok){
-        throw new Error('HTTP ' + res.status);
-      }
-      const data = await res.json();
-      if (!data.ok){
-        throw new Error('Réponse Worker non ok');
-      }
-      return data;
-    }
+/* ---------- Initial load ----------- */
+loadPendingRequests();
+loadClients();
+</script>
 
-    async function editClient(payload){
-      const res = await fetch(`${WORKER_BASE}/client-edit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok){
-        throw new Error('HTTP ' + res.status);
-      }
-      const data = await res.json();
-      if (!data.ok){
-        throw new Error('Réponse Worker non ok');
-      }
-      return data;
-    }
-
-    // ===== Navigation =====
-    searchInput.addEventListener('input', () => {
-      applyFilter(searchInput.value);
-    });
-
-    btnBack.addEventListener('click', () => {
-      const parts = location.pathname.split('/').filter(Boolean);
-      const project = parts.length ? parts[0] : '';
-      location.href = `/${project}/index.html`;
-    });
-
-    btnExport.addEventListener('click', () => {
-      window.open(`${WORKER_BASE}/clients-export-xls`, '_blank');
-    });
-
-    btnPrevPage.addEventListener('click', () => {
-      currentPage--;
-      renderTable();
-    });
-    btnNextPage.addEventListener('click', () => {
-      currentPage++;
-      renderTable();
-    });
-
-    // ===== Modale NOUVEAU CLIENT =====
-    const modalNew = document.getElementById('modalNew');
-    const modalMsg = document.getElementById('modalMsg');
-    const btnNewClient = document.getElementById('btnNewClient');
-    const btnCloseModal = document.getElementById('btnCloseModal');
-    const btnCreateClient = document.getElementById('btnCreateClient');
-
-    btnNewClient.addEventListener('click', () => {
-      modalMsg.textContent = '';
-      modalMsg.style.color = '#ffe3e3';
-      document.getElementById('newEmail').value = '';
-      document.getElementById('newCompany').value = '';
-      document.getElementById('newContact').value = '';
-      document.getElementById('newDiscount').value = '0';
-      document.getElementById('newStatus').value = 'active';
-      modalNew.style.display = 'flex';
-    });
-
-    btnCloseModal.addEventListener('click', () => {
-      modalNew.style.display = 'none';
-    });
-
-    btnCreateClient.addEventListener('click', async () => {
-      const email = document.getElementById('newEmail').value.trim().toLowerCase();
-      const company = document.getElementById('newCompany').value.trim();
-      const contact = document.getElementById('newContact').value.trim();
-      const discount = Number(document.getElementById('newDiscount').value);
-      const status = document.getElementById('newStatus').value;
-
-      modalMsg.textContent = '';
-      modalMsg.style.color = '#ffe3e3';
-
-      if (!email){
-        modalMsg.textContent = "Email obligatoire.";
-        return;
-      }
-
-      try{
-        const res = await fetch(`${WORKER_BASE}/client-create`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, company, contact, discount, status })
-        });
-        const data = await res.json();
-
-        if (!res.ok || !data.ok){
-          modalMsg.textContent = "Erreur : " + (data.message || "création impossible");
-          return;
-        }
-
-        modalMsg.style.color = '#b7ffcf';
-        modalMsg.textContent = "Client créé. Mot de passe : " + data.password;
-        alert("Mot de passe pour " + email + " :\n\n" + data.password);
-
-        await loadClients();
-      }catch(err){
-        console.error(err);
-        modalMsg.style.color = '#ffe3e3';
-        modalMsg.textContent = "Erreur réseau.";
-      }
-    });
-
-    // ===== Modale EDIT CLIENT =====
-    const modalEdit = document.getElementById('modalEdit');
-    const editMsg = document.getElementById('editMsg');
-    const editEmailCurrent = document.getElementById('editEmailCurrent');
-    const editNewEmail = document.getElementById('editNewEmail');
-    const editCompany = document.getElementById('editCompany');
-    const editContact = document.getElementById('editContact');
-    const editDiscount = document.getElementById('editDiscount');
-    const editStatus = document.getElementById('editStatus');
-    const editCancel = document.getElementById('editCancel');
-    const editSave = document.getElementById('editSave');
-
-    tbody.addEventListener('click', async (e) => {
-      const editBtn = e.target.closest('.btn-row-edit');
-      const toggleBtn = e.target.closest('.btn-row-toggle');
-      const resetBtn = e.target.closest('.btn-row-reset');
-
-      // ✏ Ouvrir la modale d'édition
-      if (editBtn){
-        const email = editBtn.getAttribute('data-email');
-        if (!email) return;
-        const c = allClients.find(cl => cl.email === email);
-        if (!c) return;
-
-        editMsg.textContent = '';
-        editMsg.style.color = '#ffe3e3';
-
-        editEmailCurrent.value = c.email;
-        editNewEmail.value = c.email; // tu peux mettre "" si tu préfères
-        editCompany.value = c.company || "";
-        editContact.value = c.contact_name || "";
-        editDiscount.value = Math.round((c.discount_rate || 0) * 100);
-        editStatus.value = c.status || "active";
-
-        modalEdit.style.display = 'flex';
-        return;
-      }
-
-      // 🔒 Bloquer / 🔓 Réactiver
-      if (toggleBtn) {
-        const email = toggleBtn.getAttribute('data-email');
-        if (!email) return;
-
-        const client = allClients.find(c => c.email === email);
-        if (!client) return;
-
-        const currentStatus = (client.status || 'active').toLowerCase();
-        const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
-
-        const message = nextStatus === 'inactive'
-          ? `Voulez-vous vraiment bloquer l'accès pour ${client.company || client.email} ?`
-          : `Voulez-vous réactiver l'accès pour ${client.company || client.email} ?`;
-
-        if (!confirm(message)) return;
-
-        try{
-          errBox.textContent = '';
-          errBox.style.color = '#ffe3e3';
-
-          const result = await updateClient(email, { status: nextStatus });
-
-          client.status = result.status || nextStatus;
-          if (typeof result.discountRate === 'number') {
-            client.discount_rate = result.discountRate;
-          }
-
-          renderTable();
-
-          errBox.style.color = '#b7ffcf';
-          errBox.textContent = nextStatus === 'inactive'
-            ? "Client bloqué avec succès."
-            : "Client réactivé avec succès.";
-        }catch(err){
-          console.error('Erreur update statut :', err);
-          errBox.style.color = '#ffe3e3';
-          errBox.textContent = "Erreur lors de la mise à jour du statut.";
-        }
-
-        return;
-      }
-
-      // 🔁 Reset MDP
-      if (resetBtn) {
-        const email = resetBtn.getAttribute('data-email');
-        if (!email) return;
-
-        const client = allClients.find(c => c.email === email);
-        if (!client) return;
-
-        const ok = confirm(
-          `Réinitialiser le mot de passe pour ${client.company || client.email} ?\n\n` +
-          `Un nouveau mot de passe sera généré et remplacera l'ancien.`
-        );
-        if (!ok) return;
-
-        try {
-          errBox.textContent = '';
-          errBox.style.color = '#ffe3e3';
-
-          const { password } = await resetClientPassword(email);
-
-          errBox.style.color = '#b7ffcf';
-          errBox.textContent =
-            `Nouveau mot de passe pour ${email} : ${password} (copiez-le tout de suite, il ne sera plus affiché).`;
-
-          alert(
-            `Nouveau mot de passe pour ${email} :\n\n` +
-            `${password}\n\n` +
-            `Copiez-le maintenant, il ne sera plus visible ensuite.`
-          );
-        } catch (err) {
-          console.error('Erreur reset MDP :', err);
-          errBox.style.color = '#ffe3e3';
-          errBox.textContent = "Erreur lors de la réinitialisation du mot de passe.";
-        }
-      }
-    });
-
-    editCancel.addEventListener('click', () => {
-      modalEdit.style.display = 'none';
-    });
-
-    editSave.addEventListener('click', async () => {
-      const email = editEmailCurrent.value.trim().toLowerCase();
-      let newEmail = editNewEmail.value.trim().toLowerCase();
-      const company = editCompany.value.trim();
-      const contact = editContact.value.trim();
-      const discount = Number(editDiscount.value);
-      const status = editStatus.value;
-
-      if (!email){
-        editMsg.style.color = '#ffe3e3';
-        editMsg.textContent = "Email actuel manquant.";
-        return;
-      }
-      if (!newEmail) newEmail = email;
-      if (isNaN(discount) || discount < 0 || discount > 90){
-        editMsg.style.color = '#ffe3e3';
-        editMsg.textContent = "Remise entre 0 et 90 %.";
-        return;
-      }
-
-      try{
-        editMsg.textContent = '';
-        editMsg.style.color = '#ffe3e3';
-
-        await editClient({
-          email,
-          newEmail,
-          company,
-          contact,
-          discount,
-          status
-        });
-
-        modalEdit.style.display = 'none';
-        alert("Client mis à jour avec succès.");
-        await loadClients();
-      }catch(err){
-        console.error(err);
-        editMsg.style.color = '#ffe3e3';
-        editMsg.textContent = "Erreur lors de la mise à jour du client.";
-      }
-    });
-
-    // Chargement initial
-    loadClients();
-  </script>
 </body>
 </html>
+
+
