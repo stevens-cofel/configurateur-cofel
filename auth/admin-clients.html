@@ -477,18 +477,16 @@
             <td><span class="status-pill ${classStatus}">${labelStatus}</span></td>
             <td>${formatDate(c.created_at)}</td>
             <td>${formatDate(c.last_login_at)}</td>
-           <td>
-  <button class="btn-row btn-row-edit" data-email="${c.email}">✏ Modifier</button>
-  <button class="btn-row btn-row-secondary btn-row-toggle" data-email="${c.email}">
-    ${actionLabel}
-  </button>
-  <button class="btn-row btn-row-reset" data-email="${c.email}">🔁 Reset MDP</button>
-
-  <button class="btn-row btn-row-delete" data-email="${c.email}" style="background:#c62828;color:white;">
-    🗑 Supprimer
-  </button>
-</td>
-
+            <td>
+              <button class="btn-row btn-row-edit" data-email="${c.email}">✏ Modifier</button>
+              <button class="btn-row btn-row-secondary btn-row-toggle" data-email="${c.email}">
+                ${actionLabel}
+              </button>
+              <button class="btn-row btn-row-reset" data-email="${c.email}">🔁 Reset MDP</button>
+              <button class="btn-row btn-row-delete" data-email="${c.email}" style="background:#c62828;color:white;">
+                🗑 Supprimer
+              </button>
+            </td>
           </tr>
         `;
       }).join("");
@@ -691,39 +689,39 @@
 
       /* ----- RESET MDP ----- */
       if (reset){
-        /* ----- SUPPRIMER CLIENT ----- */
-if (e.target.classList.contains("btn-row-delete")) {
-  const email = e.target.dataset.email;
-
-  if (!confirm(`Supprimer le client : ${email} ?`)) return;
-
-  try {
-    const res = await fetch(`${WORKER_BASE}/client-delete`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
-    });
-
-    const out = await res.json();
-
-    if (out.ok) {
-      alert("Client supprimé !");
-      loadClients();
-    } else {
-      alert("Erreur lors de la suppression.");
-    }
-  } catch (err) {
-    alert("Erreur réseau : " + err);
-  }
-}
-
         const email = reset.getAttribute("data-email");
         if (!confirm("Réinitialiser le mot de passe ?")) return;
 
         const result = await resetClientPassword(email);
         alert(`Nouveau mot de passe : ${result.password}`);
       }
-    });
+    
+      /* ----- SUPPRIMER CLIENT ----- */
+      const del = e.target.closest(".btn-row-delete");
+      if (del){
+        const email = del.getAttribute("data-email");
+        if (!confirm(`Supprimer le client : ${email} ?`)) return;
+
+        try {
+          const res = await fetch(`${WORKER_BASE}/client-delete`, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({ email })
+          });
+
+          const out = await res.json();
+
+          if (out.ok){
+            alert("Client supprimé !");
+            loadClients();
+          } else {
+            alert("Erreur lors de la suppression.");
+          }
+        } catch(err){
+          alert("Erreur réseau : " + err);
+        }
+      }
+});
 
     /* ===========================================================
        MODALE NOUVEAU CLIENT
