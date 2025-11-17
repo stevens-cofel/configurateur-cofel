@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -174,62 +175,28 @@
     }
 
     function renderThirdSelector(){
-  const isMess = state.type==="messagerie";
-  thirdLabel.textContent = isMess ? "Poids (kg)" : "Longueur palette (m)";
-  thirdSelect.disabled = !state.dept;
-
-  if(!state.dept){
-    thirdSelect.innerHTML = `<option value="">— Choisir —</option>`;
-    addBtn.disabled=true;
-    return;
-  }
-
-  const rowsDept = byDept(isMess?state.mess:state.affr, state.dept);
-
-  if(isMess){
-    // MESSAGERIE : valeurs classiques
-    const opts = [...new Set(rowsDept.map(r => r.poids_kg))];
-    thirdSelect.innerHTML = `<option value="">— Choisir —</option>` +
-      opts.map(v => `<option value="${v}">${v}</option>`).join("");
-  } else {
-    // AFFRETEMENT : afficher les fourchettes directement du CSV
-    const opts = [...new Set(rowsDept.map(r => r.longueur_m))];
-    thirdSelect.innerHTML = `<option value="">— Choisir —</option>` +
-      opts.map(v => `<opt
-
+      const isMess = state.type==="messagerie";
+      thirdLabel.textContent = isMess ? "Poids (kg)" : "Longueur palette (m)";
+      thirdSelect.disabled = !state.dept;
+      if(!state.dept){ thirdSelect.innerHTML=`<option value="">— Choisir —</option>`; addBtn.disabled=true; return; }
+      const rowsDept = byDept(isMess?state.mess:state.affr, state.dept);
+      const key = isMess ? "poids_kg" : "longueur_m";
+      const opts = uniqueNums(rowsDept.map(r=>r[key]));
+      thirdSelect.innerHTML = `<option value="">— Choisir —</option>` + opts.map(v=>`<option value="${v}">${v}</option>`).join("");
+      state.third=""; addBtn.disabled=true; renderPrice();
+    }
 
     function renderPrice(){
-  if(!state.dept || !state.third){
-    ctx.textContent="Sélection en attente…";
-    price.textContent="—";
-    return;
-  }
-
-  const isMess = state.type==="messagerie";
-  const rows = byDept(isMess?state.mess:state.affr, state.dept);
-  const key  = isMess ? "poids_kg" : "longueur_m";
-
-  let found;
-
-  if(isMess){
-    found = rows.find(r => r[key] === state.third);
-  } else {
-    // AFFRETEMENT : comparaison TEXTUELLE (fourchettes)
-    found = rows.find(r => r[key].trim() === state.third.trim());
-  }
-
-  if(!found){
-    ctx.textContent="Aucune ligne trouvée";
-    price.textContent="—";
-    addBtn.disabled=true;
-    return;
-  }
-
-  ctx.textContent = `${isMess?"Messagerie":"Affrètement"} • Dept ${state.dept} • ${isMess?"Poids":"Longueur"}: ${state.third}`;
-  price.textContent = fmtEUR(found.prix_ht);
-  addBtn.disabled = false;
-}
-
+      if(!state.dept || !state.third){ ctx.textContent="Sélection en attente…"; price.textContent="—"; return; }
+      const isMess = state.type==="messagerie";
+      const rows = byDept(isMess?state.mess:state.affr, state.dept);
+      const key = isMess ? "poids_kg" : "longueur_m";
+      const found = rows.find(r => parseFloat(r[key])===parseFloat(state.third));
+      if(!found){ ctx.textContent="Aucune ligne trouvée"; price.textContent="—"; addBtn.disabled=true; return; }
+      ctx.textContent = `${isMess?"Messagerie":"Affrètement"} • Dept ${state.dept} • ${isMess?"Poids":"Longueur"}: ${state.third}`;
+      price.textContent = fmtEUR(found.prix_ht);
+      addBtn.disabled = false;
+    }
 
     function addToDevis(){
       const isMess = state.type==="messagerie";
