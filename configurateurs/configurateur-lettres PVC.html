@@ -319,6 +319,12 @@ document.getElementById("btnAddDevis").addEventListener("click",()=>{
     if(laq) base+=row.laquage||0;
     if(fix) base+=row.fixation||0;
     if(retro && e>=19) base+=row.retro||0;
+let remiseClient = 1;
+try {
+    const p = JSON.parse(localStorage.getItem('cofel_client_profile'));
+    if (p && typeof p.discountRate === 'number') 
+        remiseClient = 1 - p.discountRate;
+} catch(e){}
 
     const pu=base*UPLIFT_PUBLIC*remiseClient;
 
@@ -340,4 +346,5 @@ document.getElementById("btnAddDevis").addEventListener("click",()=>{
 </script>
 </body>
 </html>
+
 
