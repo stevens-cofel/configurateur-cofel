@@ -150,6 +150,206 @@
       from{ transform:translateY(0); opacity:.6;}
       to  { transform:translateY(-4px); opacity:1;}
     }
+
+    .card{
+      background:rgba(6,4,18,.8);
+      border-radius:var(--radius);
+      border:1px solid rgba(255,255,255,.22);
+      padding:14px 16px 16px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(var(--blur));
+    }
+
+    .toolbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:8px;
+    }
+    .toolbar-left{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      font-size:13px;
+    }
+    .filter-row{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .filter-row input{
+      min-width:220px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(15,10,35,.8);
+      color:var(--txt);
+      font-size:13px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.18);
+    }
+
+    .pagination{
+      margin-top:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:12px;
+      color:var(--txt-dim);
+    }
+    .pagination button{
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:none;
+      cursor:pointer;
+      background:#fff;
+      color:#1a102b;
+      font-weight:600;
+    }
+    .pagination button:disabled{
+      opacity:.4;
+      cursor:default;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:600;
+    }
+    .status-active{
+      background:rgba(0,220,130,.12);
+      color:#65f3b0;
+      border:1px solid rgba(0,220,130,.4);
+    }
+    .status-inactive{
+      background:rgba(255,80,80,.12);
+      color:#ffb0b0;
+      border:1px solid rgba(255,80,80,.4);
+    }
+
+    .btn-row{
+      font-size:11px;
+      border-radius:999px;
+      padding:4px 8px;
+      border:none;
+      cursor:pointer;
+      margin:1px;
+      white-space:nowrap;
+    }
+    .btn-row-edit{
+      background:#fff;
+      color:#1a102b;
+      font-weight:600;
+    }
+    .btn-row-secondary{
+      background:rgba(255,255,255,.08);
+      color:var(--txt);
+      border:1px solid rgba(255,255,255,.25);
+    }
+    .btn-row-reset{
+      background:#ffca28;
+      color:#1a102b;
+      font-weight:600;
+    }
+
+    .empty{
+      text-align:center;
+      padding:20px 8px;
+      font-size:13px;
+      color:var(--txt-dim);
+    }
+
+    .err{
+      color:#ffb3b3;
+      font-size:13px;
+      margin-top:8px;
+    }
+
+    .pagination-buttons{
+      display:flex;
+      gap:6px;
+    }
+
+    /* Modales */
+    #modalNew, #modalEdit{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.65);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:10;
+    }
+    .modal-card{
+      width:100%;
+      max-width:420px;
+      background:rgba(15,10,35,.96);
+      border-radius:16px;
+      padding:18px 16px 16px;
+      border:1px solid rgba(255,255,255,.22);
+      box-shadow:0 12px 40px rgba(0,0,0,.45);
+    }
+    .modal-card h3{
+      margin:0 0 10px;
+      font-size:16px;
+    }
+    .modal-field{
+      margin-bottom:10px;
+      font-size:13px;
+    }
+    .modal-field label{
+      display:block;
+      margin-bottom:4px;
+      color:var(--txt-dim);
+    }
+    .modal-field input,
+    .modal-field select{
+      width:100%;
+      padding:6px 8px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.25);
+      background:rgba(5,4,20,.9);
+      color:var(--txt);
+      font-size:13px;
+    }
+    .modal-actions{
+      margin-top:12px;
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+    }
+    .btn-modal{
+      border-radius:999px;
+      padding:6px 12px;
+      border:none;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:600;
+    }
+    .btn-modal-primary{
+      background:#fff; color:#1a102b;
+    }
+    .btn-modal-secondary{
+      background:rgba(255,255,255,.08);
+      color:var(--txt);
+      border:1px solid rgba(255,255,255,.25);
+    }
   </style>
 </head>
 <body>
@@ -368,6 +568,7 @@
       <div id="editMsg"></div>
     </div>
   </div>
+
   <!-- ========================================================= -->
   <!-- ======================= SCRIPTS ========================== -->
   <!-- ========================================================= -->
@@ -625,7 +826,7 @@
     });
 
     /* ===========================================================
-       ÉCOUTEURS TABLEAU CLIENTS (reset, edit, toggle)
+       ÉCOUTEURS TABLEAU CLIENTS (reset, edit, toggle, delete)
     ============================================================ */
 
     // RESET MDP
@@ -638,7 +839,7 @@
       return res.json();
     }
 
-    // EDIT CLIENT
+    // EDIT CLIENT (appel Worker)
     async function updateClient(payload){
       const res = await fetch(`${WORKER_BASE}/client-edit`, {
         method:"POST",
@@ -648,25 +849,23 @@
       return res.json();
     }
 
+    const modalNew = document.getElementById("modalNew");
+    const modalEdit = document.getElementById("modalEdit");
+
     tbody.addEventListener("click", async e => {
       const edit   = e.target.closest(".btn-row-edit");
       const toggle = e.target.closest(".btn-row-toggle");
       const reset  = e.target.closest(".btn-row-reset");
 
-      /* ----- EDIT ----- */
+      /* ----- EDIT → FENÊTRE SÉPARÉE ----- */
       if (edit){
         const email = edit.getAttribute("data-email");
-        const c = allClients.find(c => c.email === email);
-        if (!c) return;
-
-        document.getElementById("editEmailCurrent").value = c.email;
-        document.getElementById("editNewEmail").value = c.email;
-        document.getElementById("editCompany").value = c.company;
-        document.getElementById("editContact").value = c.contact_name;
-        document.getElementById("editDiscount").value = Math.round(c.discount_rate * 100);
-        document.getElementById("editStatus").value = c.status;
-
-        modalEdit.style.display = "flex";
+        window.open(
+          `./edit-client.html?email=${encodeURIComponent(email)}`,
+          "_blank",
+          "width=520,height=720,top=100,left=100"
+        );
+        return;
       }
 
       /* ----- BLOQUER / DÉBLOQUER ----- */
@@ -695,7 +894,7 @@
         const result = await resetClientPassword(email);
         alert(`Nouveau mot de passe : ${result.password}`);
       }
-    
+
       /* ----- SUPPRIMER CLIENT ----- */
       const del = e.target.closest(".btn-row-delete");
       if (del){
@@ -721,16 +920,20 @@
           alert("Erreur réseau : " + err);
         }
       }
-});
+    });
 
     /* ===========================================================
-       MODALE NOUVEAU CLIENT
+       MODALE NOUVEAU CLIENT (désormais → FENÊTRE SÉPARÉE)
     ============================================================ */
-    const modalNew = document.getElementById("modalNew");
     document.getElementById("btnNewClient").onclick = () => {
-      document.getElementById("modalMsg").textContent = "";
-      modalNew.style.display = "flex";
+      window.open(
+        "./new-client.html",
+        "_blank",
+        "width=520,height=680,top=120,left=120"
+      );
     };
+
+    // (La logique interne de la modale est conservée au cas où tu la réutilises plus tard)
     document.getElementById("btnCloseModal").onclick = () =>
       modalNew.style.display = "none";
 
@@ -770,9 +973,8 @@
     };
 
     /* ===========================================================
-       MODALE EDIT CLIENT
+       MODALE EDIT CLIENT (gardée mais plus utilisée)
     ============================================================ */
-    const modalEdit = document.getElementById("modalEdit");
     document.getElementById("editCancel").onclick = () =>
       modalEdit.style.display = "none";
 
