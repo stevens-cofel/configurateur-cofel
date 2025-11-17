@@ -1,7 +1,5 @@
-// /auth/config.js  (JS pur, aucune balise <script>, aucun commentaire HTML)
 export const AUTH_SETTINGS = {
   siteId: "cofel-configs",
-  // Empreinte SHA-256 de "Cofel2025!"
-  passwordHash: "f754854329ca38b7e07239bc592c685c8bfe9300c9b5c5b587798e035f7d48cd",
+  passwordHash: "ef4939d99fe00e05dbb8503ecffc116390956aa2f80837b2cc6bacdb0ff2b02b",
   tokenDays: 7
 };
