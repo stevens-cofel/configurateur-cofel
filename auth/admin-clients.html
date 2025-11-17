@@ -286,12 +286,12 @@
       gap:6px;
     }
 
-    /* Modales */
+    /* Modales (gardées mais FORCÉES invisibles) */
     #modalNew, #modalEdit{
       position:fixed;
       inset:0;
       background:rgba(0,0,0,.65);
-      display:none;
+      display:none !important; /* 🔒 jamais affichées */
       align-items:center;
       justify-content:center;
       z-index:10;
@@ -380,7 +380,6 @@
 
   <!-- ONGLET : CLIENTS -->
   <div id="tab-clients" class="tab-panel active">
-    <!-- ======= SECTION CLIENTS (suite) ======= -->
 
     <section class="card">
       <div class="toolbar">
@@ -433,10 +432,7 @@
   </div> <!-- FIN ONGLET CLIENTS -->
 
 
-  <!-- ========================================================= -->
-  <!-- =================  ONGLET : DEMANDES  ==================== -->
-  <!-- ========================================================= -->
-
+  <!-- ONGLET : DEMANDES D’ACCÈS -->
   <div id="tab-requests" class="tab-panel">
 
     <section class="card">
@@ -473,11 +469,8 @@
   </div> <!-- FIN ONGLET DEMANDES -->
 
 
-  <!-- ========================================================= -->
-  <!-- =================  MODALE : NOUVEAU CLIENT  ============= -->
-  <!-- ========================================================= -->
-
-  <div id="modalNew" style="display:none;">
+  <!-- MODALE : NOUVEAU CLIENT (gardée mais jamais affichée) -->
+  <div id="modalNew">
     <div class="modal-card">
       <h3>Créer un nouveau client</h3>
 
@@ -518,12 +511,8 @@
     </div>
   </div>
 
-
-  <!-- ========================================================= -->
-  <!-- =================  MODALE : EDIT CLIENT   =============== -->
-  <!-- ========================================================= -->
-
-  <div id="modalEdit" style="display:none;">
+  <!-- MODALE : EDIT CLIENT (gardée mais jamais affichée) -->
+  <div id="modalEdit">
     <div class="modal-card">
       <h3>Modifier client</h3>
 
@@ -569,16 +558,12 @@
     </div>
   </div>
 
-  <!-- ========================================================= -->
   <!-- ======================= SCRIPTS ========================== -->
-  <!-- ========================================================= -->
 
   <script>
     const WORKER_BASE = "https://cofel-auth.sonveven.workers.dev";
 
-    /* ===========================================================
-       ONGLET NAVIGATION
-    ============================================================ */
+    /* ONGLET NAVIGATION */
     const tabButtons = document.querySelectorAll(".tab-btn");
     const tabPanels  = document.querySelectorAll(".tab-panel");
 
@@ -596,10 +581,7 @@
       });
     });
 
-    /* ===========================================================
-       TABLEAU CLIENTS
-    ============================================================ */
-
+    /* TABLEAU CLIENTS */
     const tbody = document.getElementById("tbodyClients");
     const loader = document.getElementById("loader");
     const errBox = document.getElementById("err");
@@ -709,9 +691,7 @@
       }
     }
 
-    /* ===========================================================
-       TABLEAU DES DEMANDES D'ACCÈS
-    ============================================================ */
+    /* TABLEAU DES DEMANDES D'ACCÈS */
 
     const reqLoader = document.getElementById("reqLoader");
     const reqError  = document.getElementById("reqError");
@@ -755,9 +735,6 @@
       }
     }
 
-    /* ===========================================================
-       ACTION : APPROUVER
-    ============================================================ */
     async function approveRequest(id){
       try{
         const res = await fetch(`${WORKER_BASE}/admin-approve`, {
@@ -782,9 +759,6 @@
       }
     }
 
-    /* ===========================================================
-       ACTION : REFUSER
-    ============================================================ */
     async function rejectRequest(id){
       try{
         const res = await fetch(`${WORKER_BASE}/access-request-reject`, {
@@ -803,9 +777,6 @@
       }
     }
 
-    /* ===========================================================
-       ÉCOUTEURS — TABLE DES DEMANDES
-    ============================================================ */
     reqTbody.addEventListener("click", e => {
       const approve = e.target.closest(".btn-approve");
       const reject  = e.target.closest(".btn-reject");
@@ -825,11 +796,8 @@
       }
     });
 
-    /* ===========================================================
-       ÉCOUTEURS TABLEAU CLIENTS (reset, edit, toggle, delete)
-    ============================================================ */
+    /* ACTIONS CLIENTS : reset, toggle, delete, edit */
 
-    // RESET MDP
     async function resetClientPassword(email){
       const res = await fetch(`${WORKER_BASE}/client-reset-password`, {
         method:"POST",
@@ -839,7 +807,6 @@
       return res.json();
     }
 
-    // EDIT CLIENT (appel Worker)
     async function updateClient(payload){
       const res = await fetch(`${WORKER_BASE}/client-edit`, {
         method:"POST",
@@ -856,8 +823,9 @@
       const edit   = e.target.closest(".btn-row-edit");
       const toggle = e.target.closest(".btn-row-toggle");
       const reset  = e.target.closest(".btn-row-reset");
+      const del    = e.target.closest(".btn-row-delete");
 
-      /* ----- EDIT → FENÊTRE SÉPARÉE ----- */
+      /* EDIT → FENÊTRE POP-UP */
       if (edit){
         const email = edit.getAttribute("data-email");
         window.open(
@@ -868,7 +836,7 @@
         return;
       }
 
-      /* ----- BLOQUER / DÉBLOQUER ----- */
+      /* BLOQUER / DÉBLOQUER */
       if (toggle){
         const email = toggle.getAttribute("data-email");
         const c = allClients.find(x => x.email === email);
@@ -884,19 +852,20 @@
         });
 
         loadClients();
+        return;
       }
 
-      /* ----- RESET MDP ----- */
+      /* RESET MDP */
       if (reset){
         const email = reset.getAttribute("data-email");
         if (!confirm("Réinitialiser le mot de passe ?")) return;
 
         const result = await resetClientPassword(email);
         alert(`Nouveau mot de passe : ${result.password}`);
+        return;
       }
 
-      /* ----- SUPPRIMER CLIENT ----- */
-      const del = e.target.closest(".btn-row-delete");
+      /* SUPPRIMER CLIENT */
       if (del){
         const email = del.getAttribute("data-email");
         if (!confirm(`Supprimer le client : ${email} ?`)) return;
@@ -922,9 +891,7 @@
       }
     });
 
-    /* ===========================================================
-       MODALE NOUVEAU CLIENT (désormais → FENÊTRE SÉPARÉE)
-    ============================================================ */
+    /* BOUTON NOUVEAU CLIENT → POP-UP */
     document.getElementById("btnNewClient").onclick = () => {
       window.open(
         "./new-client.html",
@@ -933,7 +900,7 @@
       );
     };
 
-    // (La logique interne de la modale est conservée au cas où tu la réutilises plus tard)
+    /* Logique de modale conservée mais jamais utilisée */
     document.getElementById("btnCloseModal").onclick = () =>
       modalNew.style.display = "none";
 
@@ -972,9 +939,6 @@
       }
     };
 
-    /* ===========================================================
-       MODALE EDIT CLIENT (gardée mais plus utilisée)
-    ============================================================ */
     document.getElementById("editCancel").onclick = () =>
       modalEdit.style.display = "none";
 
@@ -1007,9 +971,7 @@
       }
     };
 
-    /* ===========================================================
-       NAV / EXPORT
-    ============================================================ */
+    /* NAV / EXPORT */
     document.getElementById("btnBack").onclick = () => {
       location.href = "../index.html";
     };
@@ -1024,9 +986,7 @@
     btnPrevPage.onclick = () => { currentPage--; renderTable(); };
     btnNextPage.onclick = () => { currentPage++; renderTable(); };
 
-    /* ===========================================================
-       CHARGEMENT INITIAL
-    ============================================================ */
+    /* CHARGEMENT INITIAL */
     loadClients();
     loadRequests();
 
