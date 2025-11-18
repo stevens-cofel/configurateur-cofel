@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Administration clients — Cofel</title>
 
-  <!-- 🔒 Protection par le même mot de passe que le portail interne -->
+  <!-- 🔒 Protection identique au portail interne -->
   <script src="./lock.js" type="module"></script>
 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,968 +30,481 @@
       padding:20px;
     }
 
-    .shell{
-      max-width:1200px;
-      margin:0 auto;
-    }
-
+    .shell{ max-width:1200px; margin:0 auto; }
     header{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:16px;
       margin-bottom:18px;
       flex-wrap:wrap;
     }
-    .brand{
-      display:flex; align-items:center; gap:12px;
-    }
-    .brand img{
-      height:40px; width:auto; border-radius:10px; object-fit:contain;
-    }
-    h1{
-      margin:0;
-      font-size:clamp(18px,2.4vw,22px);
-    }
-    .tagline{
-      margin:4px 0 0;
-      font-size:13px;
-      color:var(--txt-dim);
-    }
-
-    .header-actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
+    .brand{display:flex; align-items:center; gap:12px;}
+    .brand img{height:40px; border-radius:10px;}
+    h1{margin:0; font-size:22px;}
     .btn{
-      appearance:none; border:none; cursor:pointer; font-weight:700;
-      color:#0b0b0b; background:#fff; border-radius:999px; padding:8px 14px;
+      appearance:none; border:none; cursor:pointer;
+      background:#fff; color:#1a102b;
+      padding:8px 14px; border-radius:999px;
+      font-weight:700; font-size:13px;
       box-shadow:0 10px 24px rgba(0,0,0,.25);
-      font-size:13px;
-      white-space:nowrap;
     }
 
-    .table-wrap{
-      margin-top:6px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.18);
-      overflow:auto;
-      max-width:100%;
+    .tabs{ display:flex; gap:10px; margin-bottom:18px; }
+    .tab-btn{
+      padding:8px 16px; cursor:pointer;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.35);
+      background:rgba(0,0,0,.25); color:#fff;
+      font-size:13px; font-weight:600;
     }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:13px;
-      table-layout:auto;
-    }
-    thead{
-      background:rgba(0,0,0,.25);
-    }
-    th, td{
-      padding:8px 10px;
-      text-align:left;
-    }
-    th{
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-      color:var(--accent);
-      border-bottom:1px solid rgba(255,255,255,.22);
-      position:sticky;
-      top:0;
-      backdrop-filter: blur(10px);
-      background:rgba(10,5,30,.95);
-      z-index:1;
-      white-space:nowrap;
-    }
-
-    /* ONGLET NAVIGATION */
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-    .tab-btn {
-      padding: 8px 18px;
-      border-radius: 999px;
-      cursor: pointer;
-      border: 1px solid rgba(255,255,255,.35);
-      background: rgba(0,0,0,.25);
-      color: #f5f7ff;
-      font-weight: 600;
-      font-size: 13px;
-      transition: 0.2s;
-    }
-    .tab-btn.active {
-      background: #fff;
-      color: #1a102b;
-    }
-    .tab-panel { display:none; }
-    .tab-panel.active { display:block; }
-
-    /* LOADER */
-    .loader{
-      font-size:13px;
-      color:var(--txt-dim);
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-    .dot{
-      width:6px; height:6px; border-radius:50%; background:var(--accent);
-      animation:bounce 1s infinite alternate;
-    }
-    .dot:nth-child(2){animation-delay:.15s;}
-    .dot:nth-child(3){animation-delay:.3s;}
-    @keyframes bounce{
-      from{ transform:translateY(0); opacity:.6;}
-      to  { transform:translateY(-4px); opacity:1;}
-    }
+    .tab-btn.active{ background:#fff; color:#1a102b; }
+    .tab-panel{ display:none; }
+    .tab-panel.active{ display:block; }
 
     .card{
-      background:rgba(6,4,18,.8);
+      background:rgba(6,4,18,.85);
       border-radius:var(--radius);
       border:1px solid rgba(255,255,255,.22);
-      padding:14px 16px 16px;
       box-shadow:var(--shadow);
+      padding:16px;
       backdrop-filter:blur(var(--blur));
     }
 
-    .toolbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-bottom:8px;
+    table{ width:100%; border-collapse:collapse; }
+    th, td{ padding:8px 10px; font-size:13px; }
+    thead{ background:rgba(0,0,0,.25); }
+    th{
+      text-transform:uppercase; font-size:11px;
+      color:var(--accent);
+      border-bottom:1px solid rgba(255,255,255,.22);
     }
-    .toolbar-left{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      font-size:13px;
-    }
-    .filter-row{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-    .filter-row input{
-      min-width:220px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.22);
-      background:rgba(15,10,35,.8);
-      color:var(--txt);
-      font-size:13px;
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      font-size:12px;
-      padding:4px 10px;
-      border-radius:999px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.18);
-    }
-
-    .pagination{
-      margin-top:10px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      font-size:12px;
-      color:var(--txt-dim);
-    }
-    .pagination button{
-      font-size:12px;
-      padding:4px 10px;
-      border-radius:999px;
-      border:none;
-      cursor:pointer;
-      background:#fff;
-      color:#1a102b;
-      font-weight:600;
-    }
-    .pagination button:disabled{
-      opacity:.4;
-      cursor:default;
-    }
-
-    .status-pill{
-      display:inline-flex;
-      align-items:center;
-      padding:2px 8px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:600;
-    }
-    .status-active{
-      background:rgba(0,220,130,.12);
-      color:#65f3b0;
-      border:1px solid rgba(0,220,130,.4);
-    }
-    .status-inactive{
-      background:rgba(255,80,80,.12);
-      color:#ffb0b0;
-      border:1px solid rgba(255,80,80,.4);
-    }
-
     .btn-row{
-      font-size:11px;
-      border-radius:999px;
-      padding:4px 8px;
+      padding:4px 8px; cursor:pointer; border-radius:8px;
+      font-size:11px; margin:2px;
       border:none;
-      cursor:pointer;
-      margin:1px;
-      white-space:nowrap;
     }
-    .btn-row-edit{
-      background:#fff;
-      color:#1a102b;
-      font-weight:600;
-    }
-    .btn-row-secondary{
-      background:rgba(255,255,255,.08);
-      color:var(--txt);
-      border:1px solid rgba(255,255,255,.25);
-    }
-    .btn-row-reset{
-      background:#ffca28;
-      color:#1a102b;
-      font-weight:600;
-    }
+    .btn-approve{ background:#4caf50; color:#fff; font-weight:700; }
+    .btn-row-secondary{ background:#555; color:#fff; }
+    .btn-row-reset{ background:#ffca28; color:#000; font-weight:600; }
+    .btn-row-delete{ background:#c62828; color:white; }
 
-    .empty{
-      text-align:center;
-      padding:20px 8px;
-      font-size:13px;
-      color:var(--txt-dim);
-    }
+    .empty{ text-align:center; padding:12px; color:var(--txt-dim); }
 
-    .err{
-      color:#ffb3b3;
-      font-size:13px;
-      margin-top:8px;
-    }
-
-    .pagination-buttons{
-      display:flex;
-      gap:6px;
-    }
-
-    /* Modales (gardées mais FORCÉES invisibles) */
-    #modalNew, #modalEdit{
+    /* MODALE APPROBATION */
+    #modalApprove{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.65);
-      display:none !important; /* 🔒 jamais affichées */
+      background:rgba(0,0,0,.6);
+      display:none;
       align-items:center;
       justify-content:center;
-      z-index:10;
+      z-index:20;
     }
     .modal-card{
-      width:100%;
-      max-width:420px;
-      background:rgba(15,10,35,.96);
-      border-radius:16px;
-      padding:18px 16px 16px;
+      width:100%; max-width:420px;
+      background:rgba(25,15,45,.95);
+      border-radius:16px; padding:18px;
       border:1px solid rgba(255,255,255,.22);
       box-shadow:0 12px 40px rgba(0,0,0,.45);
     }
-    .modal-card h3{
-      margin:0 0 10px;
-      font-size:16px;
-    }
-    .modal-field{
-      margin-bottom:10px;
-      font-size:13px;
-    }
-    .modal-field label{
-      display:block;
-      margin-bottom:4px;
-      color:var(--txt-dim);
-    }
+    .modal-card h3{ margin-top:0; font-size:17px; }
+    .modal-field{ margin-bottom:12px; }
+    .modal-field label{ font-size:12px; color:var(--txt-dim); }
     .modal-field input,
     .modal-field select{
-      width:100%;
-      padding:6px 8px;
-      border-radius:8px;
-      border:1px solid rgba(255,255,255,.25);
-      background:rgba(5,4,20,.9);
-      color:var(--txt);
-      font-size:13px;
-    }
-    .modal-actions{
-      margin-top:12px;
-      display:flex;
-      justify-content:flex-end;
-      gap:8px;
-    }
-    .btn-modal{
-      border-radius:999px;
-      padding:6px 12px;
-      border:none;
-      cursor:pointer;
-      font-size:13px;
-      font-weight:600;
-    }
-    .btn-modal-primary{
-      background:#fff; color:#1a102b;
-    }
-    .btn-modal-secondary{
+      width:100%; padding:8px; font-size:14px;
       background:rgba(255,255,255,.08);
-      color:var(--txt);
       border:1px solid rgba(255,255,255,.25);
+      border-radius:8px; color:#fff;
     }
+
+    .modal-actions{ text-align:right; margin-top:16px; }
+    .btn-modal{
+      padding:8px 14px; border:none; cursor:pointer;
+      border-radius:999px; font-size:13px; font-weight:700;
+    }
+    .btn-cancel{ background:rgba(255,255,255,.08); color:#fff; }
+    .btn-ok{ background:#fff; color:#1a102b; }
   </style>
 </head>
-<body>
 
+<body>
 <div class="shell">
 
   <header>
     <div class="brand">
-      <img src="../assets/logo cofel.jpg" alt="Cofel">
-      <div>
-        <h1>Administration des comptes clients</h1>
-        <p class="tagline">Visualisez les comptes, remises, statuts, créez des clients et gérez les demandes d’accès.</p>
-      </div>
+      <img src="../assets/logo cofel.jpg">
+      <h1>Administration des comptes clients</h1>
     </div>
 
-    <div class="header-actions">
-      <button id="btnNewClient" class="btn">➕ Nouveau client</button>
-      <button id="btnExport" class="btn">⬇ Export Excel (.xls)</button>
-      <button id="btnBack" class="btn">⬅ Retour aux configurateurs</button>
+    <div class="actions">
+      <button id="btnBack" class="btn">⬅ Retour</button>
     </div>
   </header>
 
-  <!-- ONGLET NAVIGATION -->
+  <!-- TABS -->
   <div class="tabs">
-    <button class="tab-btn active" data-tab="tab-clients">Clients</button>
-    <button class="tab-btn" data-tab="tab-requests">Demandes d’accès</button>
+    <button class="tab-btn active" data-tab="clients">Clients</button>
+    <button class="tab-btn" data-tab="requests">Demandes d’accès</button>
   </div>
 
-  <!-- ONGLET : CLIENTS -->
-  <div id="tab-clients" class="tab-panel active">
+  <!-- PANNEAU : CLIENTS -->
+  <div id="clients" class="tab-panel active">
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Société</th>
+            <th>Contact</th>
+            <th>Remise</th>
+            <th>Configs</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyClients">
+          <tr><td colspan="7" class="empty">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-    <section class="card">
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <div class="filter-row">
-            <span>Recherche :</span>
-            <input id="searchInput" type="text" placeholder="Filtrer par email, société ou contact…">
-          </div>
-          <div>
-            <span id="infoCount" class="badge">Chargement…</span>
-          </div>
-        </div>
-        <div class="loader" id="loader">
-          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-          <span>Récupération des clients…</span>
-        </div>
-      </div>
+  <!-- PANNEAU : DEMANDES -->
+  <div id="requests" class="tab-panel">
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Société</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Message</th>
+            <th>Créé</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="reqTbody">
+          <tr><td colspan="7" class="empty">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Société</th>
-              <th>Contact</th>
-              <th>Remise</th>
-              <th>Statut</th>
-              <th>Créé le</th>
-              <th>Dernière connexion</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyClients">
-            <tr><td colspan="8" class="empty">En attente des données…</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="pagination">
-        <div id="paginationInfo">Page 1 / 1</div>
-        <div class="pagination-buttons">
-          <button id="btnPrevPage">◀ Précédent</button>
-          <button id="btnNextPage">Suivant ▶</button>
-        </div>
-      </div>
-
-      <div id="err" class="err"></div>
-    </section>
-
-  </div> <!-- FIN ONGLET CLIENTS -->
-
-
-  <!-- ONGLET : DEMANDES D’ACCÈS -->
-  <div id="tab-requests" class="tab-panel">
-
-    <section class="card">
-      <h2 style="margin-top:0; font-size:18px;">Demandes d’accès en attente</h2>
-
-      <div id="reqLoader" class="loader" style="display:flex; margin-bottom:10px;">
-        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-        <span>Chargement des demandes…</span>
-      </div>
-
-      <div id="reqError" class="err"></div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Société</th>
-              <th>Contact</th>
-              <th>Email</th>
-              <th>Téléphone</th>
-              <th>Message</th>
-              <th>Créé le</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody id="reqTbody">
-            <tr><td colspan="7" class="empty">Chargement…</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-  </div> <!-- FIN ONGLET DEMANDES -->
-
-
-  <!-- MODALE : NOUVEAU CLIENT (gardée mais jamais affichée) -->
-  <div id="modalNew">
+  <!-- MODALE APPROBATION -->
+  <div id="modalApprove">
     <div class="modal-card">
-      <h3>Créer un nouveau client</h3>
+      <h3>Approuver l’accès</h3>
 
       <div class="modal-field">
-        <label for="newEmail">Email (identifiant)</label>
-        <input id="newEmail" type="email" placeholder="client@exemple.com">
+        <label>Remise (%)</label>
+        <input id="approveDiscount" type="number" min="0" max="90" value="0">
       </div>
 
       <div class="modal-field">
-        <label for="newCompany">Société</label>
-        <input id="newCompany" type="text" placeholder="Nom de la société">
-      </div>
-
-      <div class="modal-field">
-        <label for="newContact">Nom du contact</label>
-        <input id="newContact" type="text" placeholder="Nom Prénom">
-      </div>
-
-      <div class="modal-field">
-        <label for="newDiscount">Remise (%)</label>
-        <input id="newDiscount" type="number" min="0" max="90" value="0">
-      </div>
-
-      <div class="modal-field">
-        <label for="newStatus">Statut</label>
-        <select id="newStatus">
-          <option value="active">Actif</option>
-          <option value="inactive">Inactif</option>
+        <label>Configurateurs autorisés</label>
+        <select id="approveConfigs" multiple size="8">
+          <option value="enseigne-drapeau">Enseigne drapeau</option>
+          <option value="lettre-alu-alupvc">Lettre alu / alu-PVC</option>
+          <option value="lettre-boitier">Lettre boîtier</option>
+          <option value="lettres-pvc">Lettres PVC</option>
+          <option value="rampe-lumineuse">Rampe lumineuse (PLL)</option>
+          <option value="tole-tablette">Tôle tablette</option>
+          <option value="tolerie-dibond">Tôlerie / Dibond</option>
+          <option value="totems">Totems</option>
         </select>
       </div>
 
       <div class="modal-actions">
-        <button id="btnCloseModal" class="btn-modal btn-modal-secondary">Annuler</button>
-        <button id="btnCreateClient" class="btn-modal btn-modal-primary">Créer</button>
+        <button class="btn-modal btn-cancel" id="approveCancel">Annuler</button>
+        <button class="btn-modal btn-ok" id="approveSave">Approuver</button>
       </div>
 
-      <div id="modalMsg"></div>
+      <div id="approveMsg"></div>
     </div>
   </div>
+<script>
+const WORKER_BASE = "https://cofel-auth.sonveven.workers.dev";
 
-  <!-- MODALE : EDIT CLIENT (gardée mais jamais affichée) -->
-  <div id="modalEdit">
-    <div class="modal-card">
-      <h3>Modifier client</h3>
+/* =====================  NAVIGATION TABS ===================== */
+const tabButtons = document.querySelectorAll(".tab-btn");
+const tabPanels  = document.querySelectorAll(".tab-panel");
 
-      <div class="modal-field">
-        <label for="editEmailCurrent">Email actuel (lecture seule)</label>
-        <input id="editEmailCurrent" type="email" disabled>
-      </div>
+tabButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    tabButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
 
-      <div class="modal-field">
-        <label for="editNewEmail">Nouvel email (optionnel)</label>
-        <input id="editNewEmail" type="email" placeholder="Laisser vide pour conserver l'email actuel">
-      </div>
+    const target = btn.getAttribute("data-tab");
 
-      <div class="modal-field">
-        <label for="editCompany">Société</label>
-        <input id="editCompany" type="text">
-      </div>
+    tabPanels.forEach(p => {
+      p.classList.remove("active");
+      if (p.id === target) p.classList.add("active");
+    });
+  });
+});
 
-      <div class="modal-field">
-        <label for="editContact">Nom du contact</label>
-        <input id="editContact" type="text">
-      </div>
+/* =====================  TABLEAU CLIENTS ===================== */
+const tbodyClients = document.getElementById("tbodyClients");
 
-      <div class="modal-field">
-        <label for="editDiscount">Remise (%)</label>
-        <input id="editDiscount" type="number" min="0" max="90">
-      </div>
+function formatRate(rate){
+  return ((rate || 0) * 100).toFixed(1) + " %";
+}
 
-      <div class="modal-field">
-        <label for="editStatus">Statut</label>
-        <select id="editStatus">
-          <option value="active">Actif</option>
-          <option value="inactive">Inactif</option>
-        </select>
-      </div>
+function formatDate(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  if(isNaN(d)) return "—";
+  return d.toLocaleDateString("fr-FR") + " " + d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+}
 
-      <div class="modal-actions">
-        <button id="editCancel" class="btn-modal btn-modal-secondary">Annuler</button>
-        <button id="editSave" class="btn-modal btn-modal-primary">Enregistrer</button>
-      </div>
+async function loadClients(){
+  tbodyClients.innerHTML = `<tr><td colspan="7" class="empty">Chargement…</td></tr>`;
+  try{
+    const r = await fetch(`${WORKER_BASE}/clients`);
+    const data = await r.json();
 
-      <div id="editMsg"></div>
-    </div>
-  </div>
+    if(!data.clients || !data.clients.length){
+      tbodyClients.innerHTML = `<tr><td colspan="7" class="empty">Aucun client.</td></tr>`;
+      return;
+    }
 
-  <!-- ======================= SCRIPTS ========================== -->
+    tbodyClients.innerHTML = data.clients.map(c => {
+      const status = c.status === "active" ? "🟢 Actif" : "🔴 Inactif";
+      const configs = JSON.parse(c.allowed_configurators || "[]");
 
-  <script>
-    const WORKER_BASE = "https://cofel-auth.sonveven.workers.dev";
+      return `
+        <tr>
+          <td>${c.email}</td>
+          <td>${c.company || "—"}</td>
+          <td>${c.contact_name || "—"}</td>
+          <td>${formatRate(c.discount_rate)}</td>
+          <td>${configs.join(", ") || "—"}</td>
+          <td>${status}</td>
+          <td>
+            <button class="btn-row btn-row-secondary btn-edit" data-email="${c.email}">✏ Modifier</button>
+            <button class="btn-row btn-row-reset btn-reset" data-email="${c.email}">🔁 Reset MDP</button>
+            <button class="btn-row btn-row-delete btn-delete" data-email="${c.email}">🗑 Supprimer</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
 
-    /* ONGLET NAVIGATION */
-    const tabButtons = document.querySelectorAll(".tab-btn");
-    const tabPanels  = document.querySelectorAll(".tab-panel");
+  } catch(err){
+    tbodyClients.innerHTML = `<tr><td colspan="7" class="empty">Erreur de chargement.</td></tr>`;
+  }
+}
 
-    tabButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        tabButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
+/* =====================  ACTIONS CLIENTS ===================== */
 
-        const target = btn.getAttribute("data-tab");
+tbodyClients.addEventListener("click", async e => {
+  const email = e.target.dataset.email;
+  if (!email) return;
 
-        tabPanels.forEach(p => {
-          if (p.id === target) p.classList.add("active");
-          else p.classList.remove("active");
-        });
-      });
+  /* --- Reset mot de passe --- */
+  if (e.target.classList.contains("btn-reset")){
+    if (!confirm("Réinitialiser le mot de passe ?")) return;
+
+    const r = await fetch(`${WORKER_BASE}/client-reset-password`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ email })
     });
 
-    /* TABLEAU CLIENTS */
-    const tbody = document.getElementById("tbodyClients");
-    const loader = document.getElementById("loader");
-    const errBox = document.getElementById("err");
-    const infoCount = document.getElementById("infoCount");
-    const searchInput = document.getElementById("searchInput");
-    const btnPrevPage = document.getElementById("btnPrevPage");
-    const btnNextPage = document.getElementById("btnNextPage");
-    const paginationInfo = document.getElementById("paginationInfo");
+    const out = await r.json();
+    alert("Nouveau mot de passe : " + out.password);
+    return;
+  }
 
-    const PAGE_SIZE = 25;
-    let allClients = [];
-    let filteredClients = [];
-    let currentPage = 1;
+  /* --- Supprimer client --- */
+  if (e.target.classList.contains("btn-delete")){
+    if (!confirm("Supprimer ce client ?")) return;
 
-    function formatDate(iso){
-      if(!iso) return "—";
-      const d = new Date(iso);
-      if (isNaN(d.getTime())) return "—";
-      return d.toLocaleDateString("fr-FR") + " " +
-             d.toLocaleTimeString("fr-FR",{ hour:"2-digit", minute:"2-digit" });
-    }
-
-    function formatDiscount(rate){
-      const pct = Math.round((rate || 0) * 1000) / 10;
-      return pct.toLocaleString("fr-FR",{maximumFractionDigits:1}) + " %";
-    }
-
-    function applyFilter(text){
-      const q = (text || "").toLowerCase().trim();
-      if (!q){
-        filteredClients = [...allClients];
-      } else {
-        filteredClients = allClients.filter(c =>
-          (c.email || "").toLowerCase().includes(q) ||
-          (c.company || "").toLowerCase().includes(q) ||
-          (c.contact_name || "").toLowerCase().includes(q)
-        );
-      }
-      currentPage = 1;
-      renderTable();
-    }
-
-    function renderTable(){
-      const total = filteredClients.length;
-      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-      currentPage = Math.min(Math.max(1, currentPage), totalPages);
-
-      const start = (currentPage - 1) * PAGE_SIZE;
-      const rows = filteredClients.slice(start, start + PAGE_SIZE);
-
-      infoCount.textContent = total
-        ? `${rows.length} client(s) affiché(s) sur ${total} — page ${currentPage}/${totalPages}`
-        : `Aucun client ne correspond au filtre`;
-
-      paginationInfo.textContent = `Page ${currentPage}/${totalPages}`;
-      btnPrevPage.disabled = currentPage <= 1;
-      btnNextPage.disabled = currentPage >= totalPages;
-
-      if (!rows.length){
-        tbody.innerHTML = `<tr><td colspan="8" class="empty">Aucun client à afficher.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = rows.map(c => {
-        const status = (c.status || "").toLowerCase();
-        const classStatus = status === "active" ? "status-active" : "status-inactive";
-        const labelStatus = status === "active" ? "Actif" : "Inactif";
-        const actionLabel = status === "active" ? "🔒 Bloquer" : "🔓 Réactiver";
-
-        return `
-          <tr data-email="${c.email}">
-            <td>${c.email}</td>
-            <td>${c.company || "—"}</td>
-            <td>${c.contact_name || "—"}</td>
-            <td>${formatDiscount(c.discount_rate)}</td>
-            <td><span class="status-pill ${classStatus}">${labelStatus}</span></td>
-            <td>${formatDate(c.created_at)}</td>
-            <td>${formatDate(c.last_login_at)}</td>
-            <td>
-              <button class="btn-row btn-row-edit" data-email="${c.email}">✏ Modifier</button>
-              <button class="btn-row btn-row-secondary btn-row-toggle" data-email="${c.email}">
-                ${actionLabel}
-              </button>
-              <button class="btn-row btn-row-reset" data-email="${c.email}">🔁 Reset MDP</button>
-              <button class="btn-row btn-row-delete" data-email="${c.email}" style="background:#c62828;color:white;">
-                🗑 Supprimer
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    }
-
-    async function loadClients(){
-      loader.style.display = "flex";
-      try{
-        const res = await fetch(`${WORKER_BASE}/clients`);
-        const data = await res.json();
-        allClients = data.clients || [];
-        filteredClients = [...allClients];
-        loader.style.display = "none";
-        renderTable();
-      } catch(err){
-        loader.style.display = "none";
-        errBox.textContent =
-          "Impossible de récupérer la liste des clients.";
-      }
-    }
-
-    /* TABLEAU DES DEMANDES D'ACCÈS */
-
-    const reqLoader = document.getElementById("reqLoader");
-    const reqError  = document.getElementById("reqError");
-    const reqTbody  = document.getElementById("reqTbody");
-
-    async function loadRequests(){
-      reqLoader.style.display = "flex";
-      reqError.textContent = "";
-      try{
-        const res = await fetch(`${WORKER_BASE}/pending-requests`);
-        const data = await res.json();
-
-        reqLoader.style.display = "none";
-
-        const rows = data.requests || [];
-        if (!rows.length){
-          reqTbody.innerHTML =
-            `<tr><td colspan="7" class="empty">Aucune demande en attente.</td></tr>`;
-          return;
-        }
-
-        reqTbody.innerHTML = rows.map(r => `
-          <tr data-id="${r.id}">
-            <td>${r.company || "—"}</td>
-            <td>${r.name || "—"}</td>
-            <td>${r.email}</td>
-            <td>${r.phone || "—"}</td>
-            <td>${r.message || "—"}</td>
-            <td>${formatDate(r.created_at)}</td>
-            <td>
-              <button class="btn-row btn-approve" data-id="${r.id}">✔ Approuver</button>
-              <button class="btn-row btn-row-secondary btn-reject" data-id="${r.id}">❌ Refuser</button>
-            </td>
-          </tr>
-        `).join("");
-
-      }catch(err){
-        reqLoader.style.display = "none";
-        reqError.textContent =
-          "Erreur lors du chargement des demandes.";
-      }
-    }
-
-    async function approveRequest(id){
-      try{
-        const res = await fetch(`${WORKER_BASE}/admin-approve`, {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({
-            requestId:id,
-            discount:0,
-            configs:["tôle-tablette"]
-          })
-        });
-
-        const data = await res.json();
-        if (data.ok){
-          alert("Demande approuvée.");
-          loadRequests();
-          loadClients();
-        }
-
-      }catch(err){
-        alert("Erreur lors de l'approbation.");
-      }
-    }
-
-    async function rejectRequest(id){
-      try{
-        const res = await fetch(`${WORKER_BASE}/access-request-reject`, {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ id })
-        });
-
-        const data = await res.json();
-        if (data.ok){
-          alert("Demande refusée.");
-          loadRequests();
-        }
-      }catch(err){
-        alert("Erreur lors du refus.");
-      }
-    }
-
-    reqTbody.addEventListener("click", e => {
-      const approve = e.target.closest(".btn-approve");
-      const reject  = e.target.closest(".btn-reject");
-
-      if (approve){
-        const id = approve.getAttribute("data-id");
-        if (confirm("Approuver cette demande ?")){
-          approveRequest(id);
-        }
-      }
-
-      if (reject){
-        const id = reject.getAttribute("data-id");
-        if (confirm("Refuser cette demande ?")){
-          rejectRequest(id);
-        }
-      }
+    await fetch(`${WORKER_BASE}/client-delete`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ email })
     });
 
-    /* ACTIONS CLIENTS : reset, toggle, delete, edit */
-
-    async function resetClientPassword(email){
-      const res = await fetch(`${WORKER_BASE}/client-reset-password`, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ email })
-      });
-      return res.json();
-    }
-
-    async function updateClient(payload){
-      const res = await fetch(`${WORKER_BASE}/client-edit`, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify(payload)
-      });
-      return res.json();
-    }
-
-    const modalNew = document.getElementById("modalNew");
-    const modalEdit = document.getElementById("modalEdit");
-
-    tbody.addEventListener("click", async e => {
-      const edit   = e.target.closest(".btn-row-edit");
-      const toggle = e.target.closest(".btn-row-toggle");
-      const reset  = e.target.closest(".btn-row-reset");
-      const del    = e.target.closest(".btn-row-delete");
-
-      /* EDIT → FENÊTRE POP-UP */
-      if (edit){
-        const email = edit.getAttribute("data-email");
-        window.open(
-          `./edit-client.html?email=${encodeURIComponent(email)}`,
-          "_blank",
-          "width=520,height=720,top=100,left=100"
-        );
-        return;
-      }
-
-      /* BLOQUER / DÉBLOQUER */
-      if (toggle){
-        const email = toggle.getAttribute("data-email");
-        const c = allClients.find(x => x.email === email);
-        if (!c) return;
-
-        const next = c.status === "active" ? "inactive" : "active";
-        if (!confirm(`Confirmer changement de statut (${next}) ?`)) return;
-
-        await fetch(`${WORKER_BASE}/client-update`, {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body:JSON.stringify({ email, status:next })
-        });
-
-        loadClients();
-        return;
-      }
-
-      /* RESET MDP */
-      if (reset){
-        const email = reset.getAttribute("data-email");
-        if (!confirm("Réinitialiser le mot de passe ?")) return;
-
-        const result = await resetClientPassword(email);
-        alert(`Nouveau mot de passe : ${result.password}`);
-        return;
-      }
-
-      /* SUPPRIMER CLIENT */
-      if (del){
-        const email = del.getAttribute("data-email");
-        if (!confirm(`Supprimer le client : ${email} ?`)) return;
-
-        try {
-          const res = await fetch(`${WORKER_BASE}/client-delete`, {
-            method:"POST",
-            headers:{ "Content-Type":"application/json" },
-            body:JSON.stringify({ email })
-          });
-
-          const out = await res.json();
-
-          if (out.ok){
-            alert("Client supprimé !");
-            loadClients();
-          } else {
-            alert("Erreur lors de la suppression.");
-          }
-        } catch(err){
-          alert("Erreur réseau : " + err);
-        }
-      }
-    });
-
-    /* BOUTON NOUVEAU CLIENT → POP-UP */
-    document.getElementById("btnNewClient").onclick = () => {
-      window.open(
-        "./new-client.html",
-        "_blank",
-        "width=520,height=680,top=120,left=120"
-      );
-    };
-
-    /* Logique de modale conservée mais jamais utilisée */
-    document.getElementById("btnCloseModal").onclick = () =>
-      modalNew.style.display = "none";
-
-    document.getElementById("btnCreateClient").onclick = async () => {
-      const email = document.getElementById("newEmail").value.trim();
-      const company = document.getElementById("newCompany").value.trim();
-      const contact = document.getElementById("newContact").value.trim();
-      const discount = Number(document.getElementById("newDiscount").value);
-      const status = document.getElementById("newStatus").value;
-
-      const msg = document.getElementById("modalMsg");
-
-      if (!email){
-        msg.textContent = "Email obligatoire.";
-        return;
-      }
-
-      try{
-        const res = await fetch(`${WORKER_BASE}/client-create`, {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body:JSON.stringify({ email, company, contact, discount, status })
-        });
-
-        const data = await res.json();
-
-        msg.style.color = "#b7ffcf";
-        msg.textContent = "Client créé. Mot de passe : " + data.password;
-        alert("Mot de passe : " + data.password);
-
-        loadClients();
-
-      }catch(err){
-        msg.style.color = "#ffe3e3";
-        msg.textContent = "Erreur lors de la création.";
-      }
-    };
-
-    document.getElementById("editCancel").onclick = () =>
-      modalEdit.style.display = "none";
-
-    document.getElementById("editSave").onclick = async () => {
-      const email = document.getElementById("editEmailCurrent").value;
-      let newEmail = document.getElementById("editNewEmail").value;
-      const company = document.getElementById("editCompany").value.trim();
-      const contact = document.getElementById("editContact").value.trim();
-      const discount = Number(document.getElementById("editDiscount").value);
-      const status = document.getElementById("editStatus").value;
-
-      if (!newEmail) newEmail = email;
-
-      try{
-        await updateClient({
-          email,
-          newEmail,
-          company,
-          contact,
-          discount,
-          status
-        });
-        alert("Modifié !");
-        modalEdit.style.display = "none";
-        loadClients();
-
-      }catch(err){
-        document.getElementById("editMsg").textContent =
-          "Erreur lors de la mise à jour.";
-      }
-    };
-
-    /* NAV / EXPORT */
-    document.getElementById("btnBack").onclick = () => {
-      location.href = "../index.html";
-    };
-
-    document.getElementById("btnExport").onclick = () => {
-      window.open(`${WORKER_BASE}/clients-export-xls`, "_blank");
-    };
-
-    searchInput.addEventListener("input", () =>
-      applyFilter(searchInput.value));
-
-    btnPrevPage.onclick = () => { currentPage--; renderTable(); };
-    btnNextPage.onclick = () => { currentPage++; renderTable(); };
-
-    /* CHARGEMENT INITIAL */
+    alert("Client supprimé.");
     loadClients();
+    return;
+  }
+
+  /* --- Modifier (ouvre popup séparée) --- */
+  if (e.target.classList.contains("btn-edit")){
+    window.open(
+      `./edit-client.html?email=${encodeURIComponent(email)}`,
+      "_blank",
+      "width=520,height=720,top=100,left=100"
+    );
+    return;
+  }
+});
+
+/* =====================  TABLEAU DES DEMANDES ===================== */
+const reqTbody = document.getElementById("reqTbody");
+let approvalTargetId = null;
+
+async function loadRequests(){
+  reqTbody.innerHTML = `<tr><td colspan="7" class="empty">Chargement…</td></tr>`;
+  
+  try{
+    const r = await fetch(`${WORKER_BASE}/pending-requests`);
+    const data = await r.json();
+
+    if(!data.requests || !data.requests.length){
+      reqTbody.innerHTML = `<tr><td colspan="7" class="empty">Aucune demande en attente.</td></tr>`;
+      return;
+    }
+
+    reqTbody.innerHTML = data.requests.map(r => `
+      <tr>
+        <td>${r.company}</td>
+        <td>${r.name}</td>
+        <td>${r.email}</td>
+        <td>${r.phone || "—"}</td>
+        <td>${r.message || "—"}</td>
+        <td>${formatDate(r.created_at)}</td>
+        <td>
+          <button class="btn-row btn-approve" data-id="${r.id}">✔ Approuver</button>
+          <button class="btn-row btn-row-secondary btn-reject" data-id="${r.id}">❌ Refuser</button>
+        </td>
+      </tr>
+    `).join("");
+
+  }catch(err){
+    reqTbody.innerHTML = `<tr><td colspan="7" class="empty">Erreur de chargement.</td></tr>`;
+  }
+}
+
+/* =====================  ACTIONS DEMANDES ===================== */
+
+reqTbody.addEventListener("click", async e => {
+
+  const id = e.target.dataset.id;
+  if (!id) return;
+
+  /* --- Refuser --- */
+  if (e.target.classList.contains("btn-reject")){
+    if (!confirm("Refuser cette demande ?")) return;
+
+    await fetch(`${WORKER_BASE}/access-request-reject`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ id })
+    });
+
+    alert("Demande refusée.");
     loadRequests();
+    return;
+  }
 
-  </script>
+  /* --- Approuver (ouvre modale) --- */
+  if (e.target.classList.contains("btn-approve")){
+    approvalTargetId = id;
+    document.getElementById("modalApprove").style.display = "flex";
+  }
+});
 
-</div>
+/* =====================  BOUTON RETOUR ===================== */
+document.getElementById("btnBack").onclick = () => {
+  location.href = "../index.html";
+};
+
+/* =====================  CHARGEMENT INITIAL ===================== */
+loadClients();
+loadRequests();
+/* =====================  APPROBATION — MODALE ===================== */
+
+const modalApprove = document.getElementById("modalApprove");
+const approveDiscount = document.getElementById("approveDiscount");
+const approveConfigs = document.getElementById("approveConfigs");
+const approveMsg = document.getElementById("approveMsg");
+
+document.getElementById("approveCancel").onclick = () => {
+  modalApprove.style.display = "none";
+  approveMsg.textContent = "";
+};
+
+/* --- VALIDATION --- */
+document.getElementById("approveSave").onclick = async () => {
+
+  if (!approvalTargetId){
+    alert("Erreur : aucun ID de demande.");
+    return;
+  }
+
+  /* 1) Lire la remise */
+  const discount = Number(approveDiscount.value || 0);
+
+  if (isNaN(discount) || discount < 0 || discount > 90){
+    approveMsg.style.color = "#ffb3b3";
+    approveMsg.textContent = "Remise invalide.";
+    return;
+  }
+
+  /* 2) Lire les configurateurs sélectionnés */
+  const selectedConfigs = [...approveConfigs.options]
+    .filter(opt => opt.selected)
+    .map(opt => opt.value);
+
+  if (!selectedConfigs.length){
+    approveMsg.style.color = "#ffb3b3";
+    approveMsg.textContent = "Sélectionnez au moins un configurateur.";
+    return;
+  }
+
+  /* 3) Appel WORKER : approbation */
+  try{
+    const res = await fetch(`${WORKER_BASE}/admin-approve`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        requestId: approvalTargetId,
+        discount: discount,
+        configs: selectedConfigs
+      })
+    });
+
+    const out = await res.json();
+
+    if (!out.ok){
+      approveMsg.style.color = "#ffb3b3";
+      approveMsg.textContent = "Erreur lors de l’approbation.";
+      return;
+    }
+
+    /* 4) Envoi automatique du mot de passe via Apps Script */
+    await fetch(
+      "https://script.google.com/macros/s/AKfycbwbBlKEz_-VZfTsoYbONLidKbwB2VY_JZD8aF_mYehBGPdOsrDh-9Xno0v5GNzHjrrmKg/exec",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "password_notification",
+          email: out.email,
+          password: out.password
+        })
+      }
+    );
+
+    /* 5) Confirmation UI */
+    alert("Accès approuvé. Le mot de passe a été envoyé au client.");
+    modalApprove.style.display = "none";
+
+    /* 6) Recharge tables */
+    loadRequests();
+    loadClients();
+
+  }catch(err){
+    approveMsg.style.color = "#ffb3b3";
+    approveMsg.textContent = "Erreur réseau.";
+  }
+};
+
+</script>
 </body>
 </html>
+
