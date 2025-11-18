@@ -2,426 +2,400 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Administration clients — Cofel</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Administration clients — Cofel</title>
 
-  <!-- 🔒 Protection identique au portail interne -->
-  <script src="./lock.js" type="module"></script>
+<style>
+  body{
+    margin:0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
+    background:#f4f4fa;
+  }
 
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <style>
-    :root{
-      --cofel:#5a2d82; --cofel-2:#7838a7;
-      --glass: rgba(255,255,255,.12);
-      --glass-soft: rgba(255,255,255,.06);
-      --txt:#f5f7ff; --txt-dim:#dcd6ff; --accent:#c9b7ff;
-      --radius:18px; --blur:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box;}
-    html,body{height:100%;}
-    body{
-      margin:0; color:var(--txt);
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif;
-      background:
-        radial-gradient(800px 500px at 20% -10%, rgba(255,255,255,.10), transparent 60%),
-        radial-gradient(800px 500px at 110% 10%, rgba(255,255,255,.08), transparent 60%),
-        linear-gradient(135deg, var(--cofel), var(--cofel-2));
-      padding:20px;
-    }
+  header{
+    background:#5a2d82;
+    color:white;
+    padding:16px;
+    font-size:22px;
+    font-weight:700;
+  }
 
-    .shell{ max-width:1200px; margin:0 auto; }
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:18px;
-      flex-wrap:wrap;
-    }
-    .brand{display:flex; align-items:center; gap:12px;}
-    .brand img{height:40px; border-radius:10px;}
-    h1{margin:0; font-size:22px;}
-    .btn{
-      appearance:none; border:none; cursor:pointer;
-      background:#fff; color:#1a102b;
-      padding:8px 14px; border-radius:999px;
-      font-weight:700; font-size:13px;
-      box-shadow:0 10px 24px rgba(0,0,0,.25);
-    }
+  .tabs{
+    display:flex;
+    background:white;
+    border-bottom:1px solid #ddd;
+  }
+  .tab{
+    padding:14px 20px;
+    cursor:pointer;
+    font-weight:600;
+    color:#444;
+  }
+  .tab.active{
+    border-bottom:3px solid #5a2d82;
+    color:#5a2d82;
+  }
 
-    .tabs{ display:flex; gap:10px; margin-bottom:18px; }
-    .tab-btn{
-      padding:8px 16px; cursor:pointer;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.35);
-      background:rgba(0,0,0,.25); color:#fff;
-      font-size:13px; font-weight:600;
-    }
-    .tab-btn.active{ background:#fff; color:#1a102b; }
-    .tab-panel{ display:none; }
-    .tab-panel.active{ display:block; }
+  .page{
+    display:none;
+    padding:20px;
+  }
+  .page.active{
+    display:block;
+  }
 
-    .card{
-      background:rgba(6,4,18,.85);
-      border-radius:var(--radius);
-      border:1px solid rgba(255,255,255,.22);
-      box-shadow:var(--shadow);
-      padding:16px;
-      backdrop-filter:blur(var(--blur));
-    }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 2px 6px rgba(0,0,0,.1);
+  }
+  th,td{
+    padding:12px;
+    border-bottom:1px solid #eee;
+    font-size:14px;
+  }
+  th{
+    background:#faf7ff;
+    font-weight:700;
+    color:#5a2d82;
+  }
 
-    table{ width:100%; border-collapse:collapse; }
-    th, td{ padding:8px 10px; font-size:13px; }
-    thead{ background:rgba(0,0,0,.25); }
-    th{
-      text-transform:uppercase; font-size:11px;
-      color:var(--accent);
-      border-bottom:1px solid rgba(255,255,255,.22);
-    }
-    .btn-row{
-      padding:4px 8px; cursor:pointer; border-radius:8px;
-      font-size:11px; margin:2px;
-      border:none;
-    }
-    .btn-approve{ background:#4caf50; color:#fff; font-weight:700; }
-    .btn-row-secondary{ background:#555; color:#fff; }
-    .btn-row-reset{ background:#ffca28; color:#000; font-weight:600; }
-    .btn-row-delete{ background:#c62828; color:white; }
+  button{
+    cursor:pointer;
+  }
 
-    .empty{ text-align:center; padding:12px; color:var(--txt-dim); }
+  .btn-approve{
+    background:#5a2d82;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:8px;
+    font-weight:600;
+  }
+  .btn-reject{
+    background:#999;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:8px;
+    font-weight:600;
+  }
+  .btn-edit{
+    background:#5a2d82;
+    color:white;
+    border:none;
+    padding:4px 10px;
+    border-radius:8px;
+    font-size:13px;
+  }
+  .btn-delete{
+    background:#b30000;
+    color:white;
+    border:none;
+    padding:4px 10px;
+    border-radius:8px;
+    font-size:13px;
+  }
 
-    /* MODALE APPROBATION */
-    #modalApprove{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.6);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:20;
-    }
-    .modal-card{
-      width:100%; max-width:420px;
-      background:rgba(25,15,45,.95);
-      border-radius:16px; padding:18px;
-      border:1px solid rgba(255,255,255,.22);
-      box-shadow:0 12px 40px rgba(0,0,0,.45);
-    }
-    .modal-card h3{ margin-top:0; font-size:17px; }
-    .modal-field{ margin-bottom:12px; }
-    .modal-field label{ font-size:12px; color:var(--txt-dim); }
-    .modal-field input,
-    .modal-field select{
-      width:100%; padding:8px; font-size:14px;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.25);
-      border-radius:8px; color:#fff;
-    }
+  /* ---------------- MODALE ------------------- */
 
-    .modal-actions{ text-align:right; margin-top:16px; }
-    .btn-modal{
-      padding:8px 14px; border:none; cursor:pointer;
-      border-radius:999px; font-size:13px; font-weight:700;
-    }
-    .btn-cancel{ background:rgba(255,255,255,.08); color:#fff; }
-    .btn-ok{ background:#fff; color:#1a102b; }
-  </style>
+  #modalApprove{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:20;
+  }
+  .modal-card{
+    width: 380px;
+    background:white;
+    border-radius:12px;
+    padding:20px;
+    box-shadow:0 4px 16px rgba(0,0,0,.25);
+  }
+  .modal-title{
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:12px;
+    color:#5a2d82;
+  }
+  .modal-field{
+    margin-bottom:14px;
+  }
+  .modal-field label{
+    font-size:13px;
+    font-weight:700;
+    color:#444;
+  }
+  .modal-field input{
+    width:100%;
+    padding:10px;
+    margin-top:6px;
+    border:1px solid #ddd;
+    border-radius:8px;
+  }
+
+  #approveMsg{
+    font-size:13px;
+    margin-top:6px;
+    min-height:20px;
+  }
+
+  .modal-buttons{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:12px;
+  }
+  .btn-cancel{
+    background:#aaa;
+    color:white;
+    padding:8px 16px;
+    border-radius:8px;
+    border:none;
+    font-weight:700;
+  }
+  .btn-save{
+    background:#5a2d82;
+    color:white;
+    padding:8px 16px;
+    border-radius:8px;
+    border:none;
+    font-weight:700;
+  }
+</style>
 </head>
 
 <body>
-<div class="shell">
 
-  <header>
-    <div class="brand">
-      <img src="../assets/logo cofel.jpg">
-      <h1>Administration des comptes clients</h1>
-    </div>
+<header>Administration — Cofel</header>
 
-    <div class="actions">
-      <button id="btnBack" class="btn">⬅ Retour</button>
-    </div>
-  </header>
-
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="clients">Clients</button>
-    <button class="tab-btn" data-tab="requests">Demandes d’accès</button>
-  </div>
-
-  <!-- PANNEAU : CLIENTS -->
-  <div id="clients" class="tab-panel active">
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Société</th>
-            <th>Contact</th>
-            <th>Remise</th>
-            <th>Configs</th>
-            <th>Statut</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="tbodyClients">
-          <tr><td colspan="7" class="empty">Chargement…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- PANNEAU : DEMANDES -->
-  <div id="requests" class="tab-panel">
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Société</th>
-            <th>Nom</th>
-            <th>Email</th>
-            <th>Téléphone</th>
-            <th>Message</th>
-            <th>Créé</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="reqTbody">
-          <tr><td colspan="7" class="empty">Chargement…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- MODALE APPROBATION -->
-  <div id="modalApprove">
-    <div class="modal-card">
-      <h3>Approuver l’accès</h3>
-
-      <div class="modal-field">
-        <label>Remise (%)</label>
-        <input id="approveDiscount" type="number" min="0" max="90" value="0">
-      </div>
-
-      <div class="modal-field" style="display:none;">
-  <label>Configurateurs autorisés</label>
-  <select id="approveConfigs" multiple size="8">
-    <option value="enseigne-drapeau">Enseigne drapeau</option>
-    <option value="lettre-alu-alupvc">Lettre alu / alu-PVC</option>
-    <option value="lettre-boitier">Lettre boîtier</option>
-    <option value="lettres-pvc">Lettres PVC</option>
-    <option value="rampe-lumineuse">Rampe lumineuse (PLL)</option>
-    <option value="tole-tablette">Tôle tablette</option>
-    <option value="tolerie-dibond">Tôlerie / Dibond</option>
-    <option value="totems">Totems</option>
-  </select>
+<div class="tabs">
+  <div class="tab active" data-tab="requests">Demandes d’accès</div>
+  <div class="tab" data-tab="clients">Clients</div>
 </div>
-      <div class="modal-actions">
-        <button class="btn-modal btn-cancel" id="approveCancel">Annuler</button>
-        <button class="btn-modal btn-ok" id="approveSave">Approuver</button>
-      </div>
 
-      <div id="approveMsg"></div>
+<div id="pageRequests" class="page active">
+  <h2>Demandes d’accès</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Société</th>
+        <th>Nom</th>
+        <th>Email</th>
+        <th>Téléphone</th>
+        <th>Message</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="requestsBody"></tbody>
+  </table>
+</div>
+
+<div id="pageClients" class="page">
+  <h2>Clients Cofel</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Société</th>
+        <th>Nom</th>
+        <th>Statut</th>
+        <th>Remise</th>
+        <th>Dernière connexion</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="clientsBody"></tbody>
+  </table>
+</div>
+
+<!-- ======================== MODALE APPROBATION ===================== -->
+<div id="modalApprove">
+  <div class="modal-card">
+    <div class="modal-title">Approuver la demande</div>
+
+    <div class="modal-field">
+      <label>Remise (%)</label>
+      <input id="approveDiscount" type="number" min="0" max="90" value="0">
+    </div>
+
+    <div id="approveMsg"></div>
+
+    <div class="modal-buttons">
+      <button class="btn-cancel" id="approveCancel">Annuler</button>
+      <button class="btn-save" id="approveSave">Valider</button>
     </div>
   </div>
+</div>
+
 <script>
 const WORKER_BASE = "https://cofel-auth.sonveven.workers.dev";
 
-/* =====================  NAVIGATION TABS ===================== */
-const tabButtons = document.querySelectorAll(".tab-btn");
-const tabPanels  = document.querySelectorAll(".tab-panel");
-
-tabButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    tabButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    const target = btn.getAttribute("data-tab");
-
-    tabPanels.forEach(p => {
-      p.classList.remove("active");
-      if (p.id === target) p.classList.add("active");
-    });
-  });
-});
-
-/* =====================  TABLEAU CLIENTS ===================== */
-const tbodyClients = document.getElementById("tbodyClients");
-
-function formatRate(rate){
-  return ((rate || 0) * 100).toFixed(1) + " %";
-}
-
-function formatDate(iso){
-  if(!iso) return "—";
-  const d = new Date(iso);
-  if(isNaN(d)) return "—";
-  return d.toLocaleDateString("fr-FR") + " " + d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
-}
-
-async function loadClients(){
-  tbodyClients.innerHTML = `<tr><td colspan="7" class="empty">Chargement…</td></tr>`;
-  try{
-    const r = await fetch(`${WORKER_BASE}/clients`);
-    const data = await r.json();
-
-    if(!data.clients || !data.clients.length){
-      tbodyClients.innerHTML = `<tr><td colspan="7" class="empty">Aucun client.</td></tr>`;
-      return;
-    }
-
-    tbodyClients.innerHTML = data.clients.map(c => {
-      const status = c.status === "active" ? "🟢 Actif" : "🔴 Inactif";
-      const configs = JSON.parse(c.allowed_configurators || "[]");
-
-      return `
-        <tr>
-          <td>${c.email}</td>
-          <td>${c.company || "—"}</td>
-          <td>${c.contact_name || "—"}</td>
-          <td>${formatRate(c.discount_rate)}</td>
-          <td>${configs.join(", ") || "—"}</td>
-          <td>${status}</td>
-          <td>
-            <button class="btn-row btn-row-secondary btn-edit" data-email="${c.email}">✏ Modifier</button>
-            <button class="btn-row btn-row-reset btn-reset" data-email="${c.email}">🔁 Reset MDP</button>
-            <button class="btn-row btn-row-delete btn-delete" data-email="${c.email}">🗑 Supprimer</button>
-          </td>
-        </tr>
-      `;
-    }).join("");
-
-  } catch(err){
-    tbodyClients.innerHTML = `<tr><td colspan="7" class="empty">Erreur de chargement.</td></tr>`;
-  }
-}
-
-/* =====================  ACTIONS CLIENTS ===================== */
-
-tbodyClients.addEventListener("click", async e => {
-  const email = e.target.dataset.email;
-  if (!email) return;
-
-  /* --- Reset mot de passe --- */
-  if (e.target.classList.contains("btn-reset")){
-    if (!confirm("Réinitialiser le mot de passe ?")) return;
-
-    const r = await fetch(`${WORKER_BASE}/client-reset-password`, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ email })
-    });
-
-    const out = await r.json();
-    alert("Nouveau mot de passe : " + out.password);
-    return;
-  }
-
-  /* --- Supprimer client --- */
-  if (e.target.classList.contains("btn-delete")){
-    if (!confirm("Supprimer ce client ?")) return;
-
-    await fetch(`${WORKER_BASE}/client-delete`, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ email })
-    });
-
-    alert("Client supprimé.");
-    loadClients();
-    return;
-  }
-
-  /* --- Modifier (ouvre popup séparée) --- */
-  if (e.target.classList.contains("btn-edit")){
-    window.open(
-      `./edit-client.html?email=${encodeURIComponent(email)}`,
-      "_blank",
-      "width=520,height=720,top=100,left=100"
-    );
-    return;
+/* ----------------- TABS ------------------ */
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.onclick = ()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById("page"+tab.dataset.tab.charAt(0).toUpperCase()+tab.dataset.tab.slice(1)).classList.add("active");
   }
 });
 
-/* =====================  TABLEAU DES DEMANDES ===================== */
-const reqTbody = document.getElementById("reqTbody");
-let approvalTargetId = null;
-
+/* ================================================================
+   CHARGEMENT DES DEMANDES D’ACCÈS
+================================================================ */
 async function loadRequests(){
-  reqTbody.innerHTML = `<tr><td colspan="7" class="empty">Chargement…</td></tr>`;
-  
+  const body = document.getElementById("requestsBody");
+  body.innerHTML = "<tr><td colspan='6'>Chargement...</td></tr>";
+
   try{
     const r = await fetch(`${WORKER_BASE}/pending-requests`);
     const data = await r.json();
 
-    if(!data.requests || !data.requests.length){
-      reqTbody.innerHTML = `<tr><td colspan="7" class="empty">Aucune demande en attente.</td></tr>`;
+    if (!data.ok){
+      body.innerHTML = "<tr><td colspan='6'>Erreur</td></tr>";
       return;
     }
 
-    reqTbody.innerHTML = data.requests.map(r => `
-      <tr>
-        <td>${r.company}</td>
-        <td>${r.name}</td>
-        <td>${r.email}</td>
-        <td>${r.phone || "—"}</td>
-        <td>${r.message || "—"}</td>
-        <td>${formatDate(r.created_at)}</td>
+    if (data.requests.length === 0){
+      body.innerHTML = "<tr><td colspan='6'>Aucune demande</td></tr>";
+      return;
+    }
+
+    body.innerHTML = "";
+    data.requests.forEach(req=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${req.company}</td>
+        <td>${req.name}</td>
+        <td>${req.email}</td>
+        <td>${req.phone || "-"}</td>
+        <td>${req.message || "-"}</td>
         <td>
-          <button class="btn-row btn-approve" data-id="${r.id}">✔ Approuver</button>
-          <button class="btn-row btn-row-secondary btn-reject" data-id="${r.id}">❌ Refuser</button>
+          <button class="btn-approve" onclick="openApprove('${req.id}')">✔ Approuver</button>
+          <button class="btn-reject" onclick="rejectRequest('${req.id}')">✖ Rejeter</button>
         </td>
-      </tr>
-    `).join("");
+      `;
+      body.appendChild(tr);
+    });
 
   }catch(err){
-    reqTbody.innerHTML = `<tr><td colspan="7" class="empty">Erreur de chargement.</td></tr>`;
+    body.innerHTML = "<tr><td colspan='6'>Erreur réseau</td></tr>";
   }
 }
 
-/* =====================  ACTIONS DEMANDES ===================== */
+/* ============================================
+   REJETER DEMANDE
+============================================ */
+async function rejectRequest(id){
+  if (!confirm("Rejeter cette demande ?")) return;
 
-reqTbody.addEventListener("click", async e => {
+  await fetch(`${WORKER_BASE}/access-request-reject`, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ id })
+  });
 
-  const id = e.target.dataset.id;
-  if (!id) return;
+  loadRequests();
+}
+/* ================================================================
+   CHARGEMENT DES CLIENTS COFEL
+================================================================ */
+async function loadClients(){
+  const body = document.getElementById("clientsBody");
+  body.innerHTML = "<tr><td colspan='7'>Chargement...</td></tr>";
 
-  /* --- Refuser --- */
-  if (e.target.classList.contains("btn-reject")){
-    if (!confirm("Refuser cette demande ?")) return;
+  try{
+    const r = await fetch(`${WORKER_BASE}/clients`);
+    const data = await r.json();
 
-    await fetch(`${WORKER_BASE}/access-request-reject`, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ id })
+    if (!data.ok){
+      body.innerHTML = "<tr><td colspan='7'>Erreur</td></tr>";
+      return;
+    }
+
+    if (data.clients.length === 0){
+      body.innerHTML = "<tr><td colspan='7'>Aucun client</td></tr>";
+      return;
+    }
+
+    body.innerHTML = "";
+    data.clients.forEach(c=>{
+
+      const tr = document.createElement("tr");
+
+      const discount = (Number(c.discount_rate || 0) * 100).toFixed(0) + "%";
+
+      tr.innerHTML = `
+        <td>${c.email}</td>
+        <td>${c.company || "-"}</td>
+        <td>${c.contact_name || "-"}</td>
+        <td>${c.status}</td>
+        <td>${discount}</td>
+        <td>${c.last_login_at ? c.last_login_at.replace("T"," ").slice(0,16) : "-"}</td>
+        <td>
+          <button class="btn-edit" onclick="editClient('${c.email}')">✏ Modifier</button>
+          <button class="btn-delete" onclick="deleteClient('${c.email}')">🗑 Supprimer</button>
+        </td>
+      `;
+
+      body.appendChild(tr);
     });
 
-    alert("Demande refusée.");
-    loadRequests();
-    return;
+  }catch(err){
+    body.innerHTML = "<tr><td colspan='7'>Erreur réseau</td></tr>";
   }
+}
 
-  /* --- Approuver (ouvre modale) --- */
-  if (e.target.classList.contains("btn-approve")){
-    approvalTargetId = id;
-    document.getElementById("modalApprove").style.display = "flex";
-  }
-});
+/* ================================================================
+   MODIFIER CLIENT (redirige vers page dédiée)
+================================================================ */
+function editClient(email){
+  window.location.href = "./edit-client.html?email=" + encodeURIComponent(email);
+}
 
-/* =====================  BOUTON RETOUR ===================== */
-document.getElementById("btnBack").onclick = () => {
-  location.href = "../index.html";
-};
+/* ================================================================
+   SUPPRIMER CLIENT
+================================================================ */
+async function deleteClient(email){
+  if (!confirm("Supprimer ce client ?")) return;
 
-/* =====================  CHARGEMENT INITIAL ===================== */
-loadClients();
+  await fetch(`${WORKER_BASE}/client-delete`, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ email })
+  });
+
+  loadClients();
+}
+
+/* ===================== PREMIER CHARGEMENT ====================== */
 loadRequests();
-/* =====================  APPROBATION — MODALE (simplifiée) ===================== */
+loadClients();
 
-const modalApprove = document.getElementById("modalApprove");
-const approveDiscount = document.getElementById("approveDiscount");
-const approveMsg = document.getElementById("approveMsg");
 
-// Accès toujours global : tous les configurateurs
+// ================================================================
+//   OUVERTURE DE LA MODALE D’APPROBATION
+// ================================================================
+let approvalTargetId = null;
+
+function openApprove(id){
+  approvalTargetId = id;
+  approveDiscount.value = 0;
+  approveMsg.textContent = "";
+  document.getElementById("modalApprove").style.display = "flex";
+}
+/* ================================================================
+   PARTIE C : APPROBATION — APPEL DIRECT AU WORKER (Version Finale)
+================================================================ */
+
 const ALL_CONFIGS = [
   "enseigne-drapeau",
   "lettre-alu-alupvc",
@@ -434,11 +408,11 @@ const ALL_CONFIGS = [
 ];
 
 document.getElementById("approveCancel").onclick = () => {
-  modalApprove.style.display = "none";
+  document.getElementById("modalApprove").style.display = "none";
   approveMsg.textContent = "";
 };
 
-/* --- VALIDATION --- */
+/* ----------------------- APPROBATION --------------------------- */
 document.getElementById("approveSave").onclick = async () => {
 
   if (!approvalTargetId){
@@ -456,68 +430,50 @@ document.getElementById("approveSave").onclick = async () => {
     return;
   }
 
-  // 2) Appel Worker pour approuver
+  // 2) Appel au WORKER — envoi email automatique dans le Worker
   let out;
   try{
     const res = await fetch(`${WORKER_BASE}/admin-approve`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({
         requestId: approvalTargetId,
         discount: discount,
-        configs: ALL_CONFIGS      // accès global
+        configs: ALL_CONFIGS   // accès global pour tous
       })
     });
 
-    // Si le Worker répond erreur texte, on essaie de lire proprement
     const text = await res.text();
-    try {
-      out = JSON.parse(text);
-    } catch {
-      throw new Error("Réponse non valide du Worker : " + text);
+
+    try{ out = JSON.parse(text); }
+    catch{
+      console.error("Réponse invalide du Worker:", text);
+      approveMsg.textContent = "Réponse invalide du serveur.";
+      return;
     }
 
     if (!out.ok){
-      throw new Error("Le Worker a renvoyé ok=false.");
+      approveMsg.textContent = "Le serveur a renvoyé une erreur.";
+      return;
     }
 
-  } catch(err){
-    console.error("Erreur Worker /admin-approve :", err);
-    approveMsg.textContent = "Erreur avec le serveur (approbation).";
+  }catch(err){
+    console.error("Erreur réseau Worker:", err);
+    approveMsg.textContent = "Erreur réseau.";
     return;
   }
 
-  // 3) Envoi du mot de passe via Apps Script (on n’arrête pas si ça plante)
-  try{
-    await fetch(
-      "https://script.google.com/macros/s/AKfycbznSW_kZOxToXS8HdJtpj7bG-e74V9jqmZ6YOMGfG2m2LESI7JSHZVEG1QB-uJadlzq1g/exec",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "password_notification",
-          email: out.email,
-          password: out.password
-        })
-      }
-    );
-  } catch(errMail){
-    console.error("Erreur lors de l'envoi de l'email (Apps Script) :", errMail);
-    // On NE bloque PAS l'approbation pour autant
-  }
-
-  // 4) Succès côté interface
-  approveMsg.style.color = "#b7ffcf";
+  // 3) Succès
+  approveMsg.style.color = "#1a8f3c";
   approveMsg.textContent = "Accès approuvé.";
-  alert("Accès approuvé. Le mot de passe a été envoyé (ou sera envoyé).");
 
-  modalApprove.style.display = "none";
+  alert("Accès approuvé.\nLe mot de passe a été envoyé automatiquement au client.");
+
+  document.getElementById("modalApprove").style.display = "none";
   loadRequests();
   loadClients();
 };
 
-
 </script>
 </body>
 </html>
-
