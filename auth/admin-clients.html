@@ -37,6 +37,7 @@
       justify-content:space-between;
       margin-bottom:18px;
       flex-wrap:wrap;
+      gap:10px;
     }
     .brand{display:flex; align-items:center; gap:12px;}
     .brand img{height:40px; border-radius:10px;}
@@ -47,6 +48,7 @@
       padding:8px 14px; border-radius:999px;
       font-weight:700; font-size:13px;
       box-shadow:0 10px 24px rgba(0,0,0,.25);
+      margin-left:6px;
     }
 
     .tabs{ display:flex; gap:10px; margin-bottom:18px; }
@@ -90,8 +92,9 @@
 
     .empty{ text-align:center; padding:12px; color:var(--txt-dim); }
 
-    /* MODALE APPROBATION */
-    #modalApprove{
+    /* MODALES */
+    #modalApprove,
+    #modalCreate{
       position:fixed;
       inset:0;
       background:rgba(0,0,0,.6);
@@ -100,6 +103,8 @@
       justify-content:center;
       z-index:20;
     }
+    #modalCreate{ z-index:30; }
+
     .modal-card{
       width:100%; max-width:420px;
       background:rgba(25,15,45,.95);
@@ -138,6 +143,7 @@
     </div>
 
     <div class="actions">
+      <button id="btnCreateClient" class="btn">➕ Créer un client</button>
       <button id="btnBack" class="btn">⬅ Retour</button>
     </div>
   </header>
@@ -203,18 +209,18 @@
       </div>
 
       <div class="modal-field" style="display:none;">
-  <label>Configurateurs autorisés</label>
-  <select id="approveConfigs" multiple size="8">
-    <option value="enseigne-drapeau">Enseigne drapeau</option>
-    <option value="lettre-alu-alupvc">Lettre alu / alu-PVC</option>
-    <option value="lettre-boitier">Lettre boîtier</option>
-    <option value="lettres-pvc">Lettres PVC</option>
-    <option value="rampe-lumineuse">Rampe lumineuse (PLL)</option>
-    <option value="tole-tablette">Tôle tablette</option>
-    <option value="tolerie-dibond">Tôlerie / Dibond</option>
-    <option value="totems">Totems</option>
-  </select>
-</div>
+        <label>Configurateurs autorisés</label>
+        <select id="approveConfigs" multiple size="8">
+          <option value="enseigne-drapeau">Enseigne drapeau</option>
+          <option value="lettre-alu-alupvc">Lettre alu / alu-PVC</option>
+          <option value="lettre-boitier">Lettre boîtier</option>
+          <option value="lettres-pvc">Lettres PVC</option>
+          <option value="rampe-lumineuse">Rampe lumineuse (PLL)</option>
+          <option value="tole-tablette">Tôle tablette</option>
+          <option value="tolerie-dibond">Tôlerie / Dibond</option>
+          <option value="totems">Totems</option>
+        </select>
+      </div>
       <div class="modal-actions">
         <button class="btn-modal btn-cancel" id="approveCancel">Annuler</button>
         <button class="btn-modal btn-ok" id="approveSave">Approuver</button>
@@ -223,6 +229,43 @@
       <div id="approveMsg"></div>
     </div>
   </div>
+
+  <!-- MODALE CREATION CLIENT -->
+  <div id="modalCreate">
+    <div class="modal-card">
+      <h3>Créer un client manuellement</h3>
+
+      <div class="modal-field">
+        <label>Email</label>
+        <input id="createEmail" type="email" placeholder="client@exemple.com">
+      </div>
+
+      <div class="modal-field">
+        <label>Société</label>
+        <input id="createCompany" type="text" placeholder="Nom de société">
+      </div>
+
+      <div class="modal-field">
+        <label>Nom du contact</label>
+        <input id="createName" type="text" placeholder="Nom et prénom">
+      </div>
+
+      <div class="modal-field">
+        <label>Remise (%)</label>
+        <input id="createDiscount" type="number" min="0" max="90" value="0">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-modal btn-cancel" id="createCancel">Annuler</button>
+        <button class="btn-modal btn-ok" id="createSave">Créer</button>
+      </div>
+
+      <div id="createMsg" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+</div> <!-- /.shell -->
+
 <script>
 const WORKER_BASE = "https://cofel-auth.sonveven.workers.dev";
 
@@ -415,6 +458,7 @@ document.getElementById("btnBack").onclick = () => {
 /* =====================  CHARGEMENT INITIAL ===================== */
 loadClients();
 loadRequests();
+
 /* =====================  APPROBATION — MODALE (simplifiée) ===================== */
 
 const modalApprove = document.getElementById("modalApprove");
@@ -438,7 +482,7 @@ document.getElementById("approveCancel").onclick = () => {
   approveMsg.textContent = "";
 };
 
-/* --- VALIDATION --- */
+/* --- VALIDATION APPROBATION --- */
 document.getElementById("approveSave").onclick = async () => {
 
   if (!approvalTargetId){
@@ -449,14 +493,12 @@ document.getElementById("approveSave").onclick = async () => {
   approveMsg.textContent = "";
   approveMsg.style.color = "#ffb3b3";
 
-  // 1) Remise
   const discount = Number(approveDiscount.value || 0);
   if (isNaN(discount) || discount < 0 || discount > 90){
     approveMsg.textContent = "Remise invalide (0 à 90 %).";
     return;
   }
 
-  // 2) Appel Worker pour approuver
   let out;
   try{
     const res = await fetch(`${WORKER_BASE}/admin-approve`, {
@@ -465,11 +507,10 @@ document.getElementById("approveSave").onclick = async () => {
       body: JSON.stringify({
         requestId: approvalTargetId,
         discount: discount,
-        configs: ALL_CONFIGS      // accès global
+        configs: ALL_CONFIGS
       })
     });
 
-    // Si le Worker répond erreur texte, on essaie de lire proprement
     const text = await res.text();
     try {
       out = JSON.parse(text);
@@ -487,7 +528,7 @@ document.getElementById("approveSave").onclick = async () => {
     return;
   }
 
-  // 3) Envoi du mot de passe via Apps Script (on n’arrête pas si ça plante)
+  // Envoi du mot de passe via Apps Script (non bloquant)
   try{
     await fetch(
       "https://script.google.com/macros/s/AKfycbznSW_kZOxToXS8HdJtpj7bG-e74V9jqmZ6YOMGfG2m2LESI7JSHZVEG1QB-uJadlzq1g/exec",
@@ -503,10 +544,8 @@ document.getElementById("approveSave").onclick = async () => {
     );
   } catch(errMail){
     console.error("Erreur lors de l'envoi de l'email (Apps Script) :", errMail);
-    // On NE bloque PAS l'approbation pour autant
   }
 
-  // 4) Succès côté interface
   approveMsg.style.color = "#b7ffcf";
   approveMsg.textContent = "Accès approuvé.";
   alert("Accès approuvé. Le mot de passe a été envoyé (ou sera envoyé).");
@@ -516,7 +555,79 @@ document.getElementById("approveSave").onclick = async () => {
   loadClients();
 };
 
+/* =====================  CREATION CLIENT MANUELLE ===================== */
 
+const modalCreate   = document.getElementById("modalCreate");
+const btnCreate     = document.getElementById("btnCreateClient");
+const createEmail   = document.getElementById("createEmail");
+const createCompany = document.getElementById("createCompany");
+const createName    = document.getElementById("createName");
+const createDiscount= document.getElementById("createDiscount");
+const createMsg     = document.getElementById("createMsg");
+
+btnCreate.onclick = () => {
+  createEmail.value   = "";
+  createCompany.value = "";
+  createName.value    = "";
+  createDiscount.value= "0";
+  createMsg.textContent = "";
+  modalCreate.style.display = "flex";
+};
+
+document.getElementById("createCancel").onclick = () => {
+  modalCreate.style.display = "none";
+};
+
+document.getElementById("createSave").onclick = async () => {
+  createMsg.textContent = "";
+  createMsg.style.color = "#ffb3b3";
+
+  const email = (createEmail.value || "").trim();
+  if (!email || !email.includes("@")){
+    createMsg.textContent = "Email invalide.";
+    return;
+  }
+
+  const discount = Number(createDiscount.value || 0);
+  if (isNaN(discount) || discount < 0 || discount > 90){
+    createMsg.textContent = "Remise incorrecte (0–90%).";
+    return;
+  }
+
+  try{
+    const r = await fetch(`${WORKER_BASE}/client-create`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        email,
+        company: (createCompany.value || "").trim(),
+        name: (createName.value || "").trim(),
+        discount,
+        configs: ALL_CONFIGS
+      })
+    });
+
+    const out = await r.json();
+
+    if(!out.ok){
+      createMsg.textContent = out.error || "Erreur lors de la création.";
+      return;
+    }
+
+    createMsg.style.color = "#b7ffcf";
+    createMsg.textContent = "Client créé avec succès.";
+
+    alert("Client créé ! Mot de passe : " + out.password);
+
+    modalCreate.style.display = "none";
+    loadClients();
+
+  }catch(err){
+    console.error(err);
+    createMsg.textContent = "Erreur serveur.";
+  }
+};
 </script>
+
 </body>
 </html>
