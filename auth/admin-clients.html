@@ -202,20 +202,19 @@
         <input id="approveDiscount" type="number" min="0" max="90" value="0">
       </div>
 
-      <div class="modal-field">
-        <label>Configurateurs autorisés</label>
-        <select id="approveConfigs" multiple size="8">
-          <option value="enseigne-drapeau">Enseigne drapeau</option>
-          <option value="lettre-alu-alupvc">Lettre alu / alu-PVC</option>
-          <option value="lettre-boitier">Lettre boîtier</option>
-          <option value="lettres-pvc">Lettres PVC</option>
-          <option value="rampe-lumineuse">Rampe lumineuse (PLL)</option>
-          <option value="tole-tablette">Tôle tablette</option>
-          <option value="tolerie-dibond">Tôlerie / Dibond</option>
-          <option value="totems">Totems</option>
-        </select>
-      </div>
-
+      <div class="modal-field" style="display:none;">
+  <label>Configurateurs autorisés</label>
+  <select id="approveConfigs" multiple size="8">
+    <option value="enseigne-drapeau">Enseigne drapeau</option>
+    <option value="lettre-alu-alupvc">Lettre alu / alu-PVC</option>
+    <option value="lettre-boitier">Lettre boîtier</option>
+    <option value="lettres-pvc">Lettres PVC</option>
+    <option value="rampe-lumineuse">Rampe lumineuse (PLL)</option>
+    <option value="tole-tablette">Tôle tablette</option>
+    <option value="tolerie-dibond">Tôlerie / Dibond</option>
+    <option value="totems">Totems</option>
+  </select>
+</div>
       <div class="modal-actions">
         <button class="btn-modal btn-cancel" id="approveCancel">Annuler</button>
         <button class="btn-modal btn-ok" id="approveSave">Approuver</button>
@@ -416,12 +415,23 @@ document.getElementById("btnBack").onclick = () => {
 /* =====================  CHARGEMENT INITIAL ===================== */
 loadClients();
 loadRequests();
-/* =====================  APPROBATION — MODALE ===================== */
+/* =====================  APPROBATION — MODALE (simplifiée) ===================== */
 
 const modalApprove = document.getElementById("modalApprove");
 const approveDiscount = document.getElementById("approveDiscount");
-const approveConfigs = document.getElementById("approveConfigs");
 const approveMsg = document.getElementById("approveMsg");
+
+// Accès toujours global : tous les configurateurs
+const ALL_CONFIGS = [
+  "enseigne-drapeau",
+  "lettre-alu-alupvc",
+  "lettre-boitier",
+  "lettres-pvc",
+  "rampe-lumineuse",
+  "tole-tablette",
+  "tolerie-dibond",
+  "totems"
+];
 
 document.getElementById("approveCancel").onclick = () => {
   modalApprove.style.display = "none";
@@ -436,27 +446,18 @@ document.getElementById("approveSave").onclick = async () => {
     return;
   }
 
-  /* 1) Lire la remise */
+  approveMsg.textContent = "";
+  approveMsg.style.color = "#ffb3b3";
+
+  // 1) Remise
   const discount = Number(approveDiscount.value || 0);
-
   if (isNaN(discount) || discount < 0 || discount > 90){
-    approveMsg.style.color = "#ffb3b3";
-    approveMsg.textContent = "Remise invalide.";
+    approveMsg.textContent = "Remise invalide (0 à 90 %).";
     return;
   }
 
-  /* 2) Lire les configurateurs sélectionnés */
-  const selectedConfigs = [...approveConfigs.options]
-    .filter(opt => opt.selected)
-    .map(opt => opt.value);
-
-  if (!selectedConfigs.length){
-    approveMsg.style.color = "#ffb3b3";
-    approveMsg.textContent = "Sélectionnez au moins un configurateur.";
-    return;
-  }
-
-  /* 3) Appel WORKER : approbation */
+  // 2) Appel Worker pour approuver
+  let out;
   try{
     const res = await fetch(`${WORKER_BASE}/admin-approve`, {
       method: "POST",
@@ -464,19 +465,30 @@ document.getElementById("approveSave").onclick = async () => {
       body: JSON.stringify({
         requestId: approvalTargetId,
         discount: discount,
-        configs: selectedConfigs
+        configs: ALL_CONFIGS      // accès global
       })
     });
 
-    const out = await res.json();
-
-    if (!out.ok){
-      approveMsg.style.color = "#ffb3b3";
-      approveMsg.textContent = "Erreur lors de l’approbation.";
-      return;
+    // Si le Worker répond erreur texte, on essaie de lire proprement
+    const text = await res.text();
+    try {
+      out = JSON.parse(text);
+    } catch {
+      throw new Error("Réponse non valide du Worker : " + text);
     }
 
-    /* 4) Envoi automatique du mot de passe via Apps Script */
+    if (!out.ok){
+      throw new Error("Le Worker a renvoyé ok=false.");
+    }
+
+  } catch(err){
+    console.error("Erreur Worker /admin-approve :", err);
+    approveMsg.textContent = "Erreur avec le serveur (approbation).";
+    return;
+  }
+
+  // 3) Envoi du mot de passe via Apps Script (on n’arrête pas si ça plante)
+  try{
     await fetch(
       "https://script.google.com/macros/s/AKfycbwbBlKEz_-VZfTsoYbONLidKbwB2VY_JZD8aF_mYehBGPdOsrDh-9Xno0v5GNzHjrrmKg/exec",
       {
@@ -489,20 +501,21 @@ document.getElementById("approveSave").onclick = async () => {
         })
       }
     );
-
-    /* 5) Confirmation UI */
-    alert("Accès approuvé. Le mot de passe a été envoyé au client.");
-    modalApprove.style.display = "none";
-
-    /* 6) Recharge tables */
-    loadRequests();
-    loadClients();
-
-  }catch(err){
-    approveMsg.style.color = "#ffb3b3";
-    approveMsg.textContent = "Erreur réseau.";
+  } catch(errMail){
+    console.error("Erreur lors de l'envoi de l'email (Apps Script) :", errMail);
+    // On NE bloque PAS l'approbation pour autant
   }
+
+  // 4) Succès côté interface
+  approveMsg.style.color = "#b7ffcf";
+  approveMsg.textContent = "Accès approuvé.";
+  alert("Accès approuvé. Le mot de passe a été envoyé (ou sera envoyé).");
+
+  modalApprove.style.display = "none";
+  loadRequests();
+  loadClients();
 };
+
 
 </script>
 </body>
