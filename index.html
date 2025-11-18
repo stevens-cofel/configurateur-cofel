@@ -793,6 +793,39 @@ try {
 } catch(err) {
   console.warn("⚠️ Impossible d’enregistrer le devis :", err);
 }
+// 🔵 Enregistrement du devis dans D1 (totalement isolé)
+let profileEmail = "inconnu";
+try {
+  const rawProfile = localStorage.getItem('cofel_client_profile');
+  if (rawProfile) {
+    const parsed = JSON.parse(rawProfile);
+    if (parsed.email) profileEmail = parsed.email;
+  }
+} catch(e) {
+  console.warn("Impossible de lire le profil client :", e);
+}
+
+try {
+  await fetch("https://cofel-auth.sonveven.workers.dev/log-quote", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      clientEmail: profileEmail,
+      clientCompany: client?.societe || "",
+      clientName: client?.contact || "",
+      productType: "devis-index",
+      totalHT: t.total_ht,
+      totalTTC: t.total_ttc,
+      extra: {
+        chantier: client?.chantier || "",
+        date: new Date().toISOString(),
+        lignes: d.lignes || []
+      }
+    })
+  });
+} catch(err) {
+  console.warn("⚠️ Erreur enregistrement devis D1 :", err);
+}
 
         doc.save("Devis-Cofel.pdf");
       }catch(err){
