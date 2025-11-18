@@ -771,6 +771,29 @@ const drawHeader = () => {
         await sendEmail({ client, devis: d });
 
         // 👉 Téléchargement utilisateur
+        // 👉 Enregistrement du devis dans la base D1
+try {
+  await fetch("https://cofel-auth.sonveven.workers.dev/log-quote", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      clientEmail: (client.societe || '') + " <" + (profile?.email || "inconnu") + ">",
+      clientCompany: client.societe || "",
+      clientName: client.contact || "",
+      productType: "devis-global-index",
+      totalHT: t.total_ht,
+      totalTTC: t.total_ttc,
+      extra: {
+        chantier: client.chantier,
+        date: new Date().toISOString(),
+        lignes: d.lignes || []
+      }
+    })
+  });
+} catch(err) {
+  console.warn("⚠️ Impossible d’enregistrer le devis :", err);
+}
+
         doc.save("Devis-Cofel.pdf");
       }catch(err){
         alert("Erreur pendant la génération du PDF : " + err.message);
