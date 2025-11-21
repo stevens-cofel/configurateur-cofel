@@ -770,16 +770,28 @@ const drawHeader = () => {
         // 👉 Envoi e-mail (silencieux)
         await sendEmail({ client, devis: d });
 // ---------------------------------------------------------
-// 1) Enregistrement du devis dans D1 + récupération de l’ID
+// 1) Enregistrement du devis dans D1 + récupération de l'ID
 // ---------------------------------------------------------
+
+// Récupération correcte de l'email depuis le profil client connecté
+let clientProfile = localStorage.getItem("cofel_client_profile");
+let profileEmail = "";
+
+if (clientProfile) {
+  try {
+    profileEmail = JSON.parse(clientProfile).email || "";
+  } catch (e) {
+    console.error("Erreur parsing profil client :", e);
+  }
+}
 
 const logResp = await fetch("https://cofel-auth.sonveven.workers.dev/log-quote", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    clientEmail: document.getElementById("email")?.value || "",
+    clientEmail: profileEmail,                              // ✔ correct maintenant
     clientCompany: document.getElementById("societe")?.value || "",
-    clientName: document.getElementById("nom")?.value || "",
+    clientName: document.getElementById("contact")?.value || "", 
     productType: "devis-index",
     totalHT: d.total_ht,
     totalTTC: d.total_ttc,
@@ -799,8 +811,9 @@ if (!logData.ok) {
   return;
 }
 
-window.lastCreatedQuoteId = logData.quoteId;
+window.lastCreatedQuoteId = logData.quoteId;       // ✔ maintenant correct
 console.log("🔥 ID du devis :", window.lastCreatedQuoteId);
+
 
 // ---------------------------------------------------------------------------
 // 1) Génération PDF en mémoire
