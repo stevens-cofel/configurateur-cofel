@@ -770,20 +770,21 @@ const drawHeader = () => {
         // 👉 Envoi e-mail (silencieux)
         await sendEmail({ client, devis: d });
 // ---------------------------------------------------------
-// 1) Enregistrement du devis dans D1 + récupération ID
+// 1) Enregistrement du devis dans D1 + récupération de l’ID
 // ---------------------------------------------------------
+
 const logResp = await fetch("https://cofel-auth.sonveven.workers.dev/log-quote", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    clientEmail: profileEmail,
-    clientCompany: client.societe,
-    clientName: client.contact,
+    clientEmail: document.getElementById("email")?.value || "",
+    clientCompany: document.getElementById("societe")?.value || "",
+    clientName: document.getElementById("nom")?.value || "",
     productType: "devis-index",
-    totalHT: t.total_ht,
-    totalTTC: t.total_ttc,
+    totalHT: d.total_ht,
+    totalTTC: d.total_ttc,
     extra: {
-      chantier: client.chantier,
+      chantier: document.getElementById("chantier")?.value || "",
       date: new Date().toISOString(),
       lignes: d.lignes || []
     }
@@ -791,17 +792,18 @@ const logResp = await fetch("https://cofel-auth.sonveven.workers.dev/log-quote",
 });
 
 const logData = await logResp.json();
+
 if (!logData.ok) {
-  console.error("Erreur enregistrement devis :", logData);
   alert("Erreur lors de l'enregistrement du devis.");
+  console.error(logData);
   return;
 }
 
-window.lastCreatedQuoteId = logData.quoteId;  
-console.log("ID du devis :", window.lastCreatedQuoteId);
+window.lastCreatedQuoteId = logData.quoteId;
+console.log("🔥 ID du devis :", window.lastCreatedQuoteId);
 
 // ---------------------------------------------------------
-// 2) Génération PDF en mémoire
+// 2) Génération du PDF en mémoire
 // ---------------------------------------------------------
 const pdfBlob = doc.output("blob");
 
@@ -814,15 +816,16 @@ function blobToBase64(blob) {
     reader.readAsDataURL(blob);
   });
 }
+
 const pdfBase64 = await blobToBase64(pdfBlob);
 
 // ---------------------------------------------------------
-// 3) Upload dans ton repo GitHub via Worker
+// 3) Upload PDF → GitHub via Worker
 // ---------------------------------------------------------
 const uploadPayload = {
   quoteId: window.lastCreatedQuoteId,
-  pdfBase64,
-  clientCompany: client.societe,
+  pdfBase64: pdfBase64,
+  clientCompany: document.getElementById("societe")?.value || "Inconnu",
   productType: "devis-index",
   createdAt: new Date().toISOString()
 };
@@ -834,14 +837,15 @@ try {
     body: JSON.stringify(uploadPayload)
   });
 
-  const upResult = await up.json();
-  console.log("Upload PDF :", upResult);
+  const result = await up.json();
+  console.log("📄 Upload PDF :", result);
+
 } catch (err) {
-  console.error("Erreur upload PDF :", err);
+  console.error("❌ Problème upload PDF :", err);
 }
 
 // ---------------------------------------------------------
-// 4) Téléchargement local du PDF
+// 4) Téléchargement du PDF local (client)
 // ---------------------------------------------------------
 doc.save("Devis-Cofel.pdf");
 
