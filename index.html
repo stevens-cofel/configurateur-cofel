@@ -791,7 +791,7 @@ const logResp = await fetch("https://cofel-auth.sonveven.workers.dev/log-quote",
   body: JSON.stringify({
     clientEmail: profileEmail,                              // ✔ correct maintenant
     clientCompany: document.getElementById("societe")?.value || "",
-    clientName: document.getElementById("contact")?.value || "", 
+    clientName: document.getElementById("contact")?.value || "",
     productType: "devis-index",
     totalHT: d.total_ht,
     totalTTC: d.total_ttc,
@@ -810,6 +810,10 @@ if (!logData.ok) {
   console.error(logData);
   return;
 }
+
+window.lastCreatedQuoteId = logData.quoteId;
+console.log("🔥 ID du devis :", window.lastCreatedQuoteId);
+
 
 window.lastCreatedQuoteId = logData.quoteId;       // ✔ maintenant correct
 console.log("🔥 ID du devis :", window.lastCreatedQuoteId);
