@@ -1,6 +1,6 @@
 // ============================================================================
 // Admin - Liste des devis Cofel
-// Charge les devis depuis le Worker + filtres dynamiques + bouton Voir
+// Charge les devis depuis le Worker + filtres dynamiques + bouton PDF
 // ============================================================================
 
 const API_URL = "https://cofel-auth.sonveven.workers.dev";
@@ -14,46 +14,50 @@ const fDate = document.getElementById("searchDate");
 let allQuotes = [];
 
 // ======================= CHARGEMENT DES DEVIS =======================
-async function loadQuotes(){
+async function loadQuotes() {
   tbody.innerHTML = `<tr><td colspan="7" style="padding:20px;color:var(--txt-dim);text-align:center;">Chargement...</td></tr>`;
 
-  try{
+  try {
     const res = await fetch(API_URL + "/list-quotes");
     const data = await res.json();
 
-    if(!data.ok){ throw new Error("Erreur API"); }
+    if (!data.ok) throw new Error("Erreur API");
 
     allQuotes = data.quotes || [];
     renderQuotes();
 
-  }catch(err){
+  } catch (err) {
     console.error(err);
     tbody.innerHTML = `<tr><td colspan="7" style="padding:20px;color:red;text-align:center;">Erreur de chargement</td></tr>`;
   }
 }
 
 // ======================= AFFICHAGE DES LIGNES =======================
-function renderQuotes(){
-
+function renderQuotes() {
   const emailVal = fEmail.value.toLowerCase().trim();
   const compVal = fCompany.value.toLowerCase().trim();
   const prodVal = fProduct.value;
   const dateVal = fDate.value;
 
   const filtered = allQuotes.filter(q => {
-    if(emailVal && !q.client_email.toLowerCase().includes(emailVal)) return false;
-    if(compVal && !(q.client_company||"").toLowerCase().includes(compVal)) return false;
-    if(prodVal && q.product_type !== prodVal) return false;
-    if(dateVal && !q.created_at.startsWith(dateVal)) return false;
+    if (emailVal && !q.client_email.toLowerCase().includes(emailVal)) return false;
+    if (compVal && !(q.client_company || "").toLowerCase().includes(compVal)) return false;
+    if (prodVal && q.product_type !== prodVal) return false;
+    if (dateVal && !q.created_at.startsWith(dateVal)) return false;
     return true;
   });
 
-  if(filtered.length === 0){
+  if (filtered.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--txt-dim);">Aucun devis trouvé</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = filtered.map(q => `
+  tbody.innerHTML = filtered.map(q => {
+    const pdfButton = q.pdf_url
+      ? `<a class="btn-view" href="${q.pdf_url}" target="_blank">📄 PDF</a>`
+      : `<span style="opacity:0.4;">—</span>`;
+
+    return `
       <tr>
         <td>${formatDate(q.created_at)}</td>
         <td>${q.client_email}</td>
@@ -61,33 +65,31 @@ function renderQuotes(){
         <td>${q.client_name || "-"}</td>
         <td>${q.product_type}</td>
         <td>${formatEuros(q.total_ht)}</td>
-        <td><button class="btn-view" onclick="viewQuote(${q.id})">Voir</button></td>
+        <td>${pdfButton}</td>
       </tr>
-  `).join("");
+    `;
+  }).join("");
 }
 
 // ======================= FORMATAGE =======================
-function formatDate(iso){
-  try{
+function formatDate(iso) {
+  try {
     const d = new Date(iso);
-    return d.toLocaleDateString("fr-FR") + " " + d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
-  }catch{
+    return (
+      d.toLocaleDateString("fr-FR") +
+      " " +
+      d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+    );
+  } catch {
     return iso;
   }
 }
 
-function formatEuros(n){
-  return Number(n).toFixed(2).replace('.', ',') + " €";
+function formatEuros(n) {
+  return Number(n).toFixed(2).replace(".", ",") + " €";
 }
 
-// ======================= ACTION : VOIR DEVIS =======================
-function viewQuote(id){
-  alert("(A venir) Voir devis ID: " + id);
-  // Plus tard : page détail devis
-  // window.location.href = `admin-quote-detail.html?id=${id}`;
-}
-
-// ======================= ÉCOUTEURS DE FILTRES =======================
+// ======================= FILTRES =======================
 [fEmail, fCompany, fProduct, fDate].forEach(el => {
   el.addEventListener("input", renderQuotes);
 });
