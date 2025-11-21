@@ -803,7 +803,55 @@ try {
   console.warn("⚠️ Erreur enregistrement devis D1 :", err);
 }
 
-        doc.save("Devis-Cofel.pdf");
+        // ---------------------------------------------------------------------------
+// 1) Génération PDF en mémoire
+// ---------------------------------------------------------------------------
+const pdfBlob = doc.output('blob');
+
+// Conversion Blob → Base64
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+const pdfBase64 = await blobToBase64(pdfBlob);
+
+// ---------------------------------------------------------------------------
+// 2) Récupération des infos nécessaires pour nommer/stocker le PDF
+// ---------------------------------------------------------------------------
+const quotePayload = {
+  quoteId: window.lastCreatedQuoteId,   // ⚠️ on va définir ça juste après
+  pdfBase64,
+  clientCompany: document.getElementById("companyInput")?.value || "Inconnu",
+  productType: "devis-index",
+  createdAt: new Date().toISOString()
+};
+
+// ---------------------------------------------------------------------------
+// 3) Upload dans le Worker → GitHub
+// ---------------------------------------------------------------------------
+try {
+  const up = await fetch("https://cofel-auth.soneven.workers.dev/upload-pdf", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(quotePayload)
+  });
+
+  const result = await up.json();
+  console.log("📄 PDF upload result:", result);
+} catch(err) {
+  console.error("Erreur upload PDF:", err);
+}
+
+// ---------------------------------------------------------------------------
+// 4) Téléchargement local du PDF (rien ne change pour le client 👍)
+// ---------------------------------------------------------------------------
+doc.save("Devis-Cofel.pdf");
+
       }catch(err){
         alert("Erreur pendant la génération du PDF : " + err.message);
         console.error(err);
