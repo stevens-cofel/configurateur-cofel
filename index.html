@@ -537,344 +537,284 @@
 
     // ===================== EXPORT PDF =====================
     document.getElementById("btnPdf").addEventListener("click", async () => {
-      try{
-        const { jsPDF } = window.jspdf;
-
-        // Palette
-        const COLOR_PRIMARY = [90, 45, 130];    // #5a2d82
-        const COLOR_TEXT    = [20, 20, 20];
-        const COLOR_MUTED   = [110, 110, 110];
-        const BG_SOFT       = [245, 242, 252];
-
-        const d = Devis.computeTotals();
-        const t = totalsExcludingTransportDiscount(d); // 👉 totaux corrigés pour PDF
-        const client = {
-          societe: (elSociete?.value || '').trim(),
-          contact: (elContact?.value || '').trim(),
-          chantier: (elChantier?.value || '').trim()
-        };
-
-        const doc = new jsPDF({ unit:"pt", format:"a4", compress:true });
-        const pageWidth  = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 40;
-
-        // Logo (pleine résolution, sans réduction préalable)
-        let logoData = null;
-        try { logoData = await loadImageDataURL("./assets/logo cofel.jpg"); } catch(e){ /* pas de logo */ }
-
-        // Header
-        const drawHeader = () => {
-          const yTop = margin;
-          if (logoData){
-            const LOGO_W_PT = 180;                         // ← largeur affichée dans le PDF
-            const LOGO_H_PT = Math.round(LOGO_W_PT * 0.28); // ratio visuel approximatif
-            doc.addImage(logoData, "JPEG", margin, yTop, LOGO_W_PT, LOGO_H_PT);
-          }
-          doc.setFont("Helvetica", "bold"); doc.setFontSize(18);
-          doc.setTextColor(...COLOR_PRIMARY);
-          doc.text("DEVIS", pageWidth - margin, yTop + 6, { align:"right" });
-
-          doc.setFont("Helvetica", "normal"); doc.setFontSize(10);
-          doc.setTextColor(...COLOR_TEXT);
-          const rightLines = [
-            "COFEL72 — ZA du Perquoi, 72560 Changé",
-            "SIRET 927 659 458 00024 — TVA FR80927659458",
-            "Date : " + new Date().toLocaleDateString("fr-FR")
-          ];
-          rightLines.forEach((t,i)=> doc.text(t, pageWidth - margin, yTop + 26 + i*14, { align:"right" }));
-
-          // Sous-titre moderne avec le nom du client
-const drawHeader = () => {
-  const yTop = margin;
-
-  if (logoData){
-    const LOGO_W_PT = 180;
-    const LOGO_H_PT = Math.round(LOGO_W_PT * 0.28);
-    doc.addImage(logoData, "JPEG", margin, yTop, LOGO_W_PT, LOGO_H_PT);
-  }
-
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(18);
-  doc.setTextColor(...COLOR_PRIMARY);
-  doc.text("DEVIS", pageWidth - margin, yTop + 6, { align:"right" });
-
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(...COLOR_TEXT);
-
-  const rightLines = [
-    "COFEL72 — ZA du Perquoi, 72560 Changé",
-    "SIRET 927 659 458 00024 — TVA FR80927659458",
-    "Date : " + new Date().toLocaleDateString("fr-FR")
-  ];
-  rightLines.forEach((t,i)=> 
-    doc.text(t, pageWidth - margin, yTop + 26 + i*14, { align:"right" })
-  );
-
-  doc.setDrawColor(...COLOR_PRIMARY);
-  doc.setLineWidth(1);
-  doc.line(margin, yTop + 54, pageWidth - margin, yTop + 54);
-};
-
-
-          doc.setDrawColor(...COLOR_PRIMARY);
-          doc.setLineWidth(1);
-          doc.line(margin, yTop + 54, pageWidth - margin, yTop + 54);
-        };
-
-        const drawFooter = (pageNum, pageCount) => {
-          const y = pageHeight - margin + 8;
-          doc.setFont("Helvetica","normal"); doc.setFontSize(9);
-          doc.setTextColor(...COLOR_MUTED);
-          doc.text("Conditions : Offre valable 30 jours. Délais et transport à confirmer. Paiement selon conditions Cofel.", margin, y);
-          doc.text(`Page ${pageNum} / ${pageCount}`, pageWidth - margin, y, { align:"right" });
-        };
-
-        // ⚠️ Cartouche “sous réserve” (à placer en bas de la DERNIÈRE page)
-        function drawTechNotice(yStart){
-          const boxW = pageWidth - margin*2;
-          const boxH = 56; // hauteur du cartouche
-          const x = margin;
-          const y = Math.min(pageHeight - margin - boxH - 18, yStart); // garanti visible
-
-          // fond + bord
-          doc.setFillColor(255, 247, 220);     // jaune très pâle
-          doc.setDrawColor(220, 160, 0);       // orange soutenu
-          doc.setLineWidth(1);
-          doc.roundedRect(x, y, boxW, boxH, 8, 8, "FD");
-
-          // texte centré, bien visible
-          doc.setTextColor(120, 70, 0);
-          doc.setFont("Helvetica","bold");
-          doc.setFontSize(12.5);
-          const msg = "DEVIS SOUS RÉSERVE D'APPROBATION DE NOTRE ÉQUIPE TECHNIQUE";
-          doc.text(msg, x + boxW/2, y + boxH/2 + 4, { align:"center", baseline:"middle" });
-
-          return y + boxH;
-        }
-
-        const formatEuros = (n) => (Number(n)||0).toFixed(2).replace(".", ",") + " €";
-
-        // Carte client
-        const drawClientCard = (yStart) => {
-          const cardW = pageWidth - margin*2;
-          const cardH = 90;
-          doc.setFillColor(...BG_SOFT);
-          doc.setDrawColor(230,230,240);
-          doc.roundedRect(margin, yStart, cardW, cardH, 8, 8, "FD");
-
-          let y = yStart + 24;
-          doc.setFont("Helvetica","bold"); doc.setFontSize(12);
-          doc.setTextColor(...COLOR_PRIMARY);
-          doc.text("Client", margin + 14, y);
-
-          doc.setFont("Helvetica","normal"); doc.setFontSize(11);
-          doc.setTextColor(...COLOR_TEXT);
-          y += 18;
-
-          const lines = [];
-          if(client.societe)  lines.push(["Entreprise :", client.societe]);
-          if(client.contact)  lines.push(["Contact :",    client.contact]);
-          if(client.chantier) lines.push(["Chantier :",   client.chantier]);
-          if(d.remise_pct>0)  lines.push(["Remise :",     `${d.remise_pct} %`]);
-
-          const colGap = 260;
-          const leftX = margin + 14;
-          const rightX = leftX + colGap;
-
-          lines.forEach((row, idx)=>{
-            const isRight = (idx >= 3);
-            const x = isRight ? rightX : leftX;
-            const yy = y + (isRight ? (idx-3)*16 : idx*16);
-            doc.setTextColor(...COLOR_MUTED); doc.text(row[0], x, yy);
-            doc.setTextColor(...COLOR_TEXT);  doc.text(String(row[1]), x + 80, yy);
-          });
-
-          return yStart + cardH + 18;
-        };
-
-        // Pavé totaux (avec remise hors transport)
-        const drawTotalsBox = (yStart) => {
-          const boxW = 220, boxH = 102;
-          const x = pageWidth - margin - boxW;
-          const y = yStart;
-          doc.setFillColor(255,255,255);
-          doc.setDrawColor(...COLOR_PRIMARY);
-          doc.roundedRect(x, y, boxW, boxH, 8, 8, "S");
-
-          doc.setFont("Helvetica","bold"); doc.setFontSize(12);
-          doc.setTextColor(...COLOR_PRIMARY);
-          doc.text("Récapitulatif", x + 12, y + 18);
-
-          const row = (label, value, yy, bold=false) => {
-            doc.setFont("Helvetica", bold ? "bold":"normal"); doc.setFontSize(11); doc.setTextColor(...COLOR_TEXT);
-            doc.text(label, x + 12, yy);
-            doc.text(value, x + boxW - 12, yy, { align:"right" });
-          };
-          row("Total HT",  formatEuros(t.total_ht),  y + 40);
-          row("TVA 20 %",  formatEuros(t.tva),       y + 58);
-          row("Total TTC", formatEuros(t.total_ttc), y + 82, true);
-
-          return y + boxH;
-        };
-
-        // Données tableau
-        const rows = (d.lignes||[]).map(l => ([
-          String(l.designation||"-"),
-          String(l.quantite||0),
-          (Number(l.pu_net_ht)||0).toFixed(2),
-          (Number(l.total_ligne_ht)||0).toFixed(2)
-        ]));
-
-        // Première page
-        drawHeader();
-        let currentY = drawClientCard(margin + 90);
-
-        // Tableau
-        doc.autoTable({
-          startY: currentY,
-          head: [["Désignation","Qté","PU HT","Total HT"]],
-          body: rows,
-          styles: { font:"helvetica", fontSize:10, halign:"left", cellPadding:6 },
-          headStyles: { fillColor: COLOR_PRIMARY, textColor:[255,255,255], fontStyle:"bold" },
-          alternateRowStyles: { fillColor: [250, 248, 255] },
-          columnStyles: {
-            1: { halign:"center", cellWidth: 40 },
-            2: { halign:"right",  cellWidth: 70 },
-            3: { halign:"right",  cellWidth: 80 }
-          },
-          theme:"grid",
-          margin:{ left: margin, right: margin },
-          didDrawPage: () => { drawHeader(); }
-        });
-
-        // Totaux sous le tableau (dernière page)
-        const afterTableY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 16 : (margin + 200);
-        const afterTotalsY = drawTotalsBox(afterTableY);
-
-        // ⚠️ Ajout du cartouche “Sous réserve” sur la DERNIÈRE page
-        const pageCountBefore = doc.internal.getNumberOfPages();
-        const lastPageIndex = pageCountBefore; // 1-based
-        doc.setPage(lastPageIndex);
-        const bannerStartY = Math.max(afterTotalsY + 20, pageHeight - margin - 56 - 26);
-        drawTechNotice(bannerStartY);
-
-        // Footer sur toutes les pages
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++){
-          doc.setPage(i);
-          drawFooter(i, pageCount);
-        }
-
-        // 👉 Envoi e-mail (silencieux)
-        await sendEmail({ client, devis: d });
-// ---------------------------------------------------------
-// 1) Enregistrement du devis dans D1 + récupération de l'ID
-// ---------------------------------------------------------
-
-// Récupération correcte de l'email depuis le profil client connecté
-let clientProfile = localStorage.getItem("cofel_client_profile");
-let profileEmail = "";
-
-if (clientProfile) {
   try {
-    profileEmail = JSON.parse(clientProfile).email || "";
-  } catch (e) {
-    console.error("Erreur parsing profil client :", e);
-  }
-}
+    const { jsPDF } = window.jspdf;
 
-const logResp = await fetch("https://cofel-auth.sonveven.workers.dev/log-quote", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    clientEmail: profileEmail,                              // ✔ correct maintenant
-    clientCompany: document.getElementById("societe")?.value || "",
-    clientName: document.getElementById("contact")?.value || "",
-    productType: "devis-index",
-    totalHT: d.total_ht,
-    totalTTC: d.total_ttc,
-    extra: {
-      chantier: document.getElementById("chantier")?.value || "",
-      date: new Date().toISOString(),
-      lignes: d.lignes || []
+    // Palette couleurs Cofel
+    const COLOR_PRIMARY = [90, 45, 130];   // Violet Cofel
+    const COLOR_TEXT    = [20, 20, 20];
+    const COLOR_MUTED   = [110, 110, 110];
+    const BG_SOFT       = [245, 242, 252];
+
+    // Données devis
+    const d = Devis.computeTotals();
+    const t = totalsExcludingTransportDiscount(d);
+    const client = {
+      societe: (elSociete?.value || "").trim(),
+      contact: (elContact?.value || "").trim(),
+      chantier: (elChantier?.value || "").trim(),
+    };
+
+    // jsPDF
+    const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 40;
+
+    // ----- Chargement Logo haute résolution -----
+    async function loadImageDataURL(src) {
+      const resp = await fetch(src, { cache: "no-cache" });
+      const blob = await resp.blob();
+      return await new Promise((resolve) => {
+        const fr = new FileReader();
+        fr.onload = () => resolve(fr.result);
+        fr.readAsDataURL(blob);
+      });
     }
-  })
-});
 
-const logData = await logResp.json();
+    let logoData = null;
+    try {
+      logoData = await loadImageDataURL("./assets/logo cofel.jpg");
+    } catch (e) {
+      console.warn("Logo non chargé :", e);
+    }
 
-if (!logData.ok) {
-  alert("Erreur lors de l'enregistrement du devis.");
-  console.error(logData);
-  return;
-}
+    // ----- HEADER -----
+    const drawHeader = () => {
+      const yTop = margin;
 
-window.lastCreatedQuoteId = logData.quoteId;
-console.log("🔥 ID du devis :", window.lastCreatedQuoteId);
-
-
-window.lastCreatedQuoteId = logData.quoteId;       // ✔ maintenant correct
-console.log("🔥 ID du devis :", window.lastCreatedQuoteId);
-
-
-// ---------------------------------------------------------------------------
-// 1) Génération PDF en mémoire
-// ---------------------------------------------------------------------------
-const pdfBlob = doc.output("blob");
-
-// Conversion Blob → Base64
-function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result.split(",")[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
-const pdfBase64 = await blobToBase64(pdfBlob);
-
-// ---------------------------------------------------------------------------
-// 2) Préparation des données pour l'upload
-// ---------------------------------------------------------------------------
-
-const uploadPayload = {
-  quoteId: window.lastCreatedQuoteId,
-  pdfBase64: pdfBase64,
-  clientCompany: document.getElementById("societe")?.value || "Inconnu",
-  productType: "devis-index",
-  createdAt: new Date().toISOString()
-};
-
-// ---------------------------------------------------------------------------
-// 3) Upload du PDF vers ton Worker → GitHub
-// ---------------------------------------------------------------------------
-try {
-  const up = await fetch("https://cofel-auth.sonveven.workers.dev/upload-pdf", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(uploadPayload)
-  });
-
-  const result = await up.json();
-  console.log("📄 PDF upload result:", result);
-
-} catch (err) {
-  console.error("Erreur upload PDF :", err);
-}
-
-// ---------------------------------------------------------------------------
-// 4) Téléchargement local du PDF pour le client
-// ---------------------------------------------------------------------------
-doc.save("Devis-Cofel.pdf");
-
-      }catch(err){
-        alert("Erreur pendant la génération du PDF : " + err.message);
-        console.error(err);
+      if (logoData) {
+        const W = 180;
+        const H = Math.round(W * 0.28);
+        doc.addImage(logoData, "JPEG", margin, yTop, W, H);
       }
+
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(...COLOR_PRIMARY);
+      doc.text("DEVIS", pageWidth - margin, yTop + 6, { align: "right" });
+
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(...COLOR_TEXT);
+
+      const lines = [
+        "COFEL72 — ZA du Perquoi, 72560 Changé",
+        "SIRET 927 659 458 00024 — TVA FR80927659458",
+        "Date : " + new Date().toLocaleDateString("fr-FR"),
+      ];
+
+      lines.forEach((t, i) => {
+        doc.text(t, pageWidth - margin, yTop + 26 + i * 14, { align: "right" });
+      });
+
+      // ligne violette
+      doc.setDrawColor(...COLOR_PRIMARY);
+      doc.setLineWidth(1);
+      doc.line(margin, yTop + 54, pageWidth - margin, yTop + 54);
+    };
+
+    // ----- FOOTER -----
+    const drawFooter = (pageNum, pageCount) => {
+      const y = pageHeight - margin + 12;
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...COLOR_MUTED);
+
+      doc.text(
+        "Offre valable 30 jours — Sous réserve de faisabilité et validation technique",
+        margin,
+        y
+      );
+      doc.text(`Page ${pageNum} / ${pageCount}`, pageWidth - margin, y, {
+        align: "right",
+      });
+    };
+
+    // ----- CARTOUCHE "Sous réserve" -----
+    function drawTechNotice(yStart) {
+      const boxW = pageWidth - margin * 2;
+      const boxH = 56;
+      const y = Math.min(
+        pageHeight - margin - boxH - 10,
+        yStart
+      );
+
+      doc.setFillColor(255, 247, 220);
+      doc.setDrawColor(220, 160, 0);
+      doc.roundedRect(margin, y, boxW, boxH, 8, 8, "FD");
+
+      doc.setTextColor(120, 70, 0);
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(12.5);
+      doc.text(
+        "DEVIS SOUS RÉSERVE D'APPROBATION DE NOTRE ÉQUIPE TECHNIQUE",
+        margin + boxW / 2,
+        y + boxH / 2 + 4,
+        { align: "center", baseline: "middle" }
+      );
+
+      return y + boxH;
+    }
+
+    // ----- CARTE CLIENT -----
+    const drawClientCard = (yStart) => {
+      const CARD_H = 90;
+      const cardW = pageWidth - margin * 2;
+
+      doc.setFillColor(...BG_SOFT);
+      doc.setDrawColor(230, 230, 240);
+      doc.roundedRect(margin, yStart, cardW, CARD_H, 8, 8, "FD");
+
+      let y = yStart + 24;
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(...COLOR_PRIMARY);
+      doc.text("Client", margin + 14, y);
+
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(11);
+
+      const rows = [
+        ["Entreprise :", client.societe],
+        ["Contact :", client.contact],
+        ["Chantier :", client.chantier],
+      ];
+
+      rows.forEach((r, i) => {
+        doc.setTextColor(...COLOR_MUTED);
+        doc.text(r[0], margin + 14, y + 20 + i * 16);
+        doc.setTextColor(...COLOR_TEXT);
+        doc.text(r[1] || "-", margin + 95, y + 20 + i * 16);
+      });
+
+      return yStart + CARD_H + 18;
+    };
+
+    // ----- TOTaUX -----
+    const drawTotalsBox = (yStart) => {
+      const boxW = 220;
+      const boxH = 100;
+      const x = pageWidth - margin - boxW;
+
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(...COLOR_PRIMARY);
+      doc.roundedRect(x, yStart, boxW, boxH, 8, 8);
+
+      const row = (label, value, yy, bold = false) => {
+        doc.setFont("Helvetica", bold ? "bold" : "normal");
+        doc.setFontSize(11);
+        doc.setTextColor(...COLOR_TEXT);
+        doc.text(label, x + 12, yy);
+        doc.text(value, x + boxW - 12, yy, { align: "right" });
+      };
+
+      row("Total HT", t.total_ht.toFixed(2) + " €", yStart + 28);
+      row("TVA 20 %", t.tva.toFixed(2) + " €", yStart + 46);
+      row("Total TTC", t.total_ttc.toFixed(2) + " €", yStart + 68, true);
+
+      return yStart + boxH;
+    };
+
+    // ----- TABLEAU -----
+    const rows = (d.lignes || []).map((l) => [
+      l.designation || "-",
+      String(l.quantite),
+      (Number(l.pu_net_ht) || 0).toFixed(2),
+      (Number(l.total_ligne_ht) || 0).toFixed(2),
+    ]);
+
+    drawHeader();
+    let cursorY = drawClientCard(margin + 90);
+
+    doc.autoTable({
+      startY: cursorY,
+      head: [["Désignation", "Qté", "PU HT", "Total HT"]],
+      body: rows,
+      styles: { font: "helvetica", fontSize: 10, cellPadding: 6 },
+      headStyles: { fillColor: COLOR_PRIMARY, textColor: [255, 255, 255] },
+      alternateRowStyles: { fillColor: [250, 248, 255] },
+      margin: { left: margin, right: margin },
+      theme: "grid",
+      didDrawPage: () => drawHeader(),
     });
+
+    const afterTableY = doc.lastAutoTable.finalY + 16;
+    const afterTotalsY = drawTotalsBox(afterTableY);
+
+    doc.setPage(doc.internal.getNumberOfPages());
+    drawTechNotice(afterTotalsY + 20);
+
+    // FOOTER all pages
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      drawFooter(i, pageCount);
+    }
+
+    // ----- EMAIL SILENCIEUX -----
+    await sendEmail({ client, devis: d });
+
+    // ----- ENREGISTREMENT BD -----
+    let profileEmail = "";
+    try {
+      profileEmail = JSON.parse(
+        localStorage.getItem("cofel_client_profile") || "{}"
+      ).email;
+    } catch {}
+
+    const logResp = await fetch(
+      "https://cofel-auth.sonveven.workers.dev/log-quote",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientEmail: profileEmail,
+          clientCompany: client.societe,
+          clientName: client.contact,
+          productType: "devis-index",
+          totalHT: t.total_ht,
+          totalTTC: t.total_ttc,
+          extra: {
+            chantier: client.chantier,
+            date: new Date().toISOString(),
+            lignes: d.lignes || [],
+          },
+        }),
+      }
+    );
+
+    const logData = await logResp.json();
+    window.lastCreatedQuoteId = logData.quoteId;
+
+    // ----- PDF → base64 -----
+    const pdfBlob = doc.output("blob");
+    const pdfBase64 = await new Promise((resolve) => {
+      const fr = new FileReader();
+      fr.onloadend = () => resolve(fr.result.split(",")[1]);
+      fr.readAsDataURL(pdfBlob);
+    });
+
+    // ----- UPLOAD GITHUB -----
+    await fetch("https://cofel-auth.sonveven.workers.dev/upload-pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        quoteId: window.lastCreatedQuoteId,
+        pdfBase64,
+        clientCompany: client.societe,
+        productType: "devis-index",
+        createdAt: new Date().toISOString(),
+      }),
+    });
+
+    // ----- DOWNLOAD LOCAL -----
+    doc.save("Devis-Cofel.pdf");
+  } catch (err) {
+    alert("Erreur PDF : " + err.message);
+    console.error(err);
+  }
+});
 
     // Initial render
     render();
