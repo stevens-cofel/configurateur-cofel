@@ -769,90 +769,82 @@ const drawHeader = () => {
 
         // 👉 Envoi e-mail (silencieux)
         await sendEmail({ client, devis: d });
-// 🔵 Enregistrement du devis dans D1 (totalement isolé)
-let profileEmail = "inconnu";
-try {
-  const rawProfile = localStorage.getItem('cofel_client_profile');
-  if (rawProfile) {
-    const parsed = JSON.parse(rawProfile);
-    if (parsed.email) profileEmail = parsed.email;
-  }
-} catch(e) {
-  console.warn("Impossible de lire le profil client :", e);
+// ---------------------------------------------------------
+// 1) Enregistrement du devis dans D1 + récupération ID
+// ---------------------------------------------------------
+const logResp = await fetch("https://cofel-auth.sonveven.workers.dev/log-quote", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    clientEmail: profileEmail,
+    clientCompany: client.societe,
+    clientName: client.contact,
+    productType: "devis-index",
+    totalHT: t.total_ht,
+    totalTTC: t.total_ttc,
+    extra: {
+      chantier: client.chantier,
+      date: new Date().toISOString(),
+      lignes: d.lignes || []
+    }
+  })
+});
+
+const logData = await logResp.json();
+if (!logData.ok) {
+  console.error("Erreur enregistrement devis :", logData);
+  alert("Erreur lors de l'enregistrement du devis.");
+  return;
 }
 
-try {
-  await fetch("https://cofel-auth.sonveven.workers.dev/log-quote", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      clientEmail: profileEmail,
-      clientCompany: client?.societe || "",
-      clientName: client?.contact || "",
-      productType: "devis-index",
-      totalHT: t.total_ht,
-      totalTTC: t.total_ttc,
-      extra: {
-        chantier: client?.chantier || "",
-        date: new Date().toISOString(),
-        lignes: d.lignes || []
-      }
-    })
-  });
-} catch(err) {
-  console.warn("⚠️ Erreur enregistrement devis D1 :", err);
-}
+window.lastCreatedQuoteId = logData.quoteId;  
+console.log("ID du devis :", window.lastCreatedQuoteId);
 
-        // ---------------------------------------------------------------------------
-// 1) Génération PDF en mémoire
-// ---------------------------------------------------------------------------
-const pdfBlob = doc.output('blob');
+// ---------------------------------------------------------
+// 2) Génération PDF en mémoire
+// ---------------------------------------------------------
+const pdfBlob = doc.output("blob");
 
-// Conversion Blob → Base64
+// Convertir Blob → Base64
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+    reader.onloadend = () => resolve(reader.result.split(",")[1]);
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
 }
-
 const pdfBase64 = await blobToBase64(pdfBlob);
 
-// ---------------------------------------------------------------------------
-// 2) Récupération des infos nécessaires pour nommer/stocker le PDF
-// ---------------------------------------------------------------------------
-const quotePayload = {
-  quoteId: window.lastCreatedQuoteId,   // ⚠️ on va définir ça juste après
+// ---------------------------------------------------------
+// 3) Upload dans ton repo GitHub via Worker
+// ---------------------------------------------------------
+const uploadPayload = {
+  quoteId: window.lastCreatedQuoteId,
   pdfBase64,
-  clientCompany: document.getElementById("societe")?.value || "Inconnu",
+  clientCompany: client.societe,
   productType: "devis-index",
   createdAt: new Date().toISOString()
 };
 
-// ---------------------------------------------------------------------------
-// 3) Upload dans le Worker → GitHub
-// ---------------------------------------------------------------------------
 try {
   const up = await fetch("https://cofel-auth.sonveven.workers.dev/upload-pdf", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(quotePayload)
+    body: JSON.stringify(uploadPayload)
   });
-const resp = await result.json();
-window.lastCreatedQuoteId = resp.quoteId;
 
-  const result = await up.json();
-  console.log("📄 PDF upload result:", result);
-} catch(err) {
-  console.error("Erreur upload PDF:", err);
+  const upResult = await up.json();
+  console.log("Upload PDF :", upResult);
+} catch (err) {
+  console.error("Erreur upload PDF :", err);
 }
 
-// ---------------------------------------------------------------------------
-// 4) Téléchargement local du PDF (rien ne change pour le client 👍)
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------------
+// 4) Téléchargement local du PDF
+// ---------------------------------------------------------
 doc.save("Devis-Cofel.pdf");
+
 
       }catch(err){
         alert("Erreur pendant la génération du PDF : " + err.message);
