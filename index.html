@@ -835,7 +835,7 @@ const quotePayload = {
 // 3) Upload dans le Worker → GitHub
 // ---------------------------------------------------------------------------
 try {
-  const up = await fetch("https://cofel-auth.soneven.workers.dev/upload-pdf", {
+  const up = await fetch("https://cofel-auth.sonveven.workers.dev/upload-pdf", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(quotePayload)
