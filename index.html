@@ -840,6 +840,8 @@ try {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(quotePayload)
   });
+const resp = await result.json();
+window.lastCreatedQuoteId = resp.quoteId;
 
   const result = await up.json();
   console.log("📄 PDF upload result:", result);
