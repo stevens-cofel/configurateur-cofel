@@ -87,21 +87,30 @@ function formatEuros(n) {
   return Number(n).toFixed(2).replace(".", ",") + " €";
 }
 
-// ======================= ACTION : VOIR (OUVRIR PDF) =======================
+// ======================= ACTION : VOIR (Ouvrir PDF GitHub) =======================
 function viewQuote(id) {
   const q = allQuotes.find(x => x.id === id);
+
   if (!q) {
     alert("Devis introuvable.");
     return;
   }
 
-  if (!q.pdf_url) {
-    alert("⚠️ Le PDF n’a pas encore été généré ou n’est pas disponible.");
-    return;
-  }
+  // 🔥 URL automatique PDF sur GitHub
+  const pdfUrl = `https://raw.githubusercontent.com/cofel72/pdf-devis/main/${id}.pdf`;
 
-  // 🔥 Ouvre le PDF dans un nouvel onglet
-  window.open(q.pdf_url, "_blank");
+  // Vérification rapide (fichier peut exister ou pas)
+  fetch(pdfUrl, { method: "HEAD" })
+    .then(r => {
+      if (!r.ok) {
+        alert("⚠️ Le PDF n'est pas encore disponible sur le serveur.");
+        return;
+      }
+      window.open(pdfUrl, "_blank");
+    })
+    .catch(() => {
+      alert("⚠️ Impossible d'accéder au PDF.");
+    });
 }
 
 // ======================= FILTRES =======================
