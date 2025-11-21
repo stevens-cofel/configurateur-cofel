@@ -1,6 +1,6 @@
 // ============================================================================
 // Admin - Liste des devis Cofel
-// Charge les devis depuis le Worker + filtres dynamiques + bouton PDF
+// Charge les devis depuis le Worker + filtres + ouverture PDF
 // ============================================================================
 
 const API_URL = "https://cofel-auth.sonveven.workers.dev";
@@ -52,12 +52,8 @@ function renderQuotes() {
     return;
   }
 
-  tbody.innerHTML = filtered.map(q => {
-    const pdfButton = q.pdf_url
-      ? `<a class="btn-view" href="${q.pdf_url}" target="_blank">📄 PDF</a>`
-      : `<span style="opacity:0.4;">—</span>`;
-
-    return `
+  tbody.innerHTML = filtered
+    .map(q => `
       <tr>
         <td>${formatDate(q.created_at)}</td>
         <td>${q.client_email}</td>
@@ -65,10 +61,12 @@ function renderQuotes() {
         <td>${q.client_name || "-"}</td>
         <td>${q.product_type}</td>
         <td>${formatEuros(q.total_ht)}</td>
-        <td>${pdfButton}</td>
+        <td>
+          <button class="btn-view" onclick="viewQuote(${q.id})">Voir</button>
+        </td>
       </tr>
-    `;
-  }).join("");
+    `)
+    .join("");
 }
 
 // ======================= FORMATAGE =======================
@@ -87,6 +85,23 @@ function formatDate(iso) {
 
 function formatEuros(n) {
   return Number(n).toFixed(2).replace(".", ",") + " €";
+}
+
+// ======================= ACTION : VOIR (OUVRIR PDF) =======================
+function viewQuote(id) {
+  const q = allQuotes.find(x => x.id === id);
+  if (!q) {
+    alert("Devis introuvable.");
+    return;
+  }
+
+  if (!q.pdf_url) {
+    alert("⚠️ Le PDF n’a pas encore été généré ou n’est pas disponible.");
+    return;
+  }
+
+  // 🔥 Ouvre le PDF dans un nouvel onglet
+  window.open(q.pdf_url, "_blank");
 }
 
 // ======================= FILTRES =======================
