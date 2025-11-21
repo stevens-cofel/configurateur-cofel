@@ -826,7 +826,7 @@ const pdfBase64 = await blobToBase64(pdfBlob);
 const quotePayload = {
   quoteId: window.lastCreatedQuoteId,   // ⚠️ on va définir ça juste après
   pdfBase64,
-  clientCompany: document.getElementById("companyInput")?.value || "Inconnu",
+  clientCompany: document.getElementById("societe")?.value || "Inconnu",
   productType: "devis-index",
   createdAt: new Date().toISOString()
 };
